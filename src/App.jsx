@@ -21,6 +21,7 @@ import LogHistoryPimpinan from './component/Pimpinan/LogHistoryPimpinan.jsx';
 import RiwayatUnduh from './component/Pimpinan/RiwayatUnduh.jsx';
 import ArsipDigitalPimpinan from './component/Pimpinan/ArsipDigitalPimpinan.jsx';
 import HistoryDigitalPimpinan from './component/Pimpinan/HistoryDigitalPimpinan.jsx';
+import ApprovalDigitalPimpinan from './component/Pimpinan/ApprovalDigitalPimpinan.jsx';
 
 
 import DashboardPetugas from './component/Petugas/DashboardPetugas.jsx';
@@ -201,6 +202,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <ApprovalPimpinan />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/approvalDigitalPimpinan"
+        element={
+          <ProtectedRoute>
+            <ApprovalDigitalPimpinan />
           </ProtectedRoute>
         }
       />

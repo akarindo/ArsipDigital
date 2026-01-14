@@ -155,7 +155,7 @@ export default function DashboardPimpinan () {
         <p className="user-name mb-0">Rabu</p>
         <p className="designattion mb-0">November 2025</p>
       </div>
-      <Link to="/approvalPetugas">
+      <Link to="/approvalPimpinan">
       <div className="user-box">
         <div className="col">
           <button type="button" className="btn btn-primary px-5 radius-30">Approve Permintaan</button>

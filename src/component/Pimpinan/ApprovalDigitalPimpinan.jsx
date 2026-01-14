@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import ApprovalFisik from "../ApprovalFisik";
+import ApprovalDigital from "../ApprovalDigital";
 
-export default function ApprovalPimpinan() {
+export default function ApprovalDigitalPimpinan() {
 
    const navigate = useNavigate();
   const location = useLocation();
@@ -119,7 +119,7 @@ export default function ApprovalPimpinan() {
         </div>
       </div>
       
-   <ApprovalFisik />
+   <ApprovalDigital />
   </div>
   </div>
   </div>

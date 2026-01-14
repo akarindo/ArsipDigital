@@ -1,75 +1,5 @@
-import { useNavigate, useLocation } from "react-router-dom";
-
 export default function ApprovalDigital() {
-
-   const navigate = useNavigate();
-  const location = useLocation();
-
-  const tab = location.pathname.includes("ArsipDigital") ? "ArsipDigital" : "Arsip Fisik";
-
   return (
-  <div className="page-wrapper">
-    <div className="page-content">
-      <div className="d-flex align-items-center">
-        <div className="search-bar flex-grow-1 d-flex align-items-center" style={{marginBottom: 10}}>
-          <h4 style={{marginBottom: 0}}>Approval</h4>
-        </div>
-      </div>
-      <div className="d-flex align-items-center mb-3">
-        <div className="search-bar flex-grow-1">
-          <ul className="nav nav-pills" role="tablist">
-            <li className="nav-item" role="presentation" style={{width: '50%'}}>
-              <a className="nav-link active" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
-                <div className="d-flex align-items-center justify-content-center">
-                  <div onClick={() => navigate("/approval")} className={`tab-title ${tab === "Arsip Fisik" ? "active" : ""}`}>Arsip Fisik</div>
-                </div>
-              </a>
-            </li>
-            <li className="nav-item" role="presentation" style={{width: '50%'}}>
-              <a className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
-                <div className="d-flex align-items-center justify-content-center">
-                  <div  onClick={() => navigate("/")} className={`tab-title ${tab === "ArsipDigital" ? "active" : ""}`}>Arsip Digital</div>
-                </div>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div className="dropdown bg-white my-3" style={{height: 38}}> 
-        <div className="d-flex justify-content-between">
-          <a href="#" className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0" style={{border: 'none'}} data-bs-toggle="dropdown" data-display="static">Tipe<i className="bx bxs-chevron-down ms-5" /></a>
-          <a href="#" className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0" style={{border: 'none'}} data-bs-toggle="dropdown" data-display="static">Kategori<i className="bx bxs-chevron-down ms-5" /></a>
-          <a href="#" className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0" style={{border: 'none'}} data-bs-toggle="dropdown" data-display="static">Status<i className="bx bxs-chevron-down ms-5" /></a>
-        </div>
-      </div>
-
-        <div className="d-flex align-items-center">
-          <div className="search-bar flex-grow-1">
-            <ul className="nav nav-pills" role="tablist">
-              <li className="nav-item" role="presentation" style={{width: '50%'}}>
-                <a className="nav-link active" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
-                  <div className="d-flex align-items-center justify-content-center">
-                    <div className="tab-title">Arsip Fisik</div>
-                  </div>
-                </a>
-              </li>
-              <li className="nav-item" role="presentation" style={{width: '50%'}}>
-                <a className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
-                  <div className="d-flex align-items-center justify-content-center">
-                    <div className="tab-title">Arsip Digital</div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="dropdown bg-white my-3" style={{height: 38}}> 
-          <div className="d-flex justify-content-between">
-            <a href="#" className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0" style={{border: 'none'}} data-bs-toggle="dropdown" data-display="static">Tipe<i className="bx bxs-chevron-down ms-5" /></a>
-            <a href="#" className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0" style={{border: 'none'}} data-bs-toggle="dropdown" data-display="static">Kategori<i className="bx bxs-chevron-down ms-5" /></a>
-            <a href="#" className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0" style={{border: 'none'}} data-bs-toggle="dropdown" data-display="static">Status<i className="bx bxs-chevron-down ms-5" /></a>
-          </div>
-        </div>
         <div className="customers-list mb-3">
           <div className="customers-list-item cursor-pointer bg-white" style={{marginBottom: 15}}>
             <div className="top d-flex align-items-center justify-content-between p-3">
@@ -471,6 +401,6 @@ export default function ApprovalDigital() {
             </div>
           </div>
         </div>
-      </div></div>
+  
 )
 	}

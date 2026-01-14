@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Approval from "../ApprovalFisik";
+import ApprovalFisik from "../ApprovalFisik";
 
 export default function ApprovalPetugas() {
   return (
@@ -89,7 +89,7 @@ export default function ApprovalPetugas() {
     </div>
   </header>
   {/*end header */}
-  <Approval />
+  <ApprovalFisik />
  </div>
 )
 	}
