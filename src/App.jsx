@@ -2,7 +2,7 @@
 import './App.css';
 
 import { Routes, Route, Navigate } from "react-router-dom";
-import { PengajuanProvider } from './component/Staff/PengajuanContext.jsx';
+import { PengajuanProvider } from './context/PengajuanContext.jsx';
 
 
 import Login from "./component/Login.jsx";

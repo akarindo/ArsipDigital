@@ -20,7 +20,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export default function Login() {
     } catch (error) {
       // 'error.message' akan berisi pesan dari 'throw new Error' di atas
       console.error('Login Gagal:', error.message);
-      alert(error.message);
+      // alert(error.message);
     }
   };
 
@@ -77,8 +77,8 @@ export default function Login() {
   return (
     <div>
       <div className="wrapper">
-        <div className="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0 bg-white" style={{height: '100%'}}>
-          <div className="container-fluid" style={{marginTop: '5%'}}>
+        <div className="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0 bg-white" style={{ height: '100%' }}>
+          <div className="container-fluid" style={{ marginTop: '5%' }}>
             <div className="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
               <div className="col mx-auto">
                 <div className="mb-4 text-center">

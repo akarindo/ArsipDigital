@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-const PengajuanContext = createContext();
+export const PengajuanContext = createContext();
 
 export const usePengajuan = () => {
   const context = useContext(PengajuanContext);
@@ -84,6 +84,76 @@ export const PengajuanProvider = ({ children }) => {
     }
   ]);
 
+  const [gedungs, setGedungs] = useState([]);
+  const [floors, setFloors] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [token, setToken] = useState('')
+  async function getGedung(token) {
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/buildings', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      const result = await response.json();
+      console.log("result", result)
+      if (!response.ok) {
+        throw new Error(result.message || 'Login Gagal');
+      }
+      setGedungs(result);
+    } catch (error) {
+      // 'error.message' akan berisi pesan dari 'throw new Error' di atas
+      console.error('Login Gagal:', error.message);
+    }
+  }
+  async function getFloors(token) {
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/floors', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      const result = await response.json();
+      console.log("result", result)
+      if (!response.ok) {
+        throw new Error(result.message || 'Login Gagal');
+      }
+      setFloors(result);
+    } catch (error) {
+      // 'error.message' akan berisi pesan dari 'throw new Error' di atas
+      console.error('Login Gagal:', error.message);
+    }
+  }
+  async function getRooms(token) {
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/rooms', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      const result = await response.json();
+      console.log("result", result)
+      if (!response.ok) {
+        throw new Error(result.message || 'Login Gagal');
+      }
+      setRooms(result);
+    } catch (error) {
+      // 'error.message' akan berisi pesan dari 'throw new Error' di atas
+      console.error('Login Gagal:', error.message);
+    }
+  }
   const addPengajuan = (data) => {
     const newPengajuan = {
       id: Date.now(),
@@ -109,7 +179,7 @@ export const PengajuanProvider = ({ children }) => {
   };
 
   const updatePengajuan = (id, updates) => {
-    setPengajuanList(prev => 
+    setPengajuanList(prev =>
       prev.map(item => item.id === id ? { ...item, ...updates } : item)
     );
   };
@@ -117,13 +187,27 @@ export const PengajuanProvider = ({ children }) => {
   const deletePengajuan = (id) => {
     setPengajuanList(prev => prev.filter(item => item.id !== id));
   };
-
+  useEffect(() => {
+    const auth = localStorage.getItem("token");
+    if (auth) {
+      setToken(auth)
+      getGedung(auth)
+      getFloors(auth)
+      getRooms(auth)
+    }
+  }, [])
   return (
-    <PengajuanContext.Provider value={{ 
-      pengajuanList, 
-      addPengajuan, 
-      updatePengajuan, 
-      deletePengajuan 
+    <PengajuanContext.Provider value={{
+      pengajuanList,
+      addPengajuan,
+      updatePengajuan,
+      deletePengajuan,
+      gedungs,
+      token,
+      getGedung,
+      floors,
+      getFloors,
+      rooms, getRooms
     }}>
       {children}
     </PengajuanContext.Provider>
