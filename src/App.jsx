@@ -52,12 +52,12 @@ function ProtectedRoute({ children, allowedRoles }) {
 export default function App() {
   return (
     <Routes>
-    
+
       <Route path="/" element={<Login />} />
       <Route
         path="/dashboardStaff"
         element={
-          <ProtectedRoute allowedRoles={["Staff"]}>
+          <ProtectedRoute allowedRoles={["staff"]}>
             <DashboardStaff />
           </ProtectedRoute>
         }
@@ -67,7 +67,7 @@ export default function App() {
       <Route
         path="/dashboardPetugas"
         element={
-          <ProtectedRoute allowedRoles={["Petugas"]}>
+          <ProtectedRoute allowedRoles={["petugas"]}>
             <DashboardPetugas />
           </ProtectedRoute>
         }
@@ -77,7 +77,7 @@ export default function App() {
       <Route
         path="/dashboardPimpinan"
         element={
-          <ProtectedRoute allowedRoles={["Pimpinan"]}>
+          <ProtectedRoute allowedRoles={["pimpinan"]}>
             <DashboardPimpinan />
           </ProtectedRoute>
         }
@@ -125,7 +125,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      
+
       <Route
         path="/logHistoryStaff"
         element={
@@ -250,8 +250,8 @@ export default function App() {
         }
       />
 
-      </Routes>
-    
+    </Routes>
+
   );
 }
 
