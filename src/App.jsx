@@ -29,6 +29,20 @@ import DataArsipPetugas from './component/Petugas/DataArsipPetugas.jsx';
 import DataMaster from './component/Petugas/DataMaster.jsx';
 import ApprovalPetugas from './component/Petugas/ApprovalPetugas.jsx';
 import DataUserPetugas from './component/Petugas/DataUserPetugas.jsx';
+import ArsipDigitalPetugas from './component/Petugas/ArsipDigitalPetugas.jsx';
+import ApprovalDigitalPetugas from './component/Petugas/ApprovalDigitalPetugas.jsx';
+import FileBanyakDiakses from './component/Petugas/FileBanyakDiakses.jsx';
+import UserAkses from './component/Petugas/UserAkses.jsx';
+import KategoriMaster from './component/Petugas/KategoriMaster.jsx';
+import SubKategoriMaster from './component/Petugas/SubKategoriMaster.jsx';
+import GedungMaster from './component/Petugas/GedungMaster.jsx';
+import LantaiMaster from './component/Petugas/LantaiMaster.jsx';
+import RuangMaster from './component/Petugas/RuangMaster.jsx';
+import LemariMaster from './component/Petugas/LemariMaster.jsx';
+import RakMaster from './component/Petugas/RakMaster.jsx';
+import FolderMaster from './component/Petugas/FolderMaster.jsx';
+import TujuanMaster from './component/Petugas/TujuanMaster.jsx';
+import KodeArsipMaster from './component/Petugas/KodeArsipMaster.jsx';
 
 
 
@@ -215,11 +229,39 @@ export default function App() {
         }
       />
 
+
       <Route
         path="/dataArsipPetugas"
         element={
           <ProtectedRoute>
             <DataArsipPetugas />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboardPetugas/FileBanyakDiakses"
+        element={
+          <ProtectedRoute>
+            <FileBanyakDiakses />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboardPetugas/UserAkses"
+        element={
+          <ProtectedRoute>
+            <UserAkses />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dataArsipPetugas/ArsipDigitalPetugas"
+        element={
+          <ProtectedRoute>
+            <ArsipDigitalPetugas />
           </ProtectedRoute>
         }
       />
@@ -234,6 +276,87 @@ export default function App() {
       />
 
       <Route
+        path="/dataMaster/KategoriMaster"
+        element={
+          <ProtectedRoute>
+            <KategoriMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/SubKategoriMaster"
+        element={
+          <ProtectedRoute>
+            <SubKategoriMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/GedungMaster"
+        element={
+          <ProtectedRoute>
+            <GedungMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/LantaiMaster"
+        element={
+          <ProtectedRoute>
+            <LantaiMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/RuangMaster"
+        element={
+          <ProtectedRoute>
+            <RuangMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/LemariMaster"
+        element={
+          <ProtectedRoute>
+            <LemariMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/RakMaster"
+        element={
+          <ProtectedRoute>
+            <RakMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/FolderMaster"
+        element={
+          <ProtectedRoute>
+            <FolderMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/TujuanMaster"
+        element={
+          <ProtectedRoute>
+            <TujuanMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dataMaster/KodeArsipMaster"
+        element={
+          <ProtectedRoute>
+            <KodeArsipMaster />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/approvalPetugas"
         element={
           <ProtectedRoute>
@@ -241,6 +364,16 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/approvalPetugas/approvalDigitalPetugas"
+        element={
+          <ProtectedRoute>
+            <ApprovalDigitalPetugas />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/dataUserPetugas"
         element={

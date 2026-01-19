@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import ApprovalFisik from "../ApprovalFisik";
+import ApprovalDigital from "../ApprovalDigital";
 
-export default function ApprovalPetugas() {
+export default function ApprovalDigitalPetugas() {
 
    const navigate = useNavigate();
   const location = useLocation();
@@ -84,7 +84,7 @@ export default function ApprovalPetugas() {
           <div className="col">
             <button type="button" className="btn btn-primary px-5 pe-3 ps-3 radius-30">
               <img src="assets/images/Avatar.png" alt style={{marginRight: 10}} />
-              Petugas
+              Pimpinan
             </button>
           </div>
         </div>
@@ -103,14 +103,14 @@ export default function ApprovalPetugas() {
         <div className="search-bar flex-grow-1">
           <ul className="nav nav-pills" role="tablist">
             <li onClick={() => navigate("/approvalPetugas")} className={`nav-item ${tab === "Arsip Fisik" ? "active" : ""}`} role="presentation" style={{width: '50%'}}>
-              <div className="nav-link active" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
+              <div className="nav-link" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">Arsip Fisik</div>
                 </div>
               </div>
             </li>
-            <li onClick={() => navigate("/approvalPetugas/approvalDigitalPetugas")} className={`nav-item ${tab === "Arsip Digital" ? "active" : ""}`} role="presentation" style={{width: '50%'}}>
-              <div className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
+            <li  onClick={() => navigate("approvalPetugas/approvalDigitalPetugas")} className={`nav-item ${tab === "Arsip Digital" ? "active" : ""}`} role="presentation" style={{width: '50%'}}>
+              <div className="nav-link active" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">Arsip Digital</div>
                 </div>
@@ -127,7 +127,7 @@ export default function ApprovalPetugas() {
         </div>
       </div>
       
-   <ApprovalFisik />
+   <ApprovalDigital />
   </div>
   </div>
   </div>

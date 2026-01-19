@@ -2,14 +2,13 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Chart from "react-apexcharts";
 import { useState } from "react";
 
-export default function DashboardPetugas () {
-  const navigate = useNavigate();
+export default function UserAkses () {
+    const navigate = useNavigate();
   const location = useLocation();
 
   const tab = location.pathname.includes("UserAkses") ? "UserAkses" 
               : location.pathname.includes("FileBanyakDiakses") ? "FileBanyakDiakses"
               : "FileTerbesar";
-
   const MyLineChart = () => {
       const [options] = useState({
         chart: {
@@ -347,172 +346,76 @@ export default function DashboardPetugas () {
         </div>
       </div>
     </div>
+     
+    {/* User Yang Sering Akses */}
     <div className="col d-flex mt-3">
       <div className="card radius-10 w-100">
         <div className="card-body-pim">
           <ul className="nav nav-pills mb-3 d-flex justify-content-between" role="tablist">
             <li onClick={() => navigate("/dashboardPetugas")} className={`nav-item ${tab === "FileTerbesar" ? "active" : ""}`} role="presentation" style={{width: '33%'}}>
-              <div className="nav-link active" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
+              <a className="nav-link" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">File Terbesar</div>
                 </div>
-              </div>
+              </a>
             </li>
             <li onClick={() => navigate("/dashboardPetugas/FileBanyakDiakses")} className={`nav-item ${tab === "FileBanyakAkses" ? "active" : ""}`} role="presentation" style={{width: '33%'}}>
-              <div className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
+              <a className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">File Yang Banyak Di Akses</div>
                 </div>
-              </div>
+              </a>
             </li>
             <li onClick={() => navigate("/dashboardPetugas/UserAkses")} className={`nav-item ${tab === "UserAkses" ? "active" : ""}`} role="presentation" style={{width: '33%'}}>
-              <div className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
+              <a className="nav-link active" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">User Yang Sering Akses</div>
                 </div>
-              </div>
+              </a>
             </li>
           </ul>
-          {/* File Terbesar */}
-          <div className="kotak-file p-3 pt-0 pb-0">
-            <div className="row border 1 mb-3 radius-10 pt-3 pb-3">
-              <div className="col-md-2 text-end d-flex align-items-center justify-content-center">
-                <img src="assets/images/iconpdf.png" className="img-pim"alt />
+          <div className="list-group-item ps-2 pe-2 border-0">
+            <div className="d-flex mb-4">
+              <div className="nomor align-items-center justify-content-center d-flex" style={{marginBottom: 0, marginRight: 15, fontSize: 'large'}}>
+                1
               </div>
-              <div className="col-md-10">
-                <div className="kanan pe-0" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-                  <h6 className="ms-3 mb-0">OJK</h6>
-                  <div className="d-flex align-items-center border p-2 radius-10" style={{marginRight: 10, background: '#3468F8', height: 35}}>	
-                    <div className>
-                      <p className="mb-0" style={{color: 'white'}}>Digital</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="d-flex  justify-content-between pt-0 pb-1 p-3">
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Kategori</h7> : <h7 className="mb-0 text-secondary">OJK</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Sub Kategori</h7> : <h7 className="mb-0 text-secondary">PP</h7>
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Ukuran</h7> : <h7 className="mb-0 text-secondary">80 MB</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Waktu Upload</h7> : <h7 className="mb-0 text-secondary">1 November 2025 | 10:30:00</h7>
-                    </div>
-                  </div>
-                </div>
+              <div className="chat-user-online">
+                <img src="assets/images/avatars/avatar-2.png" width={42} height={42} className="rounded-circle" alt />
               </div>
-            </div>           
-            <div className="row border 1 mb-3 radius-10 pt-3 pb-3">
-              <div className="col-md-2 text-end d-flex align-items-center justify-content-center">
-                <img src="assets/images/iconpdf.png" className="img-pim" alt />
+              <div className="flex-grow-1 ms-3 align-items-center d-flex">
+                <h3 className="mb-0 chat-title">Citra</h3>
               </div>
-              <div className="col-md-10">
-                <div className="kanan pe-0" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-                  <h6 className="ms-3 mb-0">OJK</h6>
-                  <div className="d-flex align-items-center border p-2  radius-10" style={{marginRight: 10, background: '#3468F8', height: 35}}>	
-                    <div className>
-                      <p className="mb-0" style={{color: 'white'}}>Digital</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="d-flex  justify-content-between pt-0 pb-1 p-3">
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Kategori</h7> : <h7 className="mb-0 text-secondary">OJK</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Sub Kategori</h7> : <h7 className="mb-0 text-secondary">PP</h7>
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Ukuran</h7> : <h7 className="mb-0 text-secondary">80 MB</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Waktu Upload</h7> : <h7 className="mb-0 text-secondary">1 November 2025 | 10:30:00</h7>
-                    </div>
-                  </div>
-                </div>
+              <div className="chat-time align-items-center d-flex">12 Kali Akses</div>
+            </div>
+            <div className="d-flex mb-4">
+              <div className="nomor align-items-center justify-content-center d-flex" style={{marginBottom: 0, marginRight: 15, fontSize: 'large'}}>
+                2
               </div>
-            </div>            
-            <div className="row border 1 mb-3 radius-10 pt-3 pb-3">
-              <div className="col-md-2 text-end d-flex align-items-center justify-content-center">
-                <img src="assets/images/iconpdf.png" className="img-pim" alt />
+              <div className="chat-user-online">
+                <img src="assets/images/avatars/avatar-2.png" width={42} height={42} className="rounded-circle" alt />
               </div>
-              <div className="col-md-10">
-                <div className="kanan pe-0" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-                  <h6 className="ms-3 mb-0">OJK</h6>
-                  <div className="d-flex align-items-center border p-2  radius-10" style={{marginRight: 10, background: '#3468F8', height: 35}}>	
-                    <div className>
-                      <p className="mb-0" style={{color: 'white'}}>Digital</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="d-flex  justify-content-between pt-0 pb-1 p-3">
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Kategori</h7> : <h7 className="mb-0 text-secondary">OJK</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Sub Kategori</h7> : <h7 className="mb-0 text-secondary">PP</h7>
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Ukuran</h7> : <h7 className="mb-0 text-secondary">80 MB</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Waktu Upload</h7> : <h7 className="mb-0 text-secondary">1 November 2025 | 10:30:00</h7>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex-grow-1 ms-3 align-items-center d-flex">
+                <h3 className="mb-0 chat-title">Iskandar Rizqi</h3>
               </div>
-            </div> 
-            <div className="row border 1 radius-10 pt-3 pb-3 mb-1">
-              <div className="col-md-2 text-end d-flex align-items-center justify-content-center">
-                <img src="assets/images/iconpdf.png" className="img-pim" alt />
+              <div className="chat-time align-items-center d-flex">2 Kali Akses</div>
+            </div>
+            <div className="d-flex">
+              <div className="nomor align-items-center justify-content-center d-flex" style={{marginBottom: 0, marginRight: 15, fontSize: 'large'}}>
+                3
               </div>
-              <div className="col-md-10">
-                <div className="kanan pe-0" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-                  <h6 className="ms-3 mb-0">OJK</h6>
-                  <div className="d-flex align-items-center border p-2  radius-10" style={{marginRight: 10, background: '#3468F8', height: 35}}>	
-                    <div className>
-                      <p className="mb-0" style={{color: 'white'}}>Digital</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="d-flex  justify-content-between pt-0 pb-1 p-3">
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Kategori</h7> : <h7 className="mb-0 text-secondary">OJK</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Sub Kategori</h7> : <h7 className="mb-0 text-secondary">PP</h7>
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Ukuran</h7> : <h7 className="mb-0 text-secondary">80 MB</h7>
-                    </div>
-                    <div>
-                      <h7 className="mb-1 font-weight-bold">Waktu Upload</h7> : <h7 className="mb-0 text-secondary">1 November 2025 | 10:30:00</h7>
-                    </div>
-                  </div>
-                </div>
+              <div className="chat-user-online">
+                <img src="assets/images/avatars/avatar-2.png" width={42} height={42} className="rounded-circle" alt />
               </div>
-            </div>      
-          </div>    
-        </div>
-      </div>
-    </div>
-    </div></div></div>
+              <div className="flex-grow-1 ms-3 align-items-center d-flex">
+                <h3 className="mb-0 chat-title">User</h3>
+              </div>
+              <div className="chat-time align-items-center d-flex">1 Kali Akses</div>
+            </div>
+          </div>
+        </div></div></div></div></div>
 
+
+</div>
     )
   
 }

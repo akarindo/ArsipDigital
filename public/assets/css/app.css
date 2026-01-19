@@ -139,6 +139,12 @@ a {
 	border-radius: 30px;
 }
 
+.fm-menu .list-group-item {
+	border-bottom: none;
+	cursor: pointer;
+}
+
+
 .toggle-icon {
 	font-size: 22px;
 	cursor: pointer;

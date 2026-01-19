@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+export default function Gedung () {
 
-export default function DataMaster() {
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
 
   let tab;
@@ -29,7 +29,7 @@ const navigate = useNavigate();
       tab = "JenisArsipMaster";
   }
 
-  return (
+	return (
 <div className="wrapper">
   {/*sidebar wrapper */}
   <div className="sidebar-wrapper" data-simplebar="true">
@@ -97,9 +97,9 @@ const navigate = useNavigate();
         <div className="top-menu ms-auto">
           <ul className="navbar-nav align-items-center">
             <li className="nav-item dropdown dropdown-large">
-              <div className="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a className="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="assets/images/bell-dot.png" width="25px" height="25px" alt />
-              </div>
+              </a>
             </li>
           </ul>
         </div>
@@ -130,17 +130,17 @@ const navigate = useNavigate();
           <div className="card">
             <div className="card-body-master">
               <div className="col d-flex justify-content-center">
-                <button type="button" className="btn-tambah px-5 mt-2 mb-3" data-bs-toggle="modal" data-bs-target="#tambahJenisArsip">Tambah <img src="assets/images/plus.png" width={20} height={20} /></button>
+                <button type="button" className="btn-tambah px-5 mt-2 mb-3" data-bs-toggle="modal" data-bs-target="#tambahGedungMaster">Tambah <img src="assets/images/plus.png" width={20} height={20} /></button>
               </div>
               <div>
                 <h6 className="my-2" style={{textAlign: 'center', whiteSpace: 'nowrap'}}>Kategori Data Master</h6>
               </div>
               <div className="fm-menu mt-3">
-                <div className="list-group list-group-flush"> 
-                  <div onClick={() => navigate("/dataMaster")} className={`list-group-item active py-2 ${tab === "JenisArsipMaster" ? "" : ""}`} role="presentation"><span>Jenis Arsip</span></div>
+               <div className="list-group list-group-flush"> 
+                  <div onClick={() => navigate("/dataMaster")} className={`list-group-item py-2 ${tab === "JenisArsipMaster" ? "" : ""}`} role="presentation"><span>Jenis Arsip</span></div>
                   <div onClick={() => navigate("/dataMaster/KategoriMaster")} className={`list-group-item py-2 ${tab === "KategoriMaster" ? "" : ""}`}><span>Kategori</span></div>
                   <div onClick={() => navigate("/dataMaster/SubKategoriMaster")} className={`list-group-item py-2 ${tab === "SubKategoriMaster" ? "" : ""}`}><span>Sub Kategori</span></div>
-                  <div onClick={() => navigate("/dataMaster/GedungMaster")} className={`list-group-item py-2 ${tab === "GedungMaster" ? "" : ""}`}><span>Gedung</span></div>
+                  <div onClick={() => navigate("/dataMaster/GedungMaster")} className={`list-group-item active py-2 ${tab === "GedungMaster" ? "" : ""}`}><span>Gedung</span></div>
                   <div onClick={() => navigate("/dataMaster/LantaiMaster")} className={`list-group-item py-2 ${tab === "LantaiMaster" ? "" : ""}`}><span>Lantai</span></div>
                   <div onClick={() => navigate("/dataMaster/RuangMaster")} className={`list-group-item py-2 ${tab === "RuangMaster" ? "" : ""}`}><span>Ruang</span></div>
                   <div onClick={() => navigate("/dataMaster/LemariMaster")} className={`list-group-item py-2 ${tab === "LemariMaster" ? "" : ""}`}><span>Lemari</span></div>
@@ -157,10 +157,10 @@ const navigate = useNavigate();
           <div className="customers-list-item d-flex align-items-center justify-content-between p-3 cursor-pointer bg-white radius-10" style={{marginBottom: 15}}>
             <div className="kiri" style={{display: 'flex', alignItems: 'center'}}>
               <div className>
-                <img src="assets/images/stackfiles.png" width={60} height={50} alt />
+                <img src="assets/images/block.png" width={40} height={50} alt />
               </div>
               <div className="ms-3">
-                <h6 className="mb-1 font-14">Surat</h6>
+                <h6 className="mb-1 font-14">Gedung A</h6>
               </div>
             </div>
             <div className="kanan" style={{display: 'flex'}}>
@@ -169,10 +169,10 @@ const navigate = useNavigate();
                   <h7 className="mb-1">Aksi:</h7> 
                 </div>
                 <div className="w-45">
-                  <button type="button" className="btn-edit pt-1 pb-1 d-flex align-items-center" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
+                  <button type="button" className="btn-edit pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
                 </div>	
                 <div className="w-45">
-                  <button type="button" className="btn-hapus pt-1 pb-1 d-flex align-items-center" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
+                  <button type="button" className="btn-hapus pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
                 </div>
               </div>			
             </div>
@@ -180,10 +180,10 @@ const navigate = useNavigate();
           <div className="customers-list-item d-flex align-items-center justify-content-between p-3 cursor-pointer bg-white radius-10" style={{marginBottom: 15}}>
             <div className="kiri" style={{display: 'flex', alignItems: 'center'}}>
               <div className>
-                <img src="assets/images/stackfiles.png" width={60} height={50} alt />
+                <img src="assets/images/block.png" width={40} height={50} alt />
               </div>
               <div className="ms-3">
-                <h6 className="mb-1 font-14">Laporan</h6>
+                <h6 className="mb-1 font-14">Gedung B</h6>
               </div>
             </div>
             <div className="kanan" style={{display: 'flex'}}>
@@ -192,10 +192,10 @@ const navigate = useNavigate();
                   <h7 className="mb-1">Aksi:</h7> 
                 </div>
                 <div className="w-45">
-                  <button type="button" className="btn-edit pt-1 pb-1 d-flex align-items-center" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
+                  <button type="button" className="btn-edit pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
                 </div>	
                 <div className="w-45">
-                  <button type="button" className="btn-hapus pt-1 pb-1 d-flex align-items-center" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
+                  <button type="button" className="btn-hapus pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
                 </div>
               </div>			
             </div>
@@ -203,10 +203,10 @@ const navigate = useNavigate();
           <div className="customers-list-item d-flex align-items-center justify-content-between p-3 cursor-pointer bg-white radius-10" style={{marginBottom: 15}}>
             <div className="kiri" style={{display: 'flex', alignItems: 'center'}}>
               <div className>
-                <img src="assets/images/stackfiles.png" width={60} height={50} alt />
+                <img src="assets/images/block.png" width={40} height={50} alt />
               </div>
               <div className="ms-3">
-                <h6 className="mb-1 font-14">File</h6>
+                <h6 className="mb-1 font-14">Gedung C</h6>
               </div>
             </div>
             <div className="kanan" style={{display: 'flex'}}>
@@ -215,25 +215,46 @@ const navigate = useNavigate();
                   <h7 className="mb-1">Aksi:</h7> 
                 </div>
                 <div className="w-45">
-                  <button type="button" className="btn-edit pt-1 pb-1 d-flex align-items-center" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
+                  <button type="button" className="btn-edit pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
                 </div>	
                 <div className="w-45">
-                  <button type="button" className="btn-hapus pt-1 pb-1 d-flex align-items-center" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
+                  <button type="button" className="btn-hapus pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
+                </div>
+              </div>			
+            </div>
+          </div>		
+          <div className="customers-list-item d-flex align-items-center justify-content-between p-3 cursor-pointer bg-white radius-10" style={{marginBottom: 15}}>
+            <div className="kiri" style={{display: 'flex', alignItems: 'center'}}>
+              <div className>
+                <img src="assets/images/block.png" width={40} height={50} alt />
+              </div>
+              <div className="ms-3">
+                <h6 className="mb-1 font-14">Gedung D</h6>
+              </div>
+            </div>
+            <div className="kanan" style={{display: 'flex'}}>
+              <div className="d-flex align-items-center pb-0 pt-0 gap-3">
+                <div className>
+                  <h7 className="mb-1">Aksi:</h7> 
+                </div>
+                <div className="w-45">
+                  <button type="button" className="btn-edit pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/edit.png" alt width="15px" height="15px" style={{marginRight: 8}} />Edit</button>
+                </div>	
+                <div className="w-45">
+                  <button type="button" className="btn-hapus pt-1 pb-1" style={{width: '100%'}}><img src="assets/images/hapus.png" width="15px" height="15px" style={{marginRight: 8}} alt />Hapus</button>
                 </div>
               </div>			
             </div>
           </div>		
         </div>
       </div>
-
-
       {/* Modal Tambah User */}
-      <div className="modal fade" id="tambahJenisArsip" tabIndex={-1} aria-hidden="true">
+      <div className="modal fade" id="tambahGedungMaster" tabIndex={-1} aria-hidden="true">
         <div className="modal-dialog modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header" style={{border: 'none'}}>
               <div className style={{margin: 'auto'}}>
-                <h5 className="modal-title align-items-center">Penambahan Jenis Arsip</h5>
+                <h5 className="modal-title align-items-center">Penambahan Gedung</h5>
               </div>
               <div>
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
@@ -243,7 +264,7 @@ const navigate = useNavigate();
               <img src="assets/images/documents.png" alt width="90px" height="90px" style={{display: 'block', margin: '0 auto', marginBottom: 20}} />
               <form>
                 <div className="mb-3">
-                  <label className="form-label">Jenis Arsip</label>
+                  <label className="form-label">Gedung</label>
                   <input type="text" className="form-control radius-30" placeholder="Masukkan Jenis Arsip" />
                 </div>
               </form>
@@ -265,5 +286,5 @@ const navigate = useNavigate();
   </div>
 </div>
 
-  );
+	)
 }

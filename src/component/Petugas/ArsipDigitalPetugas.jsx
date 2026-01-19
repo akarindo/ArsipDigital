@@ -1,11 +1,10 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-export default function DataArsipPetugas() {
+export default function ArsipDigitalPetugas() {
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const tab = location.pathname.includes("ArsipDigitalPetugas") ? "ArsipDigitalPetugas" : "Arsip Fisik";
+    const tab = location.pathname.includes("ArsipDigitalPetugas") ? "ArsipDigitalPetugas" : "Arsip Fisik";
 
   return (
 
@@ -106,14 +105,14 @@ export default function DataArsipPetugas() {
         <div className="search-bar flex-grow-1">
           <ul className="nav nav-pills mb-3" role="tablist">
             <li onClick={() => navigate("/dataArsipPetugas")} className={`nav-item ${tab === "Arsip Fisik" ? "active" : ""}`} role="presentation" style={{width: '50%', cursor: 'pointer'}}>
-              <div className="nav-link active" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="true">
+              <div className="nav-link" data-bs-toggle="pill" href="#primary-pills-home" role="tab" aria-selected="false">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">Arsip Fisik</div>
                 </div>
               </div>
             </li>
             <li onClick={() => navigate("/dataArsipPetugas/ArsipDigitalPetugas")} className={`nav-item ${tab === "ArsipDigitalPetugas" ? "active" : ""}`} role="presentation" style={{width: '50%', cursor: 'pointer'}}>
-              <div className="nav-link" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="false">
+              <div className="nav-link active" data-bs-toggle="pill" href="#primary-pills-profile" role="tab" aria-selected="true">
                 <div className="d-flex align-items-center justify-content-center">
                   <div className="tab-title">Arsip Digital</div>
                 </div>
@@ -123,120 +122,21 @@ export default function DataArsipPetugas() {
         </div>
         <div className="user-box">
           <div className="col mb-3">
-            <button type="button" className="btn-tambah px-5" data-bs-toggle="modal" data-bs-target="#modaltambahFisik">Tambah</button>
+            <button type="button" className="btn-tambah px-5" data-bs-toggle="modal" data-bs-target="#modaltambahDigital">Tambah</button>
           </div>
         </div>
       </div>
+
       <div className="row row-cols-1 row-cols-md-1 row-cols-lg-3 row-cols-xl-3">
-        <div className="col">
+        <div className="col mb-4">
           <div className="card">
             <div className="gambar d-flex justify-content-center">
-              <img src="assets/images/block.png" className="card-img-top" style={{width: 104, height: 146, marginTop: 15}} alt="..." />
+              <img src="assets/images/Frame 139.png" className="card-img-top" style={{width: 170, height: 138, marginTop: 15}} alt="..." />
             </div>
             <div className="card-body">
-              <h5 className="card-title">Gedung A - Utama</h5>
-              <p className="card-text">Arsip Administrasi dan Keuangan</p>
+              <h5 className="card-title">Bank Indonesia</h5>
             </div>
             <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
-              <Link to="/dataArsipStaff/lantaiStaff" className="link">
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Lantai</p>
-                          <h4 className="my-1">5</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/building.png" alt className="logo-arsip" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              </Link>
-              <Link to="/dataArsipStaff/ruang" className="link">
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Ruang</p>
-                          <h4 className="my-1">10</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/building.png" alt className="logo-arsip"/>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              </Link>
-              <Link to="/dataArsipStaff/arsip" className="link">
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Arsip</p>
-                          <h4 className="my-1">100</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/file-archive.png" alt className="logo-arsip"/>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              </Link>
-            </ul>
-          </div>
-        </div>
-        <div className="col">
-          <div className="card">
-            <div className="gambar d-flex justify-content-center">
-              <img src="assets/images/block.png" className="card-img-top" style={{width: 104, height: 146, marginTop: 15}} alt="..." />
-            </div>
-            <div className="card-body">
-              <h5 className="card-title">Gedung B - Utama</h5>
-              <p className="card-text">Arsip Administrasi dan Keuangan</p>
-            </div>
-            <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Lantai</p>
-                          <h4 className="my-1">5</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/building.png" alt className="logo-arsip" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Ruang</p>
-                          <h4 className="my-1">10</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/building.png" alt className="logo-arsip"/>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
               <li className="list-group-item" style={{border: 'none'}}>
                 <div className="col">
                   <div className="card radius-10 shadow-none">
@@ -259,45 +159,12 @@ export default function DataArsipPetugas() {
         <div className="col">
           <div className="card">
             <div className="gambar d-flex justify-content-center">
-              <img src="assets/images/block.png" className="card-img-top" style={{width: 104, height: 146, marginTop: 15}} alt="..." />
+              <img src="assets/images/Frame 139.png" className="card-img-top" style={{width: 170, height: 138, marginTop: 15}} alt="..." />
             </div>
             <div className="card-body">
-              <h5 className="card-title">Gedung C - Utama</h5>
-              <p className="card-text">Arsip Administrasi dan Keuangan</p>
+              <h5 className="card-title">OJK</h5>
             </div>
             <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Lantai</p>
-                          <h4 className="my-1">5</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/building.png" alt className="logo-arsip"/>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li className="list-group-item" style={{border: 'none'}}>
-                <div className="col">
-                  <div className="card radius-10 shadow-none">
-                    <div className="card-body-arsip">
-                      <div className="d-flex align-items-center">
-                        <div>
-                          <p className="mb-0 text-secondary">Ruang</p>
-                          <h4 className="my-1">10</h4>
-                        </div>
-                        <div className="text ms-auto font-35"><img src="assets/images/building.png" alt className="logo-arsip"/>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
               <li className="list-group-item" style={{border: 'none'}}>
                 <div className="col">
                   <div className="card radius-10 shadow-none">
@@ -317,113 +184,208 @@ export default function DataArsipPetugas() {
             </ul>
           </div>
         </div>
-      </div>
-      
-        {/* Modal Tambah Fisik */}
-        <div className="modal fade" id="modaltambahFisik" tabIndex={-1} aria-hidden="true">
-          <div className="modal-dialog modal-dialog-scrollable">
-            <div className="modal-content">
-              <div className="modal-header" style={{border: 'none'}}>
-                <h5 className="modal-title">Formulir Penambahan Data Arsip Fisik</h5>
-                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
-              </div>
-              <div className="modal-body">
-                <img src="assets/images/documents.png" />
-                <form>
-                  <div className="mb-3">
-                    <label className="form-label">Nama Arsip</label>
-                    <select className="form-select mb-3 radius-30" aria-label="Default select example">
-                      <option selected>Pilih Arsip</option>
-                      <option value={1}>One</option>
-                      <option value={2}>Two</option>
-                      <option value={3}>Three</option>
-                    </select>
-                  </div>
-                  <label className="form-label">Jenis Arsip</label>
-                  <div className="line-check" style={{display: 'flex'}}>
-                    <div className="form-check" style={{marginRight: 10}}>
-                      <input className="form-check-input" type="checkbox" defaultValue id="flexCheckDefault" />
-                      <label className="form-check-label" htmlFor="flexCheckDefault">Surat</label>
-                    </div>
-                    <div className="form-check" style={{marginRight: 10}}>
-                      <input className="form-check-input" type="checkbox" defaultValue id="flexCheckDefault" />
-                      <label className="form-check-label" htmlFor="flexCheckDefault">Laporan</label>
-                    </div>
-                    <div className="form-check" style={{marginRight: 10}}>
-                      <input className="form-check-input" type="checkbox" defaultValue id="flexCheckDefault" />
-                      <label className="form-check-label" htmlFor="flexCheckDefault">File</label>
+        <div className="col">
+          <div className="card">
+            <div className="gambar d-flex justify-content-center">
+              <img src="assets/images/Frame 139.png" className="card-img-top" style={{width: 170, height: 138, marginTop: 15}} alt="..." />
+            </div>
+            <div className="card-body">
+              <h5 className="card-title">BPR</h5>
+            </div>
+            <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
+              <li className="list-group-item" style={{border: 'none'}}>
+                <div className="col">
+                  <div className="card radius-10 shadow-none">
+                    <div className="card-body-arsip">
+                      <div className="d-flex align-items-center">
+                        <div>
+                          <p className="mb-0 text-secondary">Arsip</p>
+                          <h4 className="my-1">100</h4>
+                        </div>
+                        <div className="text ms-auto font-35"><img src="assets/images/file-archive.png" alt className="logo-arsip"/>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="line" style={{display: 'flex'}}>
-                    <div className="mb-3">
-                      <label className="form-label">Lemari</label>
-                      <select className="form-select mb-3 radius-30" aria-label="Default select example">
-                        <option selected>Pilih Lemari</option>
-                        <option value={1}>One</option>
-                        <option value={2}>Two</option>
-                        <option value={3}>Three</option>
-                      </select>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="col">
+          <div className="card">
+            <div className="gambar d-flex justify-content-center">
+              <img src="assets/images/Frame 139.png" className="card-img-top" style={{width: 170, height: 138, marginTop: 15}} alt="..." />
+            </div>
+            <div className="card-body">
+              <h5 className="card-title">Kemenkeu</h5>
+            </div>
+            <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
+              <li className="list-group-item" style={{border: 'none'}}>
+                <div className="col">
+                  <div className="card radius-10 shadow-none">
+                    <div className="card-body-arsip">
+                      <div className="d-flex align-items-center">
+                        <div>
+                          <p className="mb-0 text-secondary">Arsip</p>
+                          <h4 className="my-1">100</h4>
+                        </div>
+                        <div className="text ms-auto font-35"><img src="assets/images/file-archive.png" alt className="logo-arsip"/>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mb-3">
-                      <label className="form-label">Rak</label>
-                      <select className="form-select mb-3 radius-30" aria-label="Default select example">
-                        <option selected>Pilih Rak</option>
-                        <option value={1}>One</option>
-                        <option value={2}>Two</option>
-                        <option value={3}>Three</option>
-                      </select>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="col">
+          <div className="card">
+            <div className="gambar d-flex justify-content-center">
+              <img src="assets/images/Frame 139.png" className="card-img-top" style={{width: 170, height: 138, marginTop: 15}} alt="..." />
+            </div>
+            <div className="card-body">
+              <h5 className="card-title">Bank Indonesia</h5>
+            </div>
+            <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
+              <li className="list-group-item" style={{border: 'none'}}>
+                <div className="col">
+                  <div className="card radius-10 shadow-none">
+                    <div className="card-body-arsip">
+                      <div className="d-flex align-items-center">
+                        <div>
+                          <p className="mb-0 text-secondary">Arsip</p>
+                          <h4 className="my-1">100</h4>
+                        </div>
+                        <div className="text ms-auto font-35"><img src="assets/images/file-archive.png" alt className="logo-arsip"/>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mb-3">
-                      <label className="form-label">Nomor</label>
-                      <select className="form-select mb-3 radius-30" aria-label="Default select example">
-                        <option selected>Pilih Nomor</option>
-                        <option value={1}>One</option>
-                        <option value={2}>Two</option>
-                        <option value={3}>Three</option>
-                      </select>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="col">
+          <div className="card">
+            <div className="gambar d-flex justify-content-center">
+              <img src="assets/images/Frame 139.png" className="card-img-top" style={{width: 170, height: 138, marginTop: 15}} alt="..." />
+            </div>
+            <div className="card-body">
+              <h5 className="card-title">OJK</h5>
+            </div>
+            <ul className="list-group list-group-flush" style={{borderTop: "none"}}>
+              <li className="list-group-item" style={{border: 'none'}}>
+                <div className="col">
+                  <div className="card radius-10 shadow-none">
+                    <div className="card-body-arsip">
+                      <div className="d-flex align-items-center">
+                        <div>
+                          <p className="mb-0 text-secondary">Arsip</p>
+                          <h4 className="my-1">100</h4>
+                        </div>
+                        <div className="text ms-auto font-35"><img src="assets/images/file-archive.png" alt className="logo-arsip"/>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label">Kategori</label>
-                    <select className="form-select mb-3 radius-30" aria-label="Default select example">
-                      <option selected>Pilih Kategori</option>
-                      <option value={1}>One</option>
-                      <option value={2}>Two</option>
-                      <option value={3}>Three</option>
-                    </select>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+      {/* Modal Tambah Digital */}
+      <div className="modal fade" id="modaltambahDigital" tabIndex={-1} aria-hidden="true">
+        <div className="modal-dialog modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header" style={{border: 'none'}}>
+              <h5 className="modal-title">Formulir Penambahan Data Arsip Digital</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+            </div>
+            <div className="modal-body">
+              <img src="assets/images/documents.png" />
+              <form>
+                <div className="mb-3">
+                  <label className="form-label">Unduh File(Hanya PDF)</label>
+                  <input type="file" id="unggah_file" name="unggah_file" accept=".pdf" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Size File(Mb)</label>
+                  <input type="number" id="jumlah_item" name="jumlah_item" min={1} max={10} placeholder="Masukkan dalam bentuk MB" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Nama Arsip</label>
+                  <select className="form-select mb-3 radius-30" aria-label="Default select example">
+                    <option selected>Pilih Arsip</option>
+                    <option value={1}>One</option>
+                    <option value={2}>Two</option>
+                    <option value={3}>Three</option>
+                  </select>
+                </div>
+                <label className="form-label">Jenis Arsip</label>
+                <div className="line-check" style={{display: 'flex'}}>
+                  <div className="form-check" style={{marginRight: 10}}>
+                    <input className="form-check-input" type="checkbox" defaultValue id="flexCheckDefault" />
+                    <label className="form-check-label" htmlFor="flexCheckDefault">Surat</label>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label">Keterangan</label>
-                    <input type="text" className="form-control radius-30" />
+                  <div className="form-check" style={{marginRight: 10}}>
+                    <input className="form-check-input" type="checkbox" defaultValue id="flexCheckDefault" />
+                    <label className="form-check-label" htmlFor="flexCheckDefault">Laporan</label>
                   </div>
-                </form>
-              </div>
-              <div className="p-3 pt-0">
-                <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                  <div className="w-50">
-                    <button type="button" className="btn btn-outline-primary radius-30" style={{width: '100%'}}>Batal</button>
-                  </div>	
-                  <div className="w-50">
-                    <button type="button" className="btn btn-primary radius-30" style={{width: '100%'}} data-bs-toggle="modal" data-bs-target="#berhasilTambahFisik">Tambah</button>
+                  <div className="form-check" style={{marginRight: 10}}>
+                    <input className="form-check-input" type="checkbox" defaultValue id="flexCheckDefault" />
+                    <label className="form-check-label" htmlFor="flexCheckDefault">File</label>
                   </div>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Kode Arsip</label>
+                  <input type className="form-control radius-30" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Kategori</label>
+                  <select className="form-select mb-3 radius-30" aria-label="Default select example">
+                    <option selected>Pilih Kategori</option>
+                    <option value={1}>One</option>
+                    <option value={2}>Two</option>
+                    <option value={3}>Three</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Keterangan</label>
+                  <input type="text" className="form-control radius-30" />
+                </div>
+              </form>
+            </div>
+            <div className="p-3 pt-0">
+              <div className="d-flex align-items-center pb-0 pt-0 gap-3">
+                <div className="w-50">
+                  <button type="button" className="btn btn-outline-primary radius-30" style={{width: '100%'}}>Batal</button>
+                </div>	
+                <div className="w-50">
+                  <button type="button" className="btn btn-primary radius-30" style={{width: '100%'}} data-bs-toggle="modal" data-bs-target="#berhasilTambahDigital">Tambah</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      {/* Modal Berhasil Tambah Fisik*/}
+    </div>
+    <div className="col">
+      {/* Modal Berhasil Tambah Digital*/}
       <div className="col">
-        <div className="modal fade" id="berhasilTambahFisik" tabIndex={-1} aria-hidden="true">
+        <div className="modal fade" id="berhasilTambahDigital" tabIndex={-1} aria-hidden="true">
           <div className="modal-dialog modal-sm">
             <div className="modal-content">
               <div className="modal-header" style={{borderBottom: 'none'}}>
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
               </div>
               <div className="modal-body" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
-                <h5 className="modal-title" style={{marginBottom: 15}}>Penambahan Data Arsip Fisik</h5>
+                <h5 className="modal-title" style={{marginBottom: 15}}>Penambahan Data Arsip Digital</h5>
                 <img src="assets/images/pharmacy.png" />
-                <h6 className="modal-isi" style={{marginBottom: 0, marginTop: 15}}>Data arsip fisik berhasil ditambahkan.</h6>
+                <h6 className="modal-isi" style={{marginBottom: 0, marginTop: 15}}>Data arsip digital berhasil ditambahkan.</h6>
               </div>
               <div className="modal-footer" style={{borderTop: 'none'}}>
                 <button type="button" className="btn btn-primary" style={{width: '100%', borderRadius: 50}}>Oke</button>
@@ -431,9 +393,10 @@ export default function DataArsipPetugas() {
             </div>
           </div>
         </div>
-      </div>   
+      </div>
+    </div>
   </div>
 </div>
-
+</div>
   )
 }

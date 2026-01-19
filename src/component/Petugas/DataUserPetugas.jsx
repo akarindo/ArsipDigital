@@ -17,7 +17,7 @@ export default function DataUserPetugas() {
     <ul className="metismenu p-3" id="menu">
       <h6 className="ms-3 mb-3">MAIN MENU</h6>
           <li>
-            <Link to="/dashboardPetugas">
+            <Link to="/dashboardPetugas" className="link">
               <div className="parent-icon">
                 <img src="/assets/images/house.png" alt="Dashboard" />
               </div>
@@ -25,7 +25,7 @@ export default function DataUserPetugas() {
             </Link>
           </li>
           <li>
-            <Link to="/dataUserPetugas">
+            <Link to="/dataUserPetugas" className="link">
               <div className="parent-icon">
                 <img src="/assets/images/house.png" alt="Dashboard" />
               </div>
@@ -33,7 +33,7 @@ export default function DataUserPetugas() {
             </Link>
           </li>
           <li>
-            <Link to="/dataArsipPetugas">
+            <Link to="/dataArsipPetugas" className="link">
               <div className="parent-icon">
                 <img src="/assets/images/clipboard-list.png" alt="Data Arsip" />
               </div>
@@ -41,7 +41,7 @@ export default function DataUserPetugas() {
             </Link>
           </li>
           <li>
-            <Link to="/dataMaster">
+            <Link to="/dataMaster" className="link">
               <div className="parent-icon">
                 <img src="/assets/images/clipboard-list.png" alt="Log Pengajuan" />
               </div>
@@ -49,7 +49,7 @@ export default function DataUserPetugas() {
             </Link>
           </li>
           <li>
-            <Link to="/approvalPetugas">
+            <Link to="/approvalPetugas" className="link">
               <div className="parent-icon">
                 <img src="/assets/images/history.png" alt="Log History" />
               </div>
