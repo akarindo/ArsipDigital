@@ -30,6 +30,7 @@ export default function ManajemenSurat() {
   const [tab, setTab] = useState("masuk");
   const [loading, setLoading] = useState(false);
   const [dataSurat, setDataSurat] = useState([]);
+  const [tabArsip, setTabArsip] = useState("eksternal"); // default eksternal sesuai form lama
   const { token } = usePengajuan();
   const [selectedData, setSelectedData] = useState(null);
   const [corporates, setCorporates] = useState([]);
@@ -57,10 +58,13 @@ export default function ManajemenSurat() {
     alamat_tujuan: "",
     no_registrasi: "",
     tanggal_buat: "",
-    no_resi: "",
-    jenis_pengiriman: "",
-    provider: "J&T",
-    tanggal_serah_kurir: "",
+    no_resi: null,
+    jenis_pengiriman: null,
+    provider: null,
+    type: tabArsip,
+    penerima: null,
+    status_internal: null,
+    tanggal_serah: null,
     file_size: 0,
   });
   const openModal = (id) => {
@@ -111,10 +115,13 @@ export default function ManajemenSurat() {
       alamat_tujuan: "",
       no_registrasi: "",
       tanggal_buat: "",
-      no_resi: "",
-      jenis_pengiriman: "",
-      provider: "J&T",
-      tanggal_serah_kurir: "",
+      no_resi: null,
+      jenis_pengiriman: null,
+      provider: null,
+      type: tabArsip,
+      penerima: null,
+      status_internal: null,
+      tanggal_serah: null,
       file_size: 0,
     });
   };
@@ -376,7 +383,7 @@ export default function ManajemenSurat() {
   };
 
   // Logika Storage (Contoh)
-  const LIMIT_STORAGE_GB = 0.001;
+  const LIMIT_STORAGE_GB = 25;
   const LIMIT_IN_BYTES = LIMIT_STORAGE_GB * 1024 * 1024 * 1024;
   // Hitung total dari dataSurat (asumsi field 'file_size' ada di setiap item)
   const totalUsedBytes = dataSurat.reduce(
@@ -1068,88 +1075,180 @@ export default function ManajemenSurat() {
                       </small>
                     )}
                   </div>
-                  {/* SECTION KURIR (WAJIB DIISI) */}
-                  <div className="col-12 mt-4 py-2 bg-light rounded-3 px-3 border">
-                    <h6 className="mb-3 mt-1 fw-bold text-primary small uppercase">
-                      <i className="bx bx-truck me-2"></i>Detail Ekspedisi /
-                      Kurir
-                    </h6>
-                    <div className="row g-2 pb-2">
-                      <div className="col-md-4">
-                        <label className="form-label x-small fw-bold">
-                          Provider
-                        </label>
-                        <select
-                          className="form-select form-select-sm"
-                          value={formKeluar.provider}
-                          onChange={(e) =>
-                            setFormKeluar({
-                              ...formKeluar,
-                              provider: e.target.value,
-                            })
-                          }
+                  <div className="col-12 mt-4">
+                    <ul className="nav nav-pills nav-fill mb-3 bg-light rounded p-1">
+                      <li className="nav-item">
+                        <button
+                          type="button"
+                          className={`nav-link ${tabArsip === "internal" ? "active btn-primary" : "text-secondary"}`}
+                          onClick={() => setTabArsip("internal")}
                         >
-                          <option value="J&T">J&T Express</option>
-                          <option value="JNE">JNE</option>
-                          <option value="SICEPAT">Sicepat</option>
-                          <option value="POS">POS Indonesia</option>
-                        </select>
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label x-small fw-bold">
-                          Jenis Layanan
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control form-select-sm"
-                          placeholder="Reguler/Kilat"
-                          required
-                          value={formKeluar.jenis_pengiriman}
-                          onChange={(e) =>
-                            setFormKeluar({
-                              ...formKeluar,
-                              jenis_pengiriman: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label x-small fw-bold">
-                          Nomor Resi
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control form-select-sm"
-                          placeholder="Contoh: JT1234..."
-                          required
-                          value={formKeluar.no_resi}
-                          onChange={(e) =>
-                            setFormKeluar({
-                              ...formKeluar,
-                              no_resi: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="col-md-12">
-                        <label className="form-label x-small fw-bold">
-                          Tanggal Serah Kurir
-                        </label>
-                        <input
-                          type="date"
-                          className="form-control form-select-sm"
-                          required
-                          value={formKeluar.tanggal_serah_kurir}
-                          onChange={(e) =>
-                            setFormKeluar({
-                              ...formKeluar,
-                              tanggal_serah_kurir: e.target.value,
-                            })
-                          }
-                        />
+                          <i className="bx bx-buildings me-2"></i>Internal /
+                          Langsung
+                        </button>
+                      </li>
+                      <li className="nav-item">
+                        <button
+                          type="button"
+                          className={`nav-link ${tabArsip === "eksternal" ? "active btn-primary" : "text-secondary"}`}
+                          onClick={() => setTabArsip("eksternal")}
+                        >
+                          <i className="bx bx-truck me-2"></i>Eksternal / Kurir
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                  {/* KONTEN TAB INTERNAL */}
+                  {tabArsip === "internal" && (
+                    <div className="col-12 py-3 px-3 border rounded-3 bg-light-subtle animate__animated animate__fadeIn">
+                      <h6 className="fw-bold text-primary small mb-3">
+                        DETAIL PENGAMBILAN INTERNAL
+                      </h6>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label small fw-bold">
+                            Metode Serah Terima
+                          </label>
+                          <select
+                            className="form-select"
+                            value={formKeluar.status_internal || ""}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                status_internal: e.target.value,
+                              })
+                            }
+                            required={tabArsip === "internal"}
+                          >
+                            <option value="">-- Pilih Metode --</option>
+                            <option value="diambil">Diambil Sendiri</option>
+                            <option value="dititipkan">Dititipkan</option>
+                          </select>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label small fw-bold">
+                            Nama Penerima/Pembawa
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Nama lengkap..."
+                            value={formKeluar.penerima || ""}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                penerima: e.target.value,
+                              })
+                            }
+                            required={tabArsip === "internal"}
+                          />
+                        </div>
+                        <div className="col-md-12">
+                          <label className="form-label x-small fw-bold">
+                            Tanggal Diserahkan
+                          </label>
+                          <input
+                            type="date"
+                            className="form-control form-select-sm"
+                            value={formKeluar.tanggal_serah}
+                            required={tabArsip === "eksternal"}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                tanggal_serah: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* KONTEN TAB EKSTERNAL (KODE LAMA ANDA) */}
+                  {tabArsip === "eksternal" && (
+                    <div className="col-12 py-2 bg-light rounded-3 px-3 border animate__animated animate__fadeIn">
+                      <h6 className="mb-3 mt-1 fw-bold text-primary small uppercase">
+                        <i className="bx bx-truck me-2"></i>Detail Ekspedisi /
+                        Kurir
+                      </h6>
+                      <div className="row g-2 pb-2">
+                        <div className="col-md-4">
+                          <label className="form-label x-small fw-bold">
+                            Provider
+                          </label>
+                          <select
+                            className="form-select form-select-sm"
+                            value={formKeluar.provider}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                provider: e.target.value,
+                              })
+                            }
+                            required={tabArsip === "eksternal"}
+                          >
+                            <option value="J&T">J&T Express</option>
+                            <option value="JNE">JNE</option>
+                            <option value="SICEPAT">Sicepat</option>
+                            <option value="POS">POS Indonesia</option>
+                          </select>
+                        </div>
+                        <div className="col-md-4">
+                          <label className="form-label x-small fw-bold">
+                            Jenis Layanan
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control form-select-sm"
+                            placeholder="Reguler/Kilat"
+                            value={formKeluar.jenis_pengiriman}
+                            required={tabArsip === "eksternal"}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                jenis_pengiriman: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-md-4">
+                          <label className="form-label x-small fw-bold">
+                            Nomor Resi
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control form-select-sm"
+                            placeholder="Contoh: JT1234..."
+                            value={formKeluar.no_resi}
+                            required={tabArsip === "eksternal"}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                no_resi: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-md-12">
+                          <label className="form-label x-small fw-bold">
+                            Tanggal Serah Kurir
+                          </label>
+                          <input
+                            type="date"
+                            className="form-control form-select-sm"
+                            value={formKeluar.tanggal_serah}
+                            required={tabArsip === "eksternal"}
+                            onChange={(e) =>
+                              setFormKeluar({
+                                ...formKeluar,
+                                tanggal_serah: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="modal-footer border-0">

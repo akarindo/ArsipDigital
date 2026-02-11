@@ -334,7 +334,7 @@ export default function DataArsip({ children }) {
               </ul>
             </div>
 
-            {role == "petugas" ? (
+            {role == "staff umum" ? (
               <div className="user-box">
                 <div className="col mb-3">
                   <button
@@ -350,7 +350,7 @@ export default function DataArsip({ children }) {
                   </button>
                 </div>
               </div>
-            ) : role == "staff" ? (
+            ) : role == "pegawai" ? (
               <div className="user-box">
                 <div className="col mb-3">
                   <button
@@ -724,7 +724,6 @@ export default function DataArsip({ children }) {
               </div>
             </div>
           </div>
-        
         </div>
         <div
           className="modal fade"

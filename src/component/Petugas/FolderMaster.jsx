@@ -40,7 +40,8 @@ export default function FolderMaster() {
   } = React.useContext(PengajuanContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("id", currentUuid);
+    console.log("folder", folder);
     // Tentukan URL dan Method berdasarkan mode (Edit atau Tambah)
     const url = isEdit
       ? `${import.meta.env.VITE_API_URL}/api/folders/${currentUuid}`
@@ -77,11 +78,7 @@ export default function FolderMaster() {
       setIsEdit(false);
       setCurrentUuid(null);
       refreshData();
-
-      // Tutup Modal (Gunakan cara Bootstrap)
-      const modalElement = document.getElementById("tambahFolderMaster");
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      modal.hide();
+ handleCloseModal();
     } catch (error) {
       console.error("Error:", error.message);
       alert(error.message);
@@ -90,20 +87,31 @@ export default function FolderMaster() {
   const handleEdit = async (folderItem) => {
     setIsEdit(true);
     setCurrentUuid(folderItem.uuid);
+
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/api/folders/${folderItem?.uuid}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      },
+      { headers: { Authorization: `Bearer ${token}` } },
     );
+
     const { data } = await response.json();
+
+    // 1. Definisikan data secara eksplisit
+    const buildingId = data?.shelf?.cabinet?.room?.floor?.building_uuid;
+    const floorId = data?.shelf?.cabinet?.room?.floor_uuid;
+    const roomId = data?.shelf?.cabinet?.room_uuid;
+    const cabinetId = data?.shelf?.cabinet_uuid;
+
+    handleChangeBuild(buildingId);
+    handleChangeFloor(floorId);
+    handleChangeRoom(roomId);
+    handleChangeCabinet(cabinetId);
     setFolder({
-      building_uuid: data?.shelf?.cabinet?.room?.floor?.building_uuid,
-      floor_uuid: data?.shelf?.cabinet?.room?.floor_uuid,
-      room_uuid: data?.shelf?.cabinet?.room_uuid,
-      cabinet_uuid: data?.shelf?.cabinet_uuid,
+      building_uuid: buildingId,
+      floor_uuid: floorId,
+      room_uuid: roomId,
+      cabinet_uuid: cabinetId,
       shelf_uuid: data?.shelf_uuid,
-      name: data?.name, // Pastikan property 'name' ada di folderItem
+      name: folderItem.name, // Ambil langsung dari parameter
     });
     setItem({
       building_name: data?.shelf?.cabinet?.room?.floor?.building?.name,
@@ -194,62 +202,79 @@ export default function FolderMaster() {
       shelf_name: "",
     });
   }
+  const handleOpenModal = (data = null) => {
+    if (data) {
+      handleEdit(data);
+    } else {
+      setIsEdit(false);
+      setFolder({
+        building_uuid: "",
+        floor_uuid: "",
+        room_uuid: "",
+        cabinet_uuid: "",
+        shelf_uuid: "",
+        name: "",
+      });
+      setItem({
+        building_name: "",
+        floor_name: "",
+        room_name: "",
+        cabinet_name: "",
+        shelf_name: "",
+      });
+    }
+    const modal = new bootstrap.Modal(
+      document.getElementById("tambahFolderMaster"),
+    );
+    modal.show();
+  };
 
+  const handleCloseModal = () => {
+    const modalElement = document.getElementById("tambahFolderMaster");
+    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    if (modalInstance) modalInstance.hide();
+  };
   return (
     <AdminLayout>
-      <div className="page-wrapper">
-        <div className="page-content">
-          <div className="d-flex align-items-center">
-            <div className="d-flex align-items-center">
-              <div
-                className="search-bar flex-grow-1 d-flex align-items-center"
-                style={{ marginBottom: 10 }}
-              >
-                <h4 style={{ marginBottom: 0 }}>Data Master</h4>
+      <div className="page-wrapper px-4 py-4">
+        {/* Header */}
+        <div className="row mb-4 align-items-center">
+          <div className="col">
+            <h4 className="fw-bold mb-0 text-dark">Data Master Lantai</h4>
+            <p className="text-muted small mb-0">
+              Manajemen level lantai pada setiap gedung penyimpanan.
+            </p>
+          </div>
+          <div className="col-auto">
+            <button
+              onClick={() => handleOpenModal()}
+              className="btn btn-primary shadow-sm px-4 d-flex align-items-center gap-2"
+              style={{ borderRadius: "10px" }}
+            >
+              <i className="bx bx-plus-circle"></i> Tambah Ruang
+            </button>
+          </div>
+        </div>
+
+        <div className="row g-4">
+          {/* Sidebar */}
+          <div className="col-12 col-lg-3">
+            <div
+              className="card border-0 shadow-sm p-3"
+              style={{ borderRadius: "15px" }}
+            >
+              <div className="card-body">
+                <h6 className="fw-bold mb-3 text-uppercase small text-muted text-center">
+                  Menu Data Master
+                </h6>
+                <Sidebar />
               </div>
             </div>
           </div>
-          <div className="row-cols-xl-2 d-flex flex-nowrap">
-            <div
-              className="col-12 col-lg-2"
-              style={{ width: "22%", marginRight: "15px" }}
-            >
-              <div className="card">
-                <div className="card-body-master">
-                  <div className="col d-flex justify-content-center">
-                    <button
-                      onClick={() => {
-                        setIsEdit(false);
-                        setFolder({
-                          building_uuid: "",
-                          floor_uuid: "",
-                          room_uuid: "",
-                          cabinet_uuid: "",
-                          shelf_uuid: "",
-                          name: "",
-                        });
-                      }}
-                      type="button"
-                      className="btn-tambah px-5 mt-2 mb-3"
-                      data-bs-toggle="modal"
-                      data-bs-target="#tambahFolderMaster"
-                    >
-                      Tambah +
-                    </button>
-                  </div>
-                  <div>
-                    <h6
-                      className="my-2"
-                      style={{ textAlign: "center", whiteSpace: "nowrap" }}
-                    >
-                      Kategori Data Master
-                    </h6>
-                  </div>
-                  <Sidebar />
-                </div>
-              </div>
-            </div>
-            <div className="customers-list mb-3" style={{ width: "78%" }}>
+
+          {/* List Content */}
+          <div className="col-12 col-lg-9">
+            <div className="row">
               {folders?.map((folder) => (
                 <div
                   key={folder.uuid}
@@ -278,7 +303,10 @@ export default function FolderMaster() {
                         <h7 className="mb-1">Aksi:</h7>
                       </div>
                       <button
-                        onClick={() => handleEdit(folder)}
+                        onClick={() => {
+                          // setFolder(folder);
+                          handleEdit(folder);
+                        }}
                         type="button"
                         className="btn-edit pt-1 pb-1"
                         data-bs-toggle="modal"
@@ -318,47 +346,35 @@ export default function FolderMaster() {
               ))}
             </div>
           </div>
-          {/* Modal Tambah User */}
+          {/* Modal Form */}
           <div
             className="modal fade"
             id="tambahFolderMaster"
             tabIndex={-1}
             aria-hidden="true"
           >
-            <div className="modal-dialog modal-dialog-scrollable">
-              <div className="modal-content">
-                <div className="modal-header" style={{ border: "none" }}>
-                  <div className style={{ margin: "auto" }}>
-                    <h5 className="modal-title">
-                      {isEdit ? "Edit Folder" : "Penambahan Folder"}
-                    </h5>
-                  </div>
-                  <div>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    />
-                  </div>
+            <div className="modal-dialog modal-dialog-centered">
+              <div
+                className="modal-content border-0 shadow-lg"
+                style={{ borderRadius: "20px" }}
+              >
+                <div className="modal-header border-0 pt-4 px-4">
+                  <h5 className="fw-bold">
+                    {isEdit ? "Update Rak" : "Tambah Rak Baru"}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                  ></button>
                 </div>
-                <div className="modal-body">
-                  <img
-                    src="/assets/images/documents.png"
-                    alt
-                    width="90px"
-                    height="90px"
-                    style={{
-                      display: "block",
-                      margin: "0 auto",
-                      marginBottom: 20,
-                    }}
-                  />
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                      <label className="form-label">Pilih Gedung</label>
+
+                <form onSubmit={handleSubmit}>
+                  <div className="modal-body p-4">
+                    <div className="mb-3">
+                      <label className="form-label small fw-bold">Gedung</label>
                       <select
-                        name="building_uuid"
+                        className="form-select border-0 bg-light py-2"
                         required
                         value={folder.building_uuid}
                         onChange={(e) => handleChangeBuild(e.target.value)}
@@ -378,9 +394,10 @@ export default function FolderMaster() {
                         ))}
                       </select>
                     </div>
-                    <div className="mb-4">
-                      <label className="form-label">Pilih Lantai</label>
+                    <div className="mb-3">
+                      <label className="form-label small fw-bold">Lantai</label>
                       <select
+                        className="form-select border-0 bg-light py-2"
                         name="floor_uuid"
                         required
                         value={folder.floor_uuid}
@@ -401,9 +418,10 @@ export default function FolderMaster() {
                         ))}
                       </select>
                     </div>
-                    <div className="mb-4">
-                      <label className="form-label">Pilih Ruang</label>
+                    <div className="mb-3">
+                      <label className="form-label small fw-bold">Ruang</label>
                       <select
+                        className="form-select border-0 bg-light py-2"
                         name="room_uuid"
                         required
                         value={folder.room_uuid}
@@ -424,9 +442,10 @@ export default function FolderMaster() {
                         ))}
                       </select>
                     </div>
-                    <div className="mb-4">
-                      <label className="form-label">Pilih Lemari</label>
+                    <div className="mb-3">
+                      <label className="form-label small fw-bold">Lemari</label>
                       <select
+                        className="form-select border-0 bg-light py-2"
                         name="cabinet_uuid"
                         required
                         value={folder.cabinet_uuid}
@@ -447,9 +466,10 @@ export default function FolderMaster() {
                         ))}
                       </select>
                     </div>
-                    <div className="mb-4">
-                      <label className="form-label">Pilih Rak</label>
+                    <div className="mb-3">
+                      <label className="form-label small fw-bold">Rak</label>
                       <select
+                        className="form-select border-0 bg-light py-2"
                         name="shelf_uuid"
                         required
                         value={folder.shelf_uuid}
@@ -484,7 +504,7 @@ export default function FolderMaster() {
                           setFolder({ ...folder, name: e.target.value })
                         }
                         className="form-control radius-30"
-                        placeholder="Masukkan Ruang Arsip"
+                        placeholder="Masukkan Nama Folder"
                       />
                     </div>
                     <div className="p-3 pt-0">
@@ -509,8 +529,8 @@ export default function FolderMaster() {
                         </div>
                       </div>
                     </div>
-                  </form>
-                </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

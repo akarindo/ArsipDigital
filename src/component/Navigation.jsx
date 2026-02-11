@@ -82,9 +82,9 @@ const Navigation = () => {
     setRole(userRole);
 
     // 2. Set menu berdasarkan role di dalam useEffect agar tidak loop
-    if (userRole === "petugas") {
+    if (userRole === "staff umum") {
       setMenus(petugasMenu);
-    } else if (userRole === "staff") {
+    } else if (userRole === "pegawai" || userRole == "hrd") {
       setMenus(staffMenu);
     } else {
       setMenus(pimpinanMenu);

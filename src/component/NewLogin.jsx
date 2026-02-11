@@ -65,9 +65,10 @@ export default function NewLogin() {
       sessionStorage.setItem("userRole", currentUser.role);
 
       const rolePath = {
-        staff: "/disposisistaff",
-        petugas: "/surat",
-        pimpinan: "/disposisi",
+        pegawai: "/disposisistaff",
+        hrd: "/disposisistaff",
+        "staff umum": "/surat",
+        direksi: "/disposisi",
       };
 
       navigate(rolePath[currentUser.role.toLowerCase()] || "/");

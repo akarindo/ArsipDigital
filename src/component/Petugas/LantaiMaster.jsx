@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
 import { PengajuanContext } from "../../context/PengajuanContext";
 import Sidebar from "../Sidebar";
 import AdminLayout from "../layouts/AdminLayout";
@@ -11,20 +10,38 @@ export default function LantaiMaster() {
   });
   const [isEdit, setIsEdit] = useState(false);
   const [currentUuid, setCurrentUuid] = useState(null);
-  const { token, gedungs, floors, getFloors } =
+  const { token, gedungs, floors, refreshData } =
     React.useContext(PengajuanContext);
+
+  const getModal = () => {
+    const modalEl = document.getElementById("tambahLantaiMaster");
+    return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+  };
+
+  const handleOpenModal = (item = null) => {
+    if (item) {
+      setIsEdit(true);
+      setCurrentUuid(item.uuid);
+      setFloor({
+        building_uuid: item.building_uuid || "",
+        name: item.name,
+      });
+    } else {
+      setIsEdit(false);
+      setFloor({ building_uuid: "", name: "" });
+    }
+    getModal().show();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const url = isEdit
         ? `${import.meta.env.VITE_API_URL}/api/floors/${currentUuid}`
         : `${import.meta.env.VITE_API_URL}/api/floors`;
 
-      const method = isEdit ? "PUT" : "POST";
       const response = await fetch(url, {
-        method: method,
+        method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -34,41 +51,25 @@ export default function LantaiMaster() {
       });
 
       const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Gagal memproses data");
 
-      if (!response.ok) {
-        throw new Error(result.message || "Login Gagal");
-      }
-      setFloor({ building_uuid: "", name: "" });
-      setIsEdit(false);
-      setCurrentUuid(null);
-      getFloors(token);
-      const modalElement = document.getElementById("tambahLantaiMaster");
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      modal.hide();
+      getModal().hide();
+      refreshData();
     } catch (error) {
-      // 'error.message' akan berisi pesan dari 'throw new Error' di atas
-      console.error("Login Gagal:", error.message);
+      alert("Error: " + error.message);
     }
   };
-  const handleEdit = (floorItem) => {
-    setIsEdit(true);
-    setCurrentUuid(floorItem.uuid);
 
-    const bUuid = floorItem.building_uuid || "";
-    setFloor({
-      building_uuid: bUuid,
-      name: floorItem.name, // Pastikan property 'name' ada di folderItem
-    });
-  };
-  const handleDelete = async (currentFloor) => {
+  const handleDelete = async (item) => {
     if (
       window.confirm(
-        "Peringatan: Menghapus item ini akan menghapus semua sub-item di dalamnya!",
+        "Peringatan: Menghapus lantai akan menghapus semua ruangan dan rak di dalamnya!",
       )
     ) {
       try {
         const response = await fetch(
-          import.meta.env.VITE_API_URL + "/api/floors/" + currentFloor.uuid,
+          `${import.meta.env.VITE_API_URL}/api/floors/${item.uuid}`,
           {
             method: "DELETE",
             headers: {
@@ -79,128 +80,96 @@ export default function LantaiMaster() {
           },
         );
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || "Login Gagal");
-        }
-        getFloors(token);
+        if (!response.ok) throw new Error("Gagal menghapus data");
+        refreshData();
       } catch (error) {
-        // 'error.message' akan berisi pesan dari 'throw new Error' di atas
-        console.error("Login Gagal:", error.message);
+        console.error("Hapus Gagal:", error.message);
       }
     }
   };
 
+  // Helper untuk mendapatkan nama gedung berdasarkan UUID
+  const getBuildingName = (uuid) => {
+    const b = gedungs?.find((g) => g.uuid === uuid);
+    return b ? b.name : "Gedung Tidak Diketahui";
+  };
+
   return (
     <AdminLayout>
-      <div className="page-wrapper">
-        <div className="page-content">
-          <div className="d-flex align-items-center">
-            <div className="d-flex align-items-center">
-              <div
-                className="search-bar flex-grow-1 d-flex align-items-center"
-                style={{ marginBottom: 10 }}
-              >
-                <h4 style={{ marginBottom: 0 }}>Data Master</h4>
+      <div className="page-wrapper px-4 py-4">
+        {/* Header */}
+        <div className="row mb-4 align-items-center">
+          <div className="col">
+            <h4 className="fw-bold mb-0 text-dark">Data Master Lantai</h4>
+            <p className="text-muted small mb-0">
+              Manajemen level lantai pada setiap gedung penyimpanan.
+            </p>
+          </div>
+          <div className="col-auto">
+            <button
+              onClick={() => handleOpenModal()}
+              className="btn btn-primary shadow-sm px-4 d-flex align-items-center gap-2"
+              style={{ borderRadius: "10px" }}
+            >
+              <i className="bx bx-plus-circle"></i> Tambah Lantai
+            </button>
+          </div>
+        </div>
+
+        <div className="row g-4">
+          {/* Sidebar */}
+          <div className="col-12 col-lg-3">
+            <div
+              className="card border-0 shadow-sm p-3"
+              style={{ borderRadius: "15px" }}
+            >
+              <div className="card-body">
+                <h6 className="fw-bold mb-3 text-uppercase small text-muted text-center">
+                  Menu Data Master
+                </h6>
+                <Sidebar />
               </div>
             </div>
           </div>
-          <div className="row-cols-xl-2 d-flex flex-nowrap">
-            <div
-              className="col-12 col-lg-2"
-              style={{ width: "22%", marginRight: "15px" }}
-            >
-              <div className="card">
-                <div className="card-body-master">
-                  <div className="col d-flex justify-content-center">
-                    <button
-                      onClick={() => {
-                        setIsEdit(false);
-                        setFloor({ building_uuid: "", name: "" });
-                      }}
-                      type="button"
-                      className="btn-tambah px-5 mt-2 mb-3"
-                      data-bs-toggle="modal"
-                      data-bs-target="#tambahLantaiMaster"
-                    >
-                      Tambah +
-                    </button>
-                  </div>
-                  <div>
-                    <h6
-                      className="my-2"
-                      style={{ textAlign: "center", whiteSpace: "nowrap" }}
-                    >
-                      Kategori Data Master
-                    </h6>
-                  </div>
-                  <Sidebar />
-                </div>
-              </div>
-            </div>
-            <div className="customers-list mb-3" style={{ width: "78%" }}>
-              {floors?.map((floor) => (
-                <div
-                  key={floor.uuid}
-                  className="customers-list-item d-flex align-items-center justify-content-between p-3 cursor-pointer bg-white radius-10"
-                  style={{ marginBottom: 15 }}
-                >
+
+          {/* List Content */}
+          <div className="col-12 col-lg-9">
+            <div className="row">
+              {floors?.map((item) => (
+                <div key={item.uuid} className="col-12 mb-3">
                   <div
-                    className="kiri"
-                    style={{ display: "flex", alignItems: "center" }}
+                    className="card border-0 shadow-sm transition-hover"
+                    style={{ borderRadius: "12px" }}
                   >
-                    <div className>
-                      <img
-                        src="/assets/images/block.png"
-                        width={40}
-                        height={50}
-                        alt
-                      />
-                    </div>
-                    <div className="ms-3">
-                      <h6 className="mb-1 font-14">{floor.name}</h6>
-                    </div>
-                  </div>
-                  <div className="kanan" style={{ display: "flex" }}>
-                    <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                      <div className>
-                        <h6 className="mb-1">Aksi:</h6>
-                      </div>
-                      <div className="w-45">
-                        <button
-                          onClick={() => handleEdit(floor)}
-                          type="button"
-                          className="btn-edit pt-1 pb-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#tambahLantaiMaster"
-                          style={{ width: "100%" }}
+                    <div className="card-body d-flex align-items-center justify-content-between p-3">
+                      <div className="d-flex align-items-center">
+                        <div
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                          style={{ width: "50px", height: "50px" }}
                         >
-                          <img
-                            src="/assets/images/edit.png"
-                            alt=""
-                            width="15px"
-                            height="15px"
-                            style={{ marginRight: 8 }}
-                          />
-                          Edit
+                          <i className="bx bx-layers text-info fs-4"></i>
+                        </div>
+                        <div>
+                          <h6 className="mb-0 fw-bold">{item.name}</h6>
+                          <span className="text-muted extra-small">
+                            <i className="bx bx-building me-1"></i>
+                            {getBuildingName(item.building_uuid)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="d-flex gap-2">
+                        <button
+                          onClick={() => handleOpenModal(item)}
+                          className="btn btn-sm btn-light-primary text-primary px-3"
+                        >
+                          <i className="bx bx-edit-alt me-1"></i> Edit
                         </button>
-                      </div>
-                      <div className="w-45">
                         <button
-                          onClick={() => handleDelete(floor)}
-                          type="submit"
-                          className="btn-hapus pt-1 pb-1"
-                          style={{ width: "100%" }}
+                          onClick={() => handleDelete(item)}
+                          className="btn btn-sm btn-light-danger text-danger px-3"
                         >
-                          <img
-                            src="/assets/images/hapus.png"
-                            width="15px"
-                            height="15px"
-                            style={{ marginRight: 8 }}
-                            alt
-                          />
-                          Hapus
+                          <i className="bx bx-trash me-1"></i> Hapus
                         </button>
                       </div>
                     </div>
@@ -209,107 +178,109 @@ export default function LantaiMaster() {
               ))}
             </div>
           </div>
-          {/* Modal Tambah User */}
-          <div
-            className="modal fade"
-            id="tambahLantaiMaster"
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            <div className="modal-dialog modal-dialog-scrollable">
-              <div className="modal-content">
-                <div className="modal-header" style={{ border: "none" }}>
-                  <div className style={{ margin: "auto" }}>
-                    <h5 className="modal-title align-items-center">
-                      Penambahan Lantai
-                    </h5>
+        </div>
+
+        {/* Modal */}
+        <div
+          className="modal fade"
+          id="tambahLantaiMaster"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div
+              className="modal-content border-0 shadow-lg"
+              style={{ borderRadius: "20px" }}
+            >
+              <div className="modal-header border-0 pt-4 px-4">
+                <h5 className="fw-bold">
+                  {isEdit ? "Update Lantai" : "Tambah Lantai Baru"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body p-4">
+                  <div className="text-center mb-4">
+                    <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
+                      <i
+                        className={`bx ${isEdit ? "bx-edit" : "bx-layers"} fs-1 text-info`}
+                      ></i>
+                    </div>
                   </div>
-                  <div>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">
+                      Pilih Gedung Induk
+                    </label>
+                    <select
+                      className="form-select border-0 bg-light"
+                      style={{ borderRadius: "12px", padding: "12px" }}
+                      required
+                      value={floor.building_uuid}
+                      onChange={(e) =>
+                        setFloor({ ...floor, building_uuid: e.target.value })
+                      }
+                    >
+                      <option value="">-- Pilih Gedung --</option>
+                      {gedungs?.map((g) => (
+                        <option key={g.uuid} value={g.uuid}>
+                          {g.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">
+                      Nama Lantai
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg border-0 bg-light"
+                      style={{ borderRadius: "12px" }}
+                      value={floor.name}
+                      onChange={(e) =>
+                        setFloor({ ...floor, name: e.target.value })
+                      }
+                      placeholder="Contoh: Lantai 1 atau Basement"
+                      required
                     />
                   </div>
                 </div>
-                <div className="modal-body">
-                  <img
-                    src="/assets/images/documents.png"
-                    alt
-                    width="90px"
-                    height="90px"
-                    style={{
-                      display: "block",
-                      margin: "0 auto",
-                      marginBottom: 20,
-                    }}
-                  />
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                      <div className="mb-4">
-                        <label className="form-label">Pilih Gedung</label>
-                        <select
-                          name="building_uuid"
-                          required
-                          value={floor.building_uuid}
-                          onChange={(e) =>
-                            setFloor({
-                              ...floor,
-                              building_uuid: e.target.value,
-                            })
-                          }
-                          id=""
-                        >
-                          <option value="">Pilih Gedung</option>
-                          {gedungs?.map((gedung) => (
-                            <option key={gedung.uuid} value={gedung.uuid}>
-                              {gedung.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <label className="form-label">Lantai</label>
-                      <input
-                        type="text"
-                        name="name"
-                        required
-                        value={floor.name}
-                        onChange={(e) =>
-                          setFloor({ ...floor, name: e.target.value })
-                        }
-                        className="form-control radius-30"
-                        placeholder="Masukkan Lantai"
-                      />
-                      <div className="p-3 pt-0">
-                        <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                          <div className="w-50">
-                            <button
-                              type="button"
-                              className="btn-batal"
-                              style={{ width: "100%" }}
-                            >
-                              Batal
-                            </button>
-                          </div>
-                          <div className="w-50">
-                            <input
-                              type="submit"
-                              className="btn-tambah"
-                              style={{ width: "100%" }}
-                              value={"Simpan"}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
+                <div className="modal-footer border-0 pb-4 px-4 d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light flex-grow-1 py-2"
+                    data-bs-dismiss="modal"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary flex-grow-1 py-2"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    {isEdit ? "Update Lantai" : "Simpan Lantai"}
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+        .btn-light-primary { background: #eef4ff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; }
+        .extra-small { font-size: 11px; display: block; margin-top: 2px; }
+      `}</style>
     </AdminLayout>
   );
 }

@@ -33,7 +33,9 @@ export default function DisposisiSurat() {
   const { users, token } = useContext(PengajuanContext);
   const [suratMasukList, setSuratMasukList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const filterStaff = users?.filter((user) => user.role === "staff");
+  const filterStaff = users?.filter(
+    (user) => user.role == "pegawai" || user.role == "hrd",
+  );
 
   const [selectedSurat, setSelectedSurat] = useState(null);
   const [formDisposisi, setFormDisposisi] = useState({
@@ -307,85 +309,6 @@ export default function DisposisiSurat() {
           {/* Table Card */}
           <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div className="card-body p-0">
-              {/* <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="bg-white border-bottom">
-                    <tr>
-                      <th className="ps-4 py-3 text-uppercase small fw-bold text-secondary">
-                        Identitas Surat
-                      </th>
-                      <th className="py-3 text-uppercase small fw-bold text-secondary">
-                        Pengirim
-                      </th>
-                      <th className="py-3 text-uppercase small fw-bold text-secondary">
-                        Perihal & Sifat
-                      </th>
-                      <th className="py-3 text-center text-uppercase small fw-bold text-secondary">
-                        Tindakan
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white">
-                    {loading ? (
-                      <tr>
-                        <td colSpan="4" className="text-center py-5">
-                          Memuat data...
-                        </td>
-                      </tr>
-                    ) : (
-                      suratMasukList.map((item) => (
-                        <tr key={item.uuid}>
-                          <td className="ps-4 py-3">
-                            <div className="d-flex align-items-center">
-                              <div className="avatar-icon bg-light-primary text-primary rounded-3 p-2 me-3">
-                                <i className="bx bx-envelope fs-4"></i>
-                              </div>
-                              <div>
-                                <div className="fw-bold text-dark">
-                                  {item.no_registrasi}
-                                </div>
-                                <div className="small text-muted">
-                                  {item.nomor_surat}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="fw-semibold">
-                              {item.corporate?.name || "Tanpa Instansi"}
-                            </div>
-                            <div className="small text-muted">
-                              Tgl Surat: {item.tanggal_surat}
-                            </div>
-                          </td>
-                          <td>
-                            <div
-                              className="text-dark text-truncate mb-1"
-                              style={{ maxWidth: "200px" }}
-                            >
-                              {item.perihal}
-                            </div>
-                            <span
-                              className={`badge border ${item.sifat === "penting" ? "text-danger border-danger" : "text-info border-info"} small font-weight-normal`}
-                            >
-                              {item.sifat}
-                            </span>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-primary rounded-pill px-4 btn-sm shadow-sm"
-                              onClick={() => handleOpenDisposisi(item)}
-                            >
-                              Beri Instruksi{" "}
-                              <i className="bx bx-right-arrow-alt ms-1"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div> */}
               <div className="table-responsive">
                 <table className="table table-hover align-middle">
                   <thead className="table-light text-secondary small uppercase">
@@ -540,7 +463,7 @@ export default function DisposisiSurat() {
                         <option value="">Pilih Nama Staf...</option>
                         {filterStaff?.map((user) => (
                           <option key={user.uuid} value={user.uuid}>
-                            {user.name}
+                            {user.name} ({user.role})
                           </option>
                         ))}
                       </select>

@@ -1,16 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
 import { PengajuanContext } from "../../context/PengajuanContext";
 import Sidebar from "../Sidebar";
 import AdminLayout from "../layouts/AdminLayout";
+
 export default function Gedung() {
-  const [gedung, setGedung] = useState({
-    name: "",
-    code: ""
-  })
-  const { token, gedungs, refreshData } = React.useContext(PengajuanContext)
+  const { token, gedungs, refreshData } = React.useContext(PengajuanContext);
   const [isEdit, setIsEdit] = useState(false);
   const [currentUuid, setCurrentUuid] = useState(null);
+  const [gedung, setGedung] = useState({ name: "", code: "" });
+
+  const getModal = () => {
+    const modalEl = document.getElementById("tambahGedungMaster");
+    return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+  };
+
+  const handleOpenModal = (item = null) => {
+    if (item) {
+      setIsEdit(true);
+      setCurrentUuid(item.uuid);
+      setGedung({ name: item.name, code: item.code || "" });
+    } else {
+      setIsEdit(false);
+      setGedung({ name: "", code: "" });
+    }
+    getModal().show();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,133 +33,130 @@ export default function Gedung() {
         ? `${import.meta.env.VITE_API_URL}/api/buildings/${currentUuid}`
         : `${import.meta.env.VITE_API_URL}/api/buildings`;
 
-      const method = isEdit ? 'PUT' : 'POST';
       const response = await fetch(url, {
-        method: method,
+        method: isEdit ? "PUT" : "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(gedung),
       });
 
       const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Gagal memproses data");
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Login Gagal');
-      }
-      setGedung({ building_uuid: "", name: "" });
-      setIsEdit(false);
-      setCurrentUuid(null);
+      getModal().hide();
       refreshData();
-      const modalElement = document.getElementById('tambahGedungMaster');
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      modal.hide()
     } catch (error) {
-      console.error('Login Gagal:', error.message);
+      alert("Error: " + error.message);
     }
   };
-  const handleEdit = (gedungItem) => {
-    setIsEdit(true);
-    setCurrentUuid(gedungItem.uuid);
-    setGedung({
-      name: gedungItem.name
-    });
-  };
-  const handleDelete = async (currentBuild) => {
-    if (window.confirm("Peringatan: Menghapus item ini akan menghapus semua sub-item di dalamnya!")) {
+
+  const handleDelete = async (item) => {
+    if (
+      window.confirm(
+        "Peringatan: Menghapus gedung akan berdampak pada data lokasi di dalamnya!",
+      )
+    ) {
       try {
-        const response = await fetch(import.meta.env.VITE_API_URL + '/api/buildings/' + currentBuild.uuid, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/buildings/${item.uuid}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || 'Login Gagal');
-        }
-        getGedung(token)
+        if (!response.ok) throw new Error("Gagal menghapus data");
+        refreshData();
       } catch (error) {
-        // 'error.message' akan berisi pesan dari 'throw new Error' di atas
-        console.error('Login Gagal:', error.message);
+        console.error("Hapus Gagal:", error.message);
       }
     }
   };
-
 
   return (
     <AdminLayout>
-      <div className="page-wrapper">
-        <div className="page-content">
-          <div className="d-flex align-items-center">
-            <div className="d-flex align-items-center">
-              <div className="search-bar flex-grow-1 d-flex align-items-center" style={{ marginBottom: 10 }}>
-                <h4 style={{ marginBottom: 0 }}>Data Master</h4>
+      <div className="page-wrapper px-4 py-4">
+        {/* Header Section */}
+        <div className="row mb-4 align-items-center">
+          <div className="col">
+            <h4 className="fw-bold mb-0 text-dark">Data Master Gedung</h4>
+            <p className="text-muted small mb-0">
+              Manajemen lokasi fisik penyimpanan arsip pusat.
+            </p>
+          </div>
+          <div className="col-auto">
+            <button
+              onClick={() => handleOpenModal()}
+              className="btn btn-primary shadow-sm px-4 d-flex align-items-center gap-2"
+              style={{ borderRadius: "10px" }}
+            >
+              <i className="bx bx-plus-circle"></i> Tambah Gedung
+            </button>
+          </div>
+        </div>
+
+        <div className="row g-4">
+          {/* Sidebar Left */}
+          <div className="col-12 col-lg-3">
+            <div
+              className="card border-0 shadow-sm p-3"
+              style={{ borderRadius: "15px" }}
+            >
+              <div className="card-body">
+                <h6 className="fw-bold mb-3 text-uppercase small text-muted text-center">
+                  Kategori Data Master
+                </h6>
+                <Sidebar />
               </div>
             </div>
           </div>
-          <div className="row-cols-xl-2 d-flex flex-nowrap">
-            <div className="col-12 col-lg-2" style={{ width: '22%', marginRight: '15px' }}>
-              <div className="card">
-                <div className="card-body-master">
-                  <div className="col d-flex justify-content-center">
-                    <button
-                      onClick={() => {
-                        setIsEdit(false);
-                        setGedung({ name: "" });
-                      }}
-                      type="button"
-                      className="btn-tambah px-5 mt-2 mb-3"
-                      data-bs-toggle="modal"
-                      data-bs-target="#tambahGedungMaster"
-                    >
-                      Tambah +
-                    </button>
-                  </div>
-                  <div>
-                    <h6 className="my-2" style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Kategori Data Master</h6>
-                  </div>
-                  <Sidebar />
-                </div>
-              </div>
-            </div>
-            <div className="customers-list mb-3" style={{ width: '78%' }}>
-              {gedungs?.map((gedung) => (
-                <div key={gedung.uuid} className="customers-list-item d-flex align-items-center justify-content-between p-3 cursor-pointer bg-white radius-10" style={{ marginBottom: 15 }}>
-                  <div className="kiri" style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className>
-                      <img src="/assets/images/block.png" width={40} height={50} alt />
-                    </div>
-                    <div className="ms-3">
-                      <h6 className="mb-1 font-14">{gedung.name}</h6>
-                    </div>
-                  </div>
-                  <div className="kanan" style={{ display: 'flex' }}>
-                    <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                      <div className>
-                        <h7 className="mb-1">Aksi:</h7>
-                      </div>
-                      <div className="w-45">
-                        <button
-                          onClick={() => handleEdit(gedung)}
-                          type="button"
-                          className="btn-edit pt-1 pb-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#tambahGedungMaster"
-                          style={{ width: '100%' }}
+
+          {/* List Content Right */}
+          <div className="col-12 col-lg-9">
+            <div className="row">
+              {gedungs?.map((item) => (
+                <div key={item.uuid} className="col-12 mb-3">
+                  <div
+                    className="card border-0 shadow-sm transition-hover"
+                    style={{ borderRadius: "12px" }}
+                  >
+                    <div className="card-body d-flex align-items-center justify-content-between p-3">
+                      <div className="d-flex align-items-center">
+                        <div
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                          style={{ width: "50px", height: "50px" }}
                         >
-                          <img src="/assets/images/edit.png" alt="" width="15px" height="15px" style={{ marginRight: 8 }} />
-                          Edit
-                        </button>
+                          <i className="bx bx-building-house text-success fs-4"></i>
+                        </div>
+                        <div>
+                          <h6 className="mb-0 fw-bold">{item.name}</h6>
+                          <span className="text-muted extra-small text-uppercase">
+                            LOKASI FISIK
+                          </span>
+                        </div>
                       </div>
-                      <div className="w-45">
-                        <button onClick={() => handleDelete(gedung)} type="submit" className="btn-hapus pt-1 pb-1" style={{ width: '100%' }}><img src="/assets/images/hapus.png" width="15px" height="15px" style={{ marginRight: 8 }} alt />Hapus</button>
+
+                      <div className="d-flex gap-2">
+                        <button
+                          onClick={() => handleOpenModal(item)}
+                          className="btn btn-sm btn-light-primary text-primary px-3"
+                        >
+                          <i className="bx bx-edit-alt me-1"></i> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          className="btn btn-sm btn-light-danger text-danger px-3"
+                        >
+                          <i className="bx bx-trash me-1"></i> Hapus
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -153,44 +164,89 @@ export default function Gedung() {
               ))}
             </div>
           </div>
-          {/* Modal Tambah User */}
-          <div className="modal fade" id="tambahGedungMaster" tabIndex={-1} aria-hidden="true">
-            <div className="modal-dialog modal-dialog-scrollable">
-              <div className="modal-content">
-                <div className="modal-header" style={{ border: 'none' }}>
-                  <div className style={{ margin: 'auto' }}>
-                    <h5 className="modal-title align-items-center">Penambahan Gedung</h5>
-                  </div>
-                  <div>
-                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
-                  </div>
-                </div>
-                <div className="modal-body">
-                  <img src="/assets/images/documents.png" alt width="90px" height="90px" style={{ display: 'block', margin: '0 auto', marginBottom: 20 }} />
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                      <label className="form-label">Gedung</label>
-                      <input type="text" value={gedung.name} onChange={(e) => setGedung({ ...gedung, name: e.target.value })} name="name" className="form-control radius-30" placeholder="Masukkan Nama Gedung" />
-                      <div className="p-3 pt-8">
-                        <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                          <div className="w-50">
-                            <button type="button" className="btn-batal" style={{ width: '100%' }}>Batal</button>
-                          </div>
-                          <div className="w-50">
-                            <input value={"Simpan"} type="submit" className="btn-tambah" style={{ width: '100%', padding: '8px 0px' }} />
-                          </div>
-                        </div>
-                      </div>
+        </div>
 
-                    </div>
-                  </form>
-                </div>
-
+        {/* Modal Modern Gedung */}
+        <div
+          className="modal fade"
+          id="tambahGedungMaster"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div
+              className="modal-content border-0 shadow-lg"
+              style={{ borderRadius: "20px" }}
+            >
+              <div className="modal-header border-0 pt-4 px-4">
+                <h5 className="fw-bold">
+                  {isEdit ? "Update Gedung" : "Tambah Gedung Baru"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
               </div>
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body p-4">
+                  <div className="text-center mb-4">
+                    <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
+                      <i
+                        className={`bx ${isEdit ? "bx-building" : "bx-plus-circle"} fs-1 text-success`}
+                      ></i>
+                    </div>
+                    <p className="text-muted small">
+                      Input nama gedung atau blok penyimpanan sesuai denah asli.
+                    </p>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">
+                      Nama Gedung / Blok
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg border-0 bg-light"
+                      style={{ borderRadius: "12px" }}
+                      value={gedung.name}
+                      onChange={(e) =>
+                        setGedung({ ...gedung, name: e.target.value })
+                      }
+                      placeholder="Contoh: Gedung A atau Blok Arsip 01"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer border-0 pb-4 px-4 d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light flex-grow-1 py-2"
+                    data-bs-dismiss="modal"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary flex-grow-1 py-2"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    {isEdit ? "Simpan Perubahan" : "Simpan Gedung"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+        .btn-light-primary { background: #eef4ff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; }
+        .extra-small { font-size: 11px; letter-spacing: 0.5px; }
+      `}</style>
     </AdminLayout>
-  )
+  );
 }

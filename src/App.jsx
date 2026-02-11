@@ -79,7 +79,7 @@ export default function App() {
         <Route
           path="/dashboardPetugas"
           element={
-            <ProtectedRoute allowedRoles={["petugas"]}>
+            <ProtectedRoute allowedRoles={["staff umum"]}>
               <DashboardPetugas />
             </ProtectedRoute>
           }
