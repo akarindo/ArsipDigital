@@ -7,6 +7,7 @@ export default function Disposisi() {
   const [semuaDisposisi, setSemuaDisposisi] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pegawai, setPegawai] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedSurat, setSelectedSurat] = useState(null);
   // const [selectedDisposisi, setSelectedDisposisi] = useState(null);
   const filterStaff = users?.filter((user) => user.role == "pegawai");
@@ -16,20 +17,19 @@ export default function Disposisi() {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi`,
         {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
-
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Fetch Gagal");
-      setSemuaDisposisi(result);
-    } catch (error) {
-      console.error("Error fetching disposisi:", error.message);
+
+      if (response.ok) {
+        // setSemuaDisposisi(result);
+        // LANGSUNG FILTER DI SINI
+        const filtered = result.filter(
+          (d) => d?.user_id === user.uuid || d?.parent_uuid === user.uuid,
+        );
+        setFilteredData(filtered);
+      }
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,12 @@ export default function Disposisi() {
 
   // Fungsi untuk update status "Diterima"
   async function handleTerimaSurat(item) {
-    const form = { ...item, tanggal_direspon: new Date().toISOString() };
+    let form = [];
+    if (item.parent_uuid) {
+      form = { ...item, read_at: new Date().toISOString() };
+    } else {
+      form = { ...item, tanggal_direspon: new Date().toISOString() };
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi/${item.uuid}`,
@@ -56,22 +61,23 @@ export default function Disposisi() {
         setSelectedDisposisi(null);
         setSelectedSurat(null);
       }
+      getDisposisi(); // Refresh data
     } catch (error) {
-      alert("Gagal memperbarui status");
+      // alert("Gagal memperbarui status");
     }
   }
   async function handleToPegawai(e) {
     e.preventDefault();
     const form = {
       arsip_uuid: selectedSurat.arsip_uuid,
-      user_id: pegawai,
+      user_id: selectedSurat.user_id,
+      parent_uuid: pegawai,
       tindak_lanjut: selectedSurat.tindak_lanjut,
       skala_prioritas: selectedSurat.skala_prioritas,
       intruksi: selectedSurat.intruksi,
       batas_waktu: selectedSurat.batas_waktu, // Sekarang akan mendukung YYYY-MM-DDTHH:mm
       catatan: selectedSurat.catatan,
     };
-    console.log("form", form);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi/${selectedSurat.uuid}`,
@@ -87,17 +93,30 @@ export default function Disposisi() {
       );
       if (response.ok) {
         getDisposisi(); // Refresh data
+        const modalElement = document.getElementById("modalDisposisi");
+        const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
         setPegawai(null);
         setSelectedSurat(null);
       }
+      getDisposisi();
     } catch (error) {
-      alert("Gagal memperbarui status");
+      // alert("Gagal memperbarui status");
     }
   }
 
-  const filterDisposisi = semuaDisposisi?.filter(
-    (disposisi) => disposisi.user_id == user.uuid,
-  );
+  // Gunakan useMemo agar filter otomatis berjalan saat semuaDisposisi atau user berubah
+  // const filterDisposisi = React.useMemo(() => {
+  //   if (!semuaDisposisi || !user?.uuid) return [];
+
+  //   return semuaDisposisi.filter(
+  //     (disposisi) =>
+  //       disposisi?.user_id === user.uuid ||
+  //       disposisi?.parent_uuid === user.uuid,
+  //   );
+  // }, [semuaDisposisi, user?.uuid]);
   const handleOpenDisposisi = (surat) => {
     setSelectedSurat(surat);
     const modal = new window.bootstrap.Modal(
@@ -105,9 +124,13 @@ export default function Disposisi() {
     );
     modal.show();
   };
+  console.log("filter", filteredData);
+  console.log("user", user);
   useEffect(() => {
-    getDisposisi();
-  }, [token]);
+    if (token && user?.uuid) {
+      getDisposisi();
+    }
+  }, [token, user]);
 
   // Helper untuk warna prioritas
   const getPrioClass = (prio) => {
@@ -146,8 +169,8 @@ export default function Disposisi() {
                 ></div>
                 <p className="mt-2 text-muted">Sinkronisasi data...</p>
               </div>
-            ) : filterDisposisi?.length > 0 ? (
-              filterDisposisi.map((item) => (
+            ) : filteredData?.length > 0 ? (
+              filteredData.map((item) => (
                 <div className="col-12 col-xl-6" key={item.id}>
                   <div className="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
                     <div className="card-body p-4">
@@ -158,13 +181,13 @@ export default function Disposisi() {
                           <i className="bx bxs-zap me-1"></i>{" "}
                           {item.skala_prioritas}
                         </span>
-                        <div className="text-end text-muted small">
+                        {/* <div className="text-end text-muted small">
                           <i className="bx bx-calendar me-1"></i>
                           Deadline:{" "}
                           <span className="text-danger fw-bold">
                             {new Date(item.batas_waktu).toLocaleString("id-ID")}
                           </span>
-                        </div>
+                        </div> */}
                       </div>
 
                       {/* <h5 className="fw-bold text-dark mb-1">
@@ -197,17 +220,27 @@ export default function Disposisi() {
                             {item.catatan || "Tidak ada catatan"}
                           </span>
                         </div>
-
-                        {item.tanggal_direspon ? (
-                          <a
-                            onClick={() => previewPDF(item.surat.file_path)}
-                            target="_blank"
-                            className="btn btn-outline-primary rounded-pill px-4"
-                          >
-                            <i className="bx bx-show me-1"></i> Lihat Surat
-                          </a>
-                        ) : (
-                          <>
+                        {item?.parent_uuid !== user.uuid ? (
+                          item?.tanggal_direspon ? (
+                            <>
+                              <a
+                                onClick={() => previewPDF(item.surat.file_path)}
+                                target="_blank"
+                                className="btn btn-outline-primary rounded-pill px-4"
+                              >
+                                <i className="bx bx-show me-1"></i> Lihat Surat
+                              </a>
+                              {user.role == "hrd" && !item.parent_uuid ? (
+                                <button
+                                  onClick={() => handleOpenDisposisi(item)}
+                                  className="btn btn-success rounded-pill px-4 shadow-sm"
+                                >
+                                  <i className="bx bx-check-double me-1"></i>{" "}
+                                  Teruskan Surat
+                                </button>
+                              ) : null}
+                            </>
+                          ) : (
                             <button
                               onClick={() => handleTerimaSurat(item)}
                               className="btn btn-primary rounded-pill px-4 shadow-sm"
@@ -215,17 +248,27 @@ export default function Disposisi() {
                               <i className="bx bx-check-double me-1"></i> Surat
                               Diterima
                             </button>
-                            {user.role == "hrd" && (
-                              <button
-                                onClick={() => handleOpenDisposisi(item)}
-                                className="btn btn-success rounded-pill px-4 shadow-sm"
-                              >
-                                <i className="bx bx-check-double me-1"></i>{" "}
-                                Teruskan Surat
-                              </button>
-                            )}
-                          </>
-                        )}
+                          )
+                        ) : null}
+                        {item?.parent_uuid == user.uuid ? (
+                          item?.parent_uuid == user.uuid && item.read_at ? (
+                            <a
+                              onClick={() => previewPDF(item.surat.file_path)}
+                              target="_blank"
+                              className="btn btn-outline-primary rounded-pill px-4"
+                            >
+                              <i className="bx bx-show me-1"></i> Lihat Surat
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => handleTerimaSurat(item)}
+                              className="btn btn-primary rounded-pill px-4 shadow-sm"
+                            >
+                              <i className="bx bx-check-double me-1"></i> Surat
+                              Diterima
+                            </button>
+                          )
+                        ) : null}
                       </div>
                     </div>
                   </div>

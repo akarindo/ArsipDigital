@@ -13,13 +13,14 @@ export default function NewLogin() {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
-  const { refreshData } = useContext(PengajuanContext);
+  const { refreshData, setToken, setRole, setUser } =
+    useContext(PengajuanContext);
 
-  useEffect(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-  }, []);
+  // useEffect(() => {
+  //   localStorage.removeItem("token");
+  //   localStorage.removeItem("role");
+  //   localStorage.removeItem("user");
+  // }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -38,18 +39,19 @@ export default function NewLogin() {
       );
 
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Email atau Password Salah");
-      }
-
       const { token, user } = result.data;
-
+      refreshData();
+      setUser(user);
+      setToken(token);
+      setRole(user.role);
       setCurrentUser(user);
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
       localStorage.setItem("user", JSON.stringify(user));
-      refreshData();
+      if (!response.ok) {
+        throw new Error(result.message || "Email atau Password Salah");
+      }
+      // refreshData();
       setShowSuccess(true);
     } catch (error) {
       setErrorMessage(error.message);
@@ -75,6 +77,11 @@ export default function NewLogin() {
     }
     setShowSuccess(false);
   };
+  useEffect(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+  }, []);
 
   return (
     <div className="bg-light min-vh-100 d-flex align-items-center">

@@ -1,11 +1,12 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePengajuan } from "../../context/PengajuanContext";
 import Navigation from "../Navigation";
 import AdminLayout from "../layouts/AdminLayout";
+import SkeletonItem from "../SkeletonItem";
 const CountdownTimer = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState("");
-
+  // const [late, setLate] = useState(false);
   useEffect(() => {
     const calculateTime = () => {
       const now = new Date().getTime();
@@ -14,6 +15,7 @@ const CountdownTimer = ({ targetDate }) => {
 
       if (difference <= 0) {
         setTimeLeft("Waktu Habis");
+        // setLate(true);
         return;
       }
 
@@ -48,6 +50,7 @@ export default function LogPengajuanStaff() {
     tujuans,
     gedungs,
     token,
+    isLoading,
     floors,
     rooms,
     cabinets,
@@ -62,6 +65,9 @@ export default function LogPengajuanStaff() {
     useState(false);
   const [selectedPengajuan, setSelectedPengajuan] = useState(null);
   const [alasanTerlambat, setAlasanTerlambat] = useState("");
+  const [showLateModal, setShowLateModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [alasanTelat, setAlasanTelat] = useState("");
   const [param, setParam] = useState("fisik");
   const handleKembalikan = (pengajuan) => {
     setSelectedPengajuan(pengajuan);
@@ -81,7 +87,6 @@ export default function LogPengajuanStaff() {
   const digitalHistory = pinjamans?.filter(
     (pinjaman) => pinjaman?.arsip?.file != null,
   );
-
   const filterPengajuan =
     param == "fisik" && location.pathname == "/logPengajuanStaff"
       ? fisik
@@ -92,21 +97,32 @@ export default function LogPengajuanStaff() {
       : digitalHistory;
   const filterPinjaman =
     location.pathname == "/logHistoryStaff" ? filterHistory : filterPengajuan;
-  const handleSubmitKembali = async (item) => {
+  const handleSubmitKembali = async (item, alasan = null) => {
+    const sekarang = new Date();
+    const deadline = new Date(item.waktu_kembalikan);
+
+    // VALIDASI: Jika telat dan belum ada alasan, tampilkan modal
+    if (sekarang > deadline && !alasan) {
+      setSelectedItem(item); // Simpan item untuk diproses nanti
+      setShowLateModal(true); // Munculkan modal alasan
+      return; // Berhenti di sini, jangan fetch dulu
+    }
+
+    // Jika tidak telat ATAU alasan sudah diisi, lanjut kirim ke API
     const dataToSend = {
       user_uuid: item.user_uuid,
       arsip_uuid: item.arsip_uuid,
       tujuan_uuid: item.tujuan_uuid,
       status: "dikembalikan",
-      response_at: new Date().toISOString(),
-      telah_dikembalikan: new Date().toISOString(),
+      response_at: sekarang.toISOString(),
+      telah_dikembalikan: sekarang.toISOString(),
+      alasan_telat: alasan, // Kirim alasan ke backend jika ada
     };
+
     try {
       const url = `${import.meta.env.VITE_API_URL}/api/peminjamans/${item.uuid}`;
-
-      const method = "PUT";
       const response = await fetch(url, {
-        method: method,
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -116,12 +132,14 @@ export default function LogPengajuanStaff() {
       });
 
       const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Gagal mengembalikan");
 
-      if (!response.ok) {
-        throw new Error(result.message || "Login Gagal");
-      }
+      setShowLateModal(false);
+      setAlasanTelat("");
+      setSelectedItem(null);
     } catch (error) {
-      console.error("Login Gagal:", error.message);
+      console.error("Gagal:", error.message);
     }
   };
 
@@ -175,7 +193,12 @@ export default function LogPengajuanStaff() {
               className="search-bar flex-grow-1 d-flex align-items-center"
               style={{ marginBottom: 10 }}
             >
-              <h4 style={{ marginBottom: 0 }}>Log Pengajuan</h4>
+              <h4 style={{ marginBottom: 0 }}>
+                Log{" "}
+                {location.pathname == "/logHistoryStaff"
+                  ? "History"
+                  : "Pengajuan"}
+              </h4>
             </div>
           </div>
           <div className="d-flex align-items-center mb-3">
@@ -220,7 +243,7 @@ export default function LogPengajuanStaff() {
               </ul>
             </div>
           </div>
-          <div className="dropdown bg-white my-3" style={{ height: 38 }}>
+          {/* <div className="dropdown bg-white my-3" style={{ height: 38 }}>
             <div className="d-flex justify-content-between">
               <a
                 href="#"
@@ -253,10 +276,16 @@ export default function LogPengajuanStaff() {
                 <i className="bx bxs-chevron-down ms-5" />
               </a>
             </div>
-          </div>
+          </div> */}
 
           <div className="customers-list mb-3">
-            {filterPinjaman.length === 0 ? (
+            {isLoading ? (
+              <div className="customers-list mb-3">
+                <SkeletonItem />
+                <SkeletonItem />
+                <SkeletonItem />
+              </div>
+            ) : filterPinjaman.length === 0 ? (
               <div className="text-center py-5 bg-white">
                 <p className="text-secondary">Belum ada pengajuan peminjaman</p>
               </div>
@@ -269,12 +298,24 @@ export default function LogPengajuanStaff() {
                   (gedung) => gedung.uuid == item?.arsip?.gedung_uuid,
                 );
                 const filterLantai = floors?.filter(
-                  (floor) => floor.uuid == item?.arsip?.floor_uuid,
+                  (floor) => floor.uuid == item?.arsip?.lantai_uuid,
+                );
+                const filterRuang = rooms?.filter(
+                  (room) => room.uuid == item?.arsip?.ruang_uuid,
+                );
+                const filterLemari = cabinets?.filter(
+                  (cabinet) => cabinet.uuid == item?.arsip?.lemari_uuid,
+                );
+                const filterRak = shelves?.filter(
+                  (shelf) => shelf.uuid == item?.arsip?.rak_uuid,
+                );
+                const filterFolder = folders?.filter(
+                  (folder) => folder.uuid == item?.arsip?.folder_uuid,
                 );
                 return (
                   <div
                     key={item.id}
-                    className="customers-list-item border shadow cursor-pointer bg-white"
+                    className="customers-list-item rounded border shadow cursor-pointer bg-white"
                     style={{ marginBottom: 15 }}
                   >
                     <div className="top d-flex align-items-center justify-content-between p-3">
@@ -319,6 +360,18 @@ export default function LogPengajuanStaff() {
                           >
                             <div className>
                               <p className="mb-0 text-white">{item.status}</p>
+                            </div>
+                          </div>
+                        )}
+                        {item.status == "reject" && (
+                          <div
+                            className="d-flex align-items-center bg-danger border p-2 radius-10"
+                            style={{ marginRight: 10, height: 35 }}
+                          >
+                            <div className>
+                              <p className="mb-0 text-white">
+                                {item.status} | {item.alasan_penolakan}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -410,7 +463,7 @@ export default function LogPengajuanStaff() {
                         )}
                       </div>
                     </div>
-                    <div className="d-flex justify-content-between pt-0 pb-1 p-3">
+                    <div className="d-flex justify-content-between pt-0 pb-4 p-3">
                       <div>
                         <div>
                           <h7 className="mb-1 font-weight-bold">Jenis</h7> :{" "}
@@ -480,80 +533,36 @@ export default function LogPengajuanStaff() {
                         )}
                       </div>
                     </div>
-                    <div className="d-flex mt-1">
-                      <div className="p-3 pt-0 pe-1">
-                        <img
-                          src="assets/images/pin.png"
-                          width={15}
-                          height={15}
-                          alt
-                        />
-                      </div>
-                      <div>
-                        <p className="me-1">
-                          {filterGedung.length > 1 ? filterGedung[0].name : ""}
-                        </p>
-                      </div>
-                      <div>
-                        <img
-                          src="assets/images/Vector.png"
-                          style={{ marginRight: 5 }}
-                          width={5}
-                          height={10}
-                          alt
-                        />
-                      </div>
-                      <div>
-                        <p className="me-1">Lantai {item.lantai}</p>
-                      </div>
-                      <div>
-                        <img
-                          src="assets/images/Vector.png"
-                          style={{ marginRight: 5 }}
-                          width={5}
-                          height={10}
-                          alt
-                        />
-                      </div>
-                      <div>
-                        <p className="me-1">Ruang {item.ruang}</p>
-                      </div>
-                      <div>
-                        <img
-                          src="assets/images/Vector.png"
-                          style={{ marginRight: 5 }}
-                          width={5}
-                          height={10}
-                          alt
-                        />
-                      </div>
-                      <div>
-                        <p className="me-1">Lemari {item.lemari}</p>
-                      </div>
-                      <div>
-                        <img
-                          src="assets/images/Vector.png"
-                          style={{ marginRight: 5 }}
-                          width={5}
-                          height={10}
-                          alt
-                        />
-                      </div>
-                      <div>
-                        <p className="me-1">Folder {item.folder}</p>
-                      </div>
-                      <div>
-                        <img
-                          src="assets/images/Vector.png"
-                          style={{ marginRight: 5 }}
-                          width={5}
-                          height={10}
-                          alt
-                        />
-                      </div>
-                      <div>
-                        <p>Nomor {item.nomor}</p>
-                      </div>
+                    <div className="d-flex align-items-center p-3 pt-0">
+                      <img
+                        src="/assets/images/pin.png"
+                        width={15}
+                        height={15}
+                        className="me-2"
+                        alt="pin"
+                      />
+
+                      {[
+                        filterGedung[0]?.name,
+                        filterLantai[0]?.name,
+                        filterRuang[0]?.name,
+                        filterLemari[0]?.name,
+                        filterRak[0]?.name,
+                        filterFolder[0]?.name,
+                      ].map((location, index, array) => (
+                        <React.Fragment key={index}>
+                          <p className="mb-0 small me-1">{location}</p>
+                          {index < array.length - 1 && (
+                            <img
+                              src="/assets/images/Vector.png"
+                              width={5}
+                              height={10}
+                              className="me-1"
+                              alt="arrow"
+                            />
+                          )}
+                        </React.Fragment>
+                      ))}
                     </div>
 
                     {/* Action Buttons */}
@@ -573,7 +582,7 @@ export default function LogPengajuanStaff() {
                       </div>
                     ) : null}
 
-                    {item.status === "Belum Dikembalikan" && (
+                    {item.status === "Belum Dikembalikan" ? (
                       <div className="d-flex justify-content-center p-3 pb-0 pt-0">
                         <div className="mb-3 w-100">
                           <button
@@ -586,7 +595,7 @@ export default function LogPengajuanStaff() {
                           </button>
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 );
               })
@@ -763,6 +772,51 @@ export default function LogPengajuanStaff() {
           )}
         </div>
       </div>
+      {/* Modal Alasan Terlambat */}
+      {showLateModal && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-danger">
+                  Peringatan: Pengembalian Terlambat!
+                </h5>
+              </div>
+              <div className="modal-body">
+                <p>
+                  Waktu pengembalian telah melewati batas. Harap masukkan alasan
+                  keterlambatan:
+                </p>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  value={alasanTelat}
+                  onChange={(e) => setAlasanTelat(e.target.value)}
+                  placeholder="Contoh: Masih digunakan untuk audit..."
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowLateModal(false)}
+                >
+                  Batal
+                </button>
+                <button
+                  className="btn btn-primary"
+                  disabled={!alasanTelat.trim()} // Tombol mati jika alasan kosong
+                  onClick={() => handleSubmitKembali(selectedItem, alasanTelat)}
+                >
+                  Kirim & Kembalikan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

@@ -6,12 +6,9 @@ import AdminLayout from "../layouts/AdminLayout";
 export default function DataArsip({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [shelfBuild, setShelfBuild] = useState([]);
-  const [cabinetBuild, setCabinetBuild] = useState([]);
+
   const [type, setType] = React.useState(null);
-  const [floorBuild, setFloorBuild] = useState([]);
-  const [roomBuild, setRoomBuild] = useState([]);
-  const [folderBuild, setFolderBuild] = useState([]);
+
   const {
     token,
     gedungs,
@@ -23,17 +20,46 @@ export default function DataArsip({ children }) {
     formDataArsip,
     setIsEdit,
     setFormDataArsip,
-    floors,
-    rooms,
-    cabinets,
-    shelves,
-    folders,
+    floorBuild,
+    folderBuild,
+    roomBuild,
+    cabinetBuild,
+    shelfBuild,
+    handleChangeBuild,
+    handleChangeFloor,
+    handleChangeRoom,
+    handleChangeCabinet,
+    handleChangeShelf,
     names,
     role,
   } = React.useContext(PengajuanContext);
   const tab = location.pathname.includes("ArsipDigitalPetugas")
     ? "ArsipDigitalPetugas"
     : "Arsip Fisik";
+  // const handleEdit = (item) => {
+  //   handleChangeBuild(item.building_uuid);
+  //   handleChangeFloor(item.floor_uuid);
+  //   handleChangeRoom(item.room_uuid);
+  //   handleChangeCabinet(item.cabinet_uuid);
+  //   setIsEdit(true);
+  //   setFormDataArsip({
+  //     file: item.file,
+  //     name_uuid: item?.names?.name,
+  //     tipe_arsip: item.tipe_arsip,
+  //     judul_arsip: item.judul_arsip,
+  //     jenis_arsip: item.jenis_arsip,
+  //     kategori_arsip: item.kategori_arsip,
+  //     gedung_uuid: item?.gedung?.name,
+  //     lantai_uuid: item?.lantai?.name,
+  //     ruang_uuid: item?.ruang?.name,
+  //     lemari_uuid: item?.lemari?.name,
+  //     rak_uuid: item?.shelf?.name,
+  //     folder_uuid: item?.folder?.name,
+  //     kode_arsip: item.kode_arsip,
+  //     keterangan: item.keterangan,
+  //   });
+  //   // setFormDataArsip({ ...item });
+  // };
   function handleType(value) {
     if (value === "dinamis") {
       setType("dinamis");
@@ -41,28 +67,7 @@ export default function DataArsip({ children }) {
       setType(null); // Sembunyikan jika bukan dinamis
     }
   }
-  function handleChangeBuild(uuid) {
-    const filterFloor = floors?.filter((floor) => floor.building_uuid == uuid);
-    setFloorBuild(filterFloor);
-  }
-  function handleChangeFloor(uuid) {
-    const filterRoom = rooms?.filter((room) => room.floor_uuid == uuid);
-    setRoomBuild(filterRoom);
-  }
-  function handleChangeRoom(uuid) {
-    const filterCabinet = cabinets?.filter(
-      (cabinet) => cabinet.room_uuid == uuid,
-    );
-    setCabinetBuild(filterCabinet);
-  }
-  function handleChangeCabinet(uuid) {
-    const filterShelf = shelves?.filter((shelf) => shelf.cabinet_uuid == uuid);
-    setShelfBuild(filterShelf);
-  }
-  function handleChangeShelf(uuid) {
-    const filterFolder = folders?.filter((folder) => folder.shelf_uuid == uuid);
-    setFolderBuild(filterFolder);
-  }
+
   const jenisArsip = [
     {
       name: "Dinamis",
@@ -113,6 +118,34 @@ export default function DataArsip({ children }) {
         };
       }
     });
+  };
+  const getModal = () => {
+    const modalEl = document.getElementById("modaltambahFisik");
+    return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+  };
+  const handleOpenModal = () => {
+    setIsEdit(false);
+
+    setFormDataArsip({
+      file: null,
+      name_uuid: null,
+      tipe_arsip: "",
+      judul_arsip: "",
+      jenis_arsip: null,
+      kategori_arsip: null,
+      gedung_uuid: null,
+      lantai_uuid: null,
+      ruang_uuid: null,
+      lemari_uuid: null,
+      rak_uuid: null,
+      folder_uuid: null,
+      kode_arsip: null,
+      keterangan: null,
+    });
+
+    setTimeout(() => {
+      getModal().show();
+    }, 300); // delay 300ms
   };
 
   const handleSubmit = async (e) => {
@@ -251,27 +284,20 @@ export default function DataArsip({ children }) {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
     }, 100);
-
-    // Tampilkan modal sukses
-    // setShowSuccessModal(true);
   };
 
   const handleSuccessOke = () => {
-    // Tutup modal sukses
     setShowSuccessModal(false);
 
-    // Hapus semua backdrop yang mungkin masih ada
     const backdrops = document.querySelectorAll(".modal-backdrop");
     backdrops.forEach((backdrop) => backdrop.remove());
     document.body.classList.remove("modal-open");
     document.body.style.overflow = "";
     document.body.style.paddingRight = "";
 
-    // Navigate ke log pengajuan
     navigate("/logPengajuanStaff");
   };
 
-  // Cleanup saat component unmount
   useEffect(() => {
     return () => {
       const backdrops = document.querySelectorAll(".modal-backdrop");
@@ -340,11 +366,9 @@ export default function DataArsip({ children }) {
                   <button
                     type="button"
                     className="btn-tambah px-5"
-                    onClick={() => {
-                      setIsEdit(false);
-                    }}
-                    data-bs-toggle="modal"
-                    data-bs-target="#modaltambahFisik"
+                    onClick={handleOpenModal}
+                    // data-bs-toggle="modal"
+                    // data-bs-target="#modaltambahFisik"
                   >
                     Tambah
                   </button>
@@ -577,7 +601,13 @@ export default function DataArsip({ children }) {
                           className="form-select mb-3 radius-30"
                           aria-label="Default select example"
                         >
-                          <option selected>Pilih Gedung</option>
+                          {isEdit ? (
+                            <option value="">
+                              {formDataArsip.gedung_uuid}
+                            </option>
+                          ) : (
+                            <option selected>Pilih Gedung</option>
+                          )}
                           {gedungs?.map((gedung) => (
                             <option key={gedung.uuid} value={gedung.uuid}>
                               {gedung.name}
@@ -597,7 +627,13 @@ export default function DataArsip({ children }) {
                           className="form-select mb-3 radius-30"
                           aria-label="Default select example"
                         >
-                          <option selected>Pilih Lantai</option>
+                          {isEdit ? (
+                            <option value="">
+                              {formDataArsip.lantai_uuid}
+                            </option>
+                          ) : (
+                            <option selected>Pilih Lantai</option>
+                          )}
                           {floorBuild?.map((floor) => (
                             <option key={floor.uuid} value={floor.uuid}>
                               {floor.name}
@@ -617,7 +653,11 @@ export default function DataArsip({ children }) {
                           className="form-select mb-3 radius-30"
                           aria-label="Default select example"
                         >
-                          <option selected>Pilih Ruang</option>
+                          {isEdit ? (
+                            <option value="">{formDataArsip.ruang_uuid}</option>
+                          ) : (
+                            <option selected>Pilih Ruang</option>
+                          )}
                           {roomBuild?.map((room) => (
                             <option key={room.uuid} value={room.uuid}>
                               {room.name}
@@ -639,7 +679,13 @@ export default function DataArsip({ children }) {
                           className="form-select mb-3 radius-30"
                           aria-label="Default select example"
                         >
-                          <option selected>Pilih Lemari</option>
+                          {isEdit ? (
+                            <option value="">
+                              {formDataArsip.lemari_uuid}
+                            </option>
+                          ) : (
+                            <option selected>Pilih Lemari</option>
+                          )}
                           {cabinetBuild?.map((cabinet) => (
                             <option key={cabinet.uuid} value={cabinet.uuid}>
                               {cabinet.name}
@@ -659,7 +705,11 @@ export default function DataArsip({ children }) {
                           className="form-select mb-3 radius-30"
                           aria-label="Default select example"
                         >
-                          <option selected>Pilih Rak</option>
+                          {isEdit ? (
+                            <option value="">{formDataArsip.rak_uuid}</option>
+                          ) : (
+                            <option selected>Pilih Rak</option>
+                          )}
                           {shelfBuild?.map((shelf) => (
                             <option key={shelf.uuid} value={shelf.uuid}>
                               {shelf.name}
@@ -676,7 +726,13 @@ export default function DataArsip({ children }) {
                           className="form-select mb-3 radius-30"
                           aria-label="Default select example"
                         >
-                          <option selected>Pilih Folder</option>
+                          {isEdit ? (
+                            <option value="">
+                              {formDataArsip.folder_uuid}
+                            </option>
+                          ) : (
+                            <option selected>Pilih Folder</option>
+                          )}
                           {folderBuild?.map((folder) => (
                             <option key={folder.uuid} value={folder.uuid}>
                               {folder.name}

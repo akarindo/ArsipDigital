@@ -23,8 +23,13 @@ export const PengajuanProvider = ({ children }) => {
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || null,
   );
-  const role = localStorage.getItem("role");
-
+  const [floorBuild, setFloorBuild] = useState([]);
+  const [roomBuild, setRoomBuild] = useState([]);
+  const [folderBuild, setFolderBuild] = useState([]);
+  const [shelfBuild, setShelfBuild] = useState([]);
+  const [cabinetBuild, setCabinetBuild] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [role, setRole] = useState(localStorage.getItem("role") || null);
   const [masterData, setMasterData] = useState({
     gedungs: [],
     types: [],
@@ -56,9 +61,8 @@ export const PengajuanProvider = ({ children }) => {
     kode_arsip: null,
     keterangan: null,
   });
-
-  // --- Helper Fetch ---
   const apiFetch = useCallback(async (endpoint, authToken) => {
+    setIsLoading(true);
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/api/${endpoint}`,
       {
@@ -71,6 +75,7 @@ export const PengajuanProvider = ({ children }) => {
       },
     );
     const result = await response.json();
+
     if (!response.ok)
       throw new Error(result.message || `Fetch ${endpoint} Gagal`);
     return result;
@@ -119,6 +124,7 @@ export const PengajuanProvider = ({ children }) => {
           pinjamans,
           arsips,
         });
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching master data:", error.message);
       }
@@ -154,12 +160,58 @@ export const PengajuanProvider = ({ children }) => {
     });
     return data;
   }, [masterData.gedungs]);
-
+  function handleChangeBuild(uuid) {
+    const filterFloor = flattenedGedung?.floors?.filter(
+      (floor) => floor.building_uuid == uuid,
+    );
+    console.log("floor", filterFloor);
+    setFloorBuild(filterFloor);
+  }
+  function handleChangeFloor(uuid) {
+    const filterRoom = flattenedGedung.rooms?.filter(
+      (room) => room.floor_uuid == uuid,
+    );
+    setRoomBuild(filterRoom);
+  }
+  function handleChangeRoom(uuid) {
+    const filterCabinet = flattenedGedung.cabinets?.filter(
+      (cabinet) => cabinet.room_uuid == uuid,
+    );
+    setCabinetBuild(filterCabinet);
+  }
+  function handleChangeCabinet(uuid) {
+    const filterShelf = flattenedGedung.shelves?.filter(
+      (shelf) => shelf.cabinet_uuid == uuid,
+    );
+    setShelfBuild(filterShelf);
+  }
+  function handleChangeShelf(uuid) {
+    const filterFolder = flattenedGedung.folders?.filter(
+      (folder) => folder.shelf_uuid == uuid,
+    );
+    setFolderBuild(filterFolder);
+  }
   // --- Handlers ---
   const handleEdit = (item) => {
     setIsEdit(true);
     setCurrentUuid(item.uuid);
-    setFormDataArsip({ ...item });
+    setFormDataArsip({
+      file: item.file,
+      name_uuid: item?.names?.name,
+      tipe_arsip: item.tipe_arsip,
+      judul_arsip: item.judul_arsip,
+      jenis_arsip: item.jenis_arsip,
+      kategori_arsip: item.kategori_arsip,
+      gedung_uuid: item?.gedung?.name,
+      lantai_uuid: item?.lantai?.name,
+      ruang_uuid: item?.ruang?.name,
+      lemari_uuid: item?.lemari?.name,
+      rak_uuid: item?.shelf?.name,
+      folder_uuid: item?.folder?.name,
+      kode_arsip: item.kode_arsip,
+      keterangan: item.keterangan,
+    });
+    // setFormDataArsip({ ...item });
   };
 
   const handleDelete = async (item) => {
@@ -188,7 +240,6 @@ export const PengajuanProvider = ({ children }) => {
       console.error("Delete Gagal:", error.message);
     }
   };
-
   // --- Effects ---
   useEffect(() => {
     const auth = localStorage.getItem("token");
@@ -212,7 +263,21 @@ export const PengajuanProvider = ({ children }) => {
       user,
       token,
       isEdit,
+      isLoading,
       setIsEdit,
+      floorBuild,
+      folderBuild,
+      roomBuild,
+      cabinetBuild,
+      shelfBuild,
+      setToken,
+      setRole,
+      setUser,
+      handleChangeBuild: () => handleChangeBuild(),
+      handleChangeFloor: () => handleChangeFloor(),
+      handleChangeRoom: () => handleChangeRoom(),
+      handleChangeCabinet: () => handleChangeCabinet(),
+      handleChangeShelf: () => handleChangeShelf(),
       currentUuid,
       formDataArsip,
       setFormDataArsip,
@@ -225,8 +290,22 @@ export const PengajuanProvider = ({ children }) => {
       flattenedGedung,
       role,
       user,
+      floorBuild,
+      folderBuild,
+      roomBuild,
+      cabinetBuild,
+      shelfBuild,
+      handleChangeBuild,
+      handleChangeFloor,
+      handleChangeRoom,
+      handleChangeCabinet,
+      handleChangeShelf,
+      isLoading,
       token,
       isEdit,
+      setToken,
+      setRole,
+      setUser,
       currentUuid,
       formDataArsip,
       getAllMasterData,

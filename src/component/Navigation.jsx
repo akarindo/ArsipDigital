@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const [menus, setMenus] = useState([]);
   const [role, setRole] = useState(null);
+  const navigate = useNavigate();
 
   const petugasMenu = [
     // { name: "Dashboard", path: "#", icon: "house.png" },
@@ -23,15 +24,10 @@ const Navigation = () => {
     },
     { name: "Approval", path: "/approvalPetugas", icon: "history.png" },
     { name: "Manajemen Surat", path: "/surat", icon: "history.png" },
-    {
-      name: "Logout",
-      path: "/",
-      icon: "clipboard-list.png",
-    },
   ];
 
   const staffMenu = [
-    { name: "Dashboard", path: "/dashboardStaff", icon: "house.png" },
+    { name: "Dashboard", path: "/dashboardpegawai", icon: "house.png" },
     { name: "Data Arsip", path: "/dataArsip", icon: "clipboard-list.png" },
     {
       name: "Log Pengajuan",
@@ -52,14 +48,9 @@ const Navigation = () => {
       path: "/disposisistaff",
       icon: "clipboard-list.png",
     },
-    {
-      name: "Logout",
-      path: "/",
-      icon: "clipboard-list.png",
-    },
   ];
   const pimpinanMenu = [
-    { name: "Dashboard", path: "/dashboardPetugas", icon: "house.png" },
+    { name: "Dashboard", path: "/dashboardpegawai", icon: "house.png" },
     { name: "Data Arsip", path: "/dataArsip", icon: "clipboard-list.png" },
     // { name: "Dashboard", path: "#", icon: "house.png" },
     // { name: "Data Arsip", path: "#", icon: "clipboard-list.png" },
@@ -69,13 +60,13 @@ const Navigation = () => {
       path: "/riwayat",
       icon: "clipboard-list.png",
     },
-    {
-      name: "Logout",
-      path: "/",
-      icon: "clipboard-list.png",
-    },
   ];
-
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    navigate("/");
+  }
   useEffect(() => {
     // 1. Ambil role dari localStorage cukup sekali saat komponen pertama kali muncul
     const userRole = localStorage.getItem("role");
@@ -104,6 +95,12 @@ const Navigation = () => {
           </Link>
         </li>
       ))}
+      <button
+        onClick={handleLogout}
+        className="btn btn-primary text-white rounded mt-4"
+      >
+        Logout
+      </button>
     </ul>
   );
 };

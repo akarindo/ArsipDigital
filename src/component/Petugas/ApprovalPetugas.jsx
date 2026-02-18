@@ -11,11 +11,14 @@ export default function ApprovalPetugas() {
   const tab = location.pathname.includes("Arsip Digital")
     ? "Arsip Digital"
     : "Arsip Fisik";
-  const { pinjamans, tujuans, token } = usePengajuan();
+  const { pinjamans, tujuans, token, isLoading } = usePengajuan();
   const fisik = pinjamans?.filter((pinjaman) => pinjaman?.arsip?.file == null);
   const digital = pinjamans?.filter(
     (pinjaman) => pinjaman?.arsip?.file != null,
   );
+  const [showModal, setShowModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [alasanTolak, setAlasanTolak] = useState("");
   const filterPinjaman = param == "fisik" ? fisik : digital;
   const formatDate = (dateString) => {
     if (!dateString) return null;
@@ -31,6 +34,10 @@ export default function ApprovalPetugas() {
     })
       .format(date)
       .replace(".", ":"); // Mengganti titik pemisah jam menjadi titik dua jika perlu
+  };
+  const handleTolak = (pengajuan) => {
+    setSelectedItem(pengajuan);
+    setShowModal(true);
   };
   const handleApprove = async (item) => {
     const dataToSend = {
@@ -63,9 +70,43 @@ export default function ApprovalPetugas() {
       console.error("Login Gagal:", error.message);
     }
   };
+  const handleReject = async (item) => {
+    const dataToSend = {
+      user_uuid: item.user_uuid,
+      arsip_uuid: item.arsip_uuid,
+      tujuan_uuid: item.tujuan_uuid,
+      status: "reject",
+      alasan_penolakan: alasanTolak,
+      response_at: new Date().toISOString(), // Format ISO agar diterima Laravel (as date)
+    };
+    try {
+      const url = `${import.meta.env.VITE_API_URL}/api/peminjamans/${item.uuid}`;
+
+      const method = "PUT";
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(dataToSend),
+      });
+
+      const result = await response.json();
+      setShowModal(false);
+      setAlasanTolak("");
+      setSelectedItem(null);
+      if (!response.ok) {
+        throw new Error(result.message || "Login Gagal");
+      }
+    } catch (error) {
+      console.error("Login Gagal:", error.message);
+    }
+  };
   const handleGetArsip = async (item) => {
     const waktuKembali = new Date();
-    waktuKembali.setHours(waktuKembali.getHours() + 8);
+    waktuKembali.setMinutes(waktuKembali.getMinutes() + 1);
     const dataToSend = {
       user_uuid: item.user_uuid,
       arsip_uuid: item.arsip_uuid,
@@ -90,7 +131,6 @@ export default function ApprovalPetugas() {
       });
 
       const result = await response.json();
-
       if (!response.ok) {
         throw new Error(result.message || "Login Gagal");
       }
@@ -214,7 +254,7 @@ export default function ApprovalPetugas() {
               </ul>
             </div>
           </div>
-          <div className="dropdown bg-white my-3" style={{ height: 38 }}>
+          {/* <div className="dropdown bg-white my-3" style={{ height: 38 }}>
             <div className="d-flex justify-content-between">
               <a
                 href="#"
@@ -247,17 +287,61 @@ export default function ApprovalPetugas() {
                 <i className="bx bxs-chevron-down ms-5" />
               </a>
             </div>
-          </div>
+          </div> */}
 
           <ApprovalFisik
             filterPinjaman={filterPinjaman}
             tujuans={tujuans}
+            isLoading={isLoading}
             handleApprove={(item) => handleApprove(item)}
+            handleTolak={(item) => handleTolak(item)}
             formatDate={(string) => formatDate(string)}
             handleGetArsip={(item) => handleGetArsip(item)}
           />
         </div>
       </div>
+      {/* Modal Alasan Terlambat */}
+      {showModal && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-danger">
+                  Peringatan: Alasan Penolakan!
+                </h5>
+              </div>
+              <div className="modal-body">
+                <p>Harap masukkan alasan penolakan:</p>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  value={alasanTolak}
+                  onChange={(e) => setAlasanTolak(e.target.value)}
+                  placeholder="Contoh: Masih digunakan untuk audit..."
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Batal
+                </button>
+                <button
+                  className="btn btn-primary"
+                  disabled={!alasanTolak.trim()} // Tombol mati jika alasan kosong
+                  onClick={() => handleReject(selectedItem, alasanTolak)}
+                >
+                  Kirim & Kembalikan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

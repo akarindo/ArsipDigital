@@ -67,9 +67,9 @@ export default function App() {
         <Route path="/" element={<NewLogin />} />
 
         <Route
-          path="/dashboardStaff"
+          path="/dashboardpegawai"
           element={
-            <ProtectedRoute allowedRoles={["staff"]}>
+            <ProtectedRoute allowedRoles={["pegawai"]}>
               <DashboardStaff />
             </ProtectedRoute>
           }
@@ -360,6 +360,7 @@ export default function App() {
         />
         <Route
           path="/disposisi"
+          allowedRoles={["direksi"]}
           element={
             <ProtectedRoute>
               <DisposisiSurat />

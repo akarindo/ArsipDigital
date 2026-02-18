@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navigation from "../Navigation";
 import { usePengajuan } from "../../context/PengajuanContext";
 
 const AdminLayout = ({ children }) => {
-  const { user } = usePengajuan();
+  const { role } = usePengajuan();
+  const [user, setUser] = React.useState(null);
+  useEffect(() => {
+    const data = localStorage.getItem("user");
+    setUser(JSON.parse(data));
+  }, []);
+  // console.log("role", role);
+  // const user = localStorage.getItem("user");
   return (
     <div className="wrapper">
       {/*sidebar wrapper */}

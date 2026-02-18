@@ -84,7 +84,7 @@ export default function Login() {
         case "staff umum":
           navigate("/surat");
           break;
-        case "pimpinan":
+        case "direksi":
           navigate("/disposisi");
           break;
       }

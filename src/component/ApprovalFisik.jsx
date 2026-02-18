@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { usePengajuan } from "../context/PengajuanContext";
+import SkeletonItem from "./SkeletonItem";
 const CountdownTimer = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState("");
+  const [late, setLate] = useState(false);
 
   useEffect(() => {
     const calculateTime = () => {
@@ -11,6 +13,7 @@ const CountdownTimer = ({ targetDate }) => {
 
       if (difference <= 0) {
         setTimeLeft("Waktu Habis");
+        setLate(true);
         return;
       }
 
@@ -37,11 +40,34 @@ const CountdownTimer = ({ targetDate }) => {
 };
 export default function ApprovalFisik({
   filterPinjaman,
+  isLoading,
   handleApprove,
+  handleTolak,
   formatDate,
   handleGetArsip,
   tujuans,
 }) {
+  if (isLoading) {
+    return (
+      <div className="customers-list mb-3">
+        <SkeletonItem />
+        <SkeletonItem />
+        <SkeletonItem />
+      </div>
+    );
+  }
+
+  // JIKA DATA KOSONG (SUDAH DILOAD TAPI MEMANG TIDAK ADA ISI)
+  if (!isLoading && filterPinjaman.length === 0) {
+    return (
+      <div className="text-center p-5 bg-white rounded shadow-sm">
+        <img src="/assets/images/empty-box.png" width={100} alt="Kosong" />
+        <p className="mt-3 text-secondary">
+          Tidak ada pengajuan untuk saat ini.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="customers-list mb-3">
       {/* <div className="customers-list-item cursor-pointer bg-white" style={{ marginBottom: 15 }}>
@@ -156,7 +182,7 @@ export default function ApprovalFisik({
         return (
           <div
             key={pinjam.uuid}
-            className="customers-list-item cursor-pointer bg-white"
+            className="customers-list-item cursor-pointer rounded bg-white"
             style={{ marginBottom: 15 }}
           >
             <div className="top d-flex align-items-center justify-content-between p-3">
@@ -204,6 +230,34 @@ export default function ApprovalFisik({
                     </div>
                   </div>
                 )}
+                {pinjam?.alasan_telat && (
+                  <div
+                    className="d-flex align-items-center border p-2 radius-10"
+                    style={{
+                      marginRight: 10,
+                      background: "#c22020",
+                      height: 35,
+                    }}
+                  >
+                    <div>
+                      <p className="mb-0" style={{ color: "white" }}>
+                        {pinjam.alasan_telat}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {pinjam.status == "reject" && (
+                  <div
+                    className="d-flex align-items-center bg-danger border p-2 radius-10"
+                    style={{ marginRight: 10, height: 35 }}
+                  >
+                    <div className>
+                      <p className="mb-0 text-white">
+                        {pinjam.status} | {pinjam.alasan_penolakan}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {pinjam?.status == "approve" && pinjam?.telah_diterima ? (
                   <>
                     <div
@@ -245,7 +299,7 @@ export default function ApprovalFisik({
                 ) : null}
               </div>
             </div>
-            <div className="d-flex justify-content-between pt-0 pb-1 p-3">
+            <div className="d-flex justify-content-between pt-0 pb-4 p-3">
               <div>
                 <div>
                   <h7 className="mb-1 font-weight-bold">Jenis</h7> :{" "}
@@ -302,7 +356,7 @@ export default function ApprovalFisik({
                 )}
               </div>
             </div>
-            <div className="d-flex mt-1">
+            {/* <div className="d-flex mt-1">
               <div className="p-3 pt-0 pe-1">
                 <img src="/assets/images/pin.png" width={15} height={15} alt />
               </div>
@@ -369,7 +423,7 @@ export default function ApprovalFisik({
               <div>
                 <p>Nomor 1</p>
               </div>
-            </div>
+            </div> */}
             <div className="d-flex gap-4 justify-content-center p-3 pb-0 pt-0">
               {pinjam?.status == "pending" && (
                 <>
@@ -389,7 +443,8 @@ export default function ApprovalFisik({
                       type="button"
                       className="btn btn-danger px-5 radius-30 w-100"
                       data-bs-toggle="modal"
-                      data-bs-target="#notifikasiKembali"
+                      onClick={() => handleTolak(pinjam)}
+                      // data-bs-target="#notifikasiKembali"
                     >
                       Tolak
                     </button>

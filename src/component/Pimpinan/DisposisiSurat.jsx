@@ -152,6 +152,12 @@ export default function DisposisiSurat() {
     );
     modal.show();
   };
+  const previewPDF = (base64String) => {
+    const newTab = window.open();
+    newTab.document.write(
+      `<iframe src="${base64String}" width="100%" height="100%" style="border:none;"></iframe>`,
+    );
+  };
 
   const handleSubmitDisposisi = async (e) => {
     e.preventDefault();
@@ -441,7 +447,7 @@ export default function DisposisiSurat() {
 
                 <div className="row g-4">
                   {/* Step 1: Destination */}
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <label className="form-label fw-bold small text-uppercase">
                       1. Teruskan Kepada
                     </label>
@@ -471,7 +477,7 @@ export default function DisposisiSurat() {
                   </div>
 
                   {/* Step 2: Deadline */}
-                  <div className="col-md-6">
+                  {/* <div className="col-md-6">
                     <label className="form-label fw-bold small text-uppercase">
                       2. Batas Waktu & Jam
                     </label>
@@ -495,7 +501,7 @@ export default function DisposisiSurat() {
                     <small className="text-muted">
                       Kapan staf harus menyelesaikan ini?
                     </small>
-                  </div>
+                  </div> */}
                   <div className="col-md-12">
                     <label className="form-label fw-bold small text-uppercase">
                       3. Tindak Lanjut
