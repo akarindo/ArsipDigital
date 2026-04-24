@@ -164,7 +164,6 @@ export const PengajuanProvider = ({ children }) => {
     const filterFloor = flattenedGedung?.floors?.filter(
       (floor) => floor.building_uuid == uuid,
     );
-    console.log("floor", filterFloor);
     setFloorBuild(filterFloor);
   }
   function handleChangeFloor(uuid) {
@@ -273,11 +272,11 @@ export const PengajuanProvider = ({ children }) => {
       setToken,
       setRole,
       setUser,
-      handleChangeBuild: () => handleChangeBuild(),
-      handleChangeFloor: () => handleChangeFloor(),
-      handleChangeRoom: () => handleChangeRoom(),
-      handleChangeCabinet: () => handleChangeCabinet(),
-      handleChangeShelf: () => handleChangeShelf(),
+      handleChangeBuild: (uuid) => handleChangeBuild(uuid),
+      handleChangeFloor: (uuid) => handleChangeFloor(uuid),
+      handleChangeRoom: (uuid) => handleChangeRoom(uuid),
+      handleChangeCabinet: (uuid) => handleChangeCabinet(uuid),
+      handleChangeShelf: (uuid) => handleChangeShelf(uuid),
       currentUuid,
       formDataArsip,
       setFormDataArsip,

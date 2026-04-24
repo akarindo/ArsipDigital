@@ -70,111 +70,6 @@ export default function ApprovalFisik({
   }
   return (
     <div className="customers-list mb-3">
-      {/* <div className="customers-list-item cursor-pointer bg-white" style={{ marginBottom: 15 }}>
-        <div className="top d-flex align-items-center justify-content-between p-3">
-          <div className="kiri" style={{ alignItems: 'center' }}>
-            <div className="d-flex align-items-center">
-              <img src="/assets/images/iconpdf.png" width={60} height={60} alt />
-              <h6 className="ms-3 mb-0">PP Investasi</h6>
-            </div>
-          </div>
-          <div className="kanan" style={{ display: 'flex' }}>
-            <div className="d-flex align-items-center border p-2 radius-10" style={{ marginRight: 10, background: '#46D657', height: 35 }}>
-              <div className>
-                <p className="mb-0" style={{ color: 'white' }}>Disetujui</p>
-              </div>
-            </div>
-            <div className="d-flex align-items-center border p-2 radius-10" style={{ marginRight: 10, height: 35 }}>
-              <div className>
-                <p className="mb-0">Sedang Dipinjam</p>
-              </div>
-            </div>
-            <div className="d-flex align-items-center border p-2 radius-10" style={{ marginRight: 10, height: 35 }}>
-              <div className="kanan d-flex align-items-center">
-                <div className style={{ marginRight: 10 }}>
-                  <p className="mb-0">4 jam : 24 menit : 30 detik</p>
-                </div>
-                <div className>
-                  <img src="/assets/images/clock.png" width={15} height={15} alt />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="d-flex  justify-content-between pt-0 pb-1 p-3">
-          <div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Jenis</h7> : <h7 className="mb-0 text-secondary">File</h7>
-            </div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Tipe</h7> : <h7 className="mb-0 text-secondary">Statis</h7>
-            </div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Tujuan</h7> : <h7 className="mb-0 text-secondary">Print</h7>
-            </div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Petugas</h7> : <h7 className="mb-0 text-secondary">Dafa Maulana</h7>
-            </div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Peminjam</h7> : <h7 className="mb-0 text-secondary">Citra</h7>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Waktu Pengajuan</h7> : <h7 className="mb-0 text-secondary">1 Desember 2025 <br />| 07:00:00 wib</h7>
-            </div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Waktu Diterima</h7> : <h7 className="mb-0 text-secondary">1 November 2025 <br />| 10:30:00 wib</h7>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Batas Peminjaman</h7> : <h7 className="mb-0 text-secondary">1 Desember <br />2025 | 18:30:00 wib</h7>
-            </div>
-            <div>
-              <h7 className="mb-1 font-weight-bold">Waktu Pengembalian</h7> : <h7 className="mb-0 text-secondary">...</h7>
-            </div>
-          </div>
-        </div>
-        <div className="d-flex mt-1">
-          <div className="p-3 pt-0 pe-1">
-            <img src="/assets/images/pin.png" width={15} height={15} alt />
-          </div>
-          <div>
-            <p className="me-1">Gedung A</p>
-          </div>
-          <div>
-            <img src="/assets/images/Vector.png" style={{ marginRight: 5 }} width={5} height={10} alt />
-          </div>
-          <div>
-            <p className="me-1">Lantai 1</p>
-          </div>
-          <div>
-            <img src="/assets/images/Vector.png" style={{ marginRight: 5 }} width={5} height={10} alt />
-          </div>
-          <div>
-            <p className="me-1">Ruang 1</p>
-          </div>
-          <div>
-            <img src="/assets/images/Vector.png" style={{ marginRight: 5 }} width={5} height={10} alt />
-          </div>
-          <div>
-            <p className="me-1">Lemari 1</p>
-          </div>
-          <div>
-            <img src="/assets/images/Vector.png" style={{ marginRight: 5 }} width={5} height={10} alt />
-          </div>
-          <div>
-            <p className="me-1">Folder 1</p>
-          </div>
-          <div>
-            <img src="/assets/images/Vector.png" style={{ marginRight: 5 }} width={5} height={10} alt />
-          </div>
-          <div>
-            <p>Nomor 1</p>
-          </div>
-        </div>
-      </div> */}
       {filterPinjaman?.map((pinjam) => {
         const filterTujuan = tujuans?.filter(
           (tujuan) => tujuan.uuid == pinjam.tujuan_uuid,
@@ -356,74 +251,7 @@ export default function ApprovalFisik({
                 )}
               </div>
             </div>
-            {/* <div className="d-flex mt-1">
-              <div className="p-3 pt-0 pe-1">
-                <img src="/assets/images/pin.png" width={15} height={15} alt />
-              </div>
-              <div>
-                <p className="me-1">Gedung A</p>
-              </div>
-              <div>
-                <img
-                  src="/assets/images/Vector.png"
-                  style={{ marginRight: 5 }}
-                  width={5}
-                  height={10}
-                  alt
-                />
-              </div>
-              <div>
-                <p className="me-1">Lantai 1</p>
-              </div>
-              <div>
-                <img
-                  src="/assets/images/Vector.png"
-                  style={{ marginRight: 5 }}
-                  width={5}
-                  height={10}
-                  alt
-                />
-              </div>
-              <div>
-                <p className="me-1">Ruang 1</p>
-              </div>
-              <div>
-                <img
-                  src="/assets/images/Vector.png"
-                  style={{ marginRight: 5 }}
-                  width={5}
-                  height={10}
-                  alt
-                />
-              </div>
-              <div>
-                <p className="me-1">Lemari 1</p>
-              </div>
-              <div>
-                <img
-                  src="/assets/images/Vector.png"
-                  style={{ marginRight: 5 }}
-                  width={5}
-                  height={10}
-                  alt
-                />
-              </div>
-              <div>
-                <p className="me-1">Folder 1</p>
-              </div>
-              <div>
-                <img
-                  src="/assets/images/Vector.png"
-                  style={{ marginRight: 5 }}
-                  width={5}
-                  height={10}
-                  alt
-                />
-              </div>
-              <div>
-                <p>Nomor 1</p>
-              </div>
-            </div> */}
+
             <div className="d-flex gap-4 justify-content-center p-3 pb-0 pt-0">
               {pinjam?.status == "pending" && (
                 <>
@@ -531,21 +359,21 @@ export default function ApprovalFisik({
                 }}
               >
                 <h5 className="modal-title" style={{ marginBottom: 15 }}>
-                  Notifikasi Pengembalian
+                  Notifikasi Persetujuan
                 </h5>
                 <img src="/assets/images/bell icon.png" />
                 <h6
                   className="modal-isi"
                   style={{ marginBottom: 0, marginTop: 15 }}
                 >
-                  Notifikasi pengembalian kepada peminjam telah berhasil
-                  terkirim.
+                  Peminjaman berhasil disetujui
                 </h6>
               </div>
               <div className="modal-footer" style={{ borderTop: "none" }}>
                 <button
                   type="button"
                   className="btn btn-primary"
+                  onClick={() => navigate("/approvalPetugas")}
                   style={{ width: "100%", borderRadius: 50 }}
                 >
                   Oke

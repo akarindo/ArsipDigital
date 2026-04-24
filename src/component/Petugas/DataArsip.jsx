@@ -67,7 +67,7 @@ export default function DataArsip({ children }) {
       setType(null); // Sembunyikan jika bukan dinamis
     }
   }
-
+  const arsipFisik = arsips?.filter((arsip) => arsip.file == null);
   const jenisArsip = [
     {
       name: "Dinamis",
@@ -816,7 +816,7 @@ export default function DataArsip({ children }) {
                       onChange={handleInputChange}
                     >
                       <option value="">Nama Arsip</option>
-                      {arsips?.map((arsip) => (
+                      {arsipFisik?.map((arsip) => (
                         <option value={arsip.uuid}>{arsip.judul_arsip}</option>
                       ))}
                     </select>

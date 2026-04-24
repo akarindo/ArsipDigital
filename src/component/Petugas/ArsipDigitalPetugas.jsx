@@ -8,10 +8,19 @@ export default function ArsipDigitalPetugas({ children }) {
   const location = useLocation();
   const [type, setType] = React.useState(null);
   const [isEdit, setIsEdit] = React.useState(false);
-  const { names, codes, token } = React.useContext(PengajuanContext);
+  const { names, codes, token, role, user, arsips, tujuans } =
+    React.useContext(PengajuanContext);
+  const arsipDigital = arsips.filter((arsip) => arsip.file != null);
   const tab = location.pathname.includes("ArsipDigitalPetugas")
     ? "ArsipDigitalPetugas"
     : "Arsip Fisik";
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
   function handleType(value) {
     if (value === "dinamis") {
       setType("dinamis");
@@ -44,6 +53,12 @@ export default function ArsipDigitalPetugas({ children }) {
     folder_uuid: null,
     kode_arsip: null,
     keterangan: null,
+  });
+  const [formData, setFormData] = React.useState({
+    user_uuid: user?.uuid,
+    arsip_uuid: "",
+    tujuan_uuid: "",
+    status: "pending",
   });
   const handleCheckboxChangeArsip = (e) => {
     const { name, value, checked } = e.target;
@@ -86,6 +101,70 @@ export default function ArsipDigitalPetugas({ children }) {
         [name]: value,
       }));
     }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.arsip_uuid || !formData.tujuan_uuid) {
+      alert("Mohon lengkapi semua field yang wajib diisi!");
+      return;
+    }
+    try {
+      const url = isEdit
+        ? `${import.meta.env.VITE_API_URL}/api/peminjamans/${currentUuid}`
+        : `${import.meta.env.VITE_API_URL}/api/peminjamans`;
+
+      const method = isEdit ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Login Gagal");
+      }
+      // setGedung({ building_uuid: "", name: "" });
+      setIsEdit(false);
+      setCurrentUuid(null);
+      refreshData();
+      const modalElement = document.getElementById("tambahGedungMaster");
+      const modal = window.bootstrap.Modal.getInstance(modalElement);
+      modal.hide();
+    } catch (error) {
+      console.error("Login Gagal:", error.message);
+    }
+
+    setFormData({
+      user_uuid: "",
+      arsip_uuid: "",
+      tujuan_uuid: "",
+      status: "pending",
+    });
+
+    // Tutup modal form menggunakan Bootstrap
+    const modalElement = document.getElementById("modalDigital");
+    const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+
+    // Hapus backdrop secara manual
+    setTimeout(() => {
+      const backdrops = document.querySelectorAll(".modal-backdrop");
+      backdrops.forEach((backdrop) => backdrop.remove());
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }, 100);
+
+    // Tampilkan modal sukses
+    setShowSuccessModal(true);
   };
   const handleSubmitArsip = async (e) => {
     e.preventDefault();
@@ -208,21 +287,107 @@ export default function ArsipDigitalPetugas({ children }) {
                 </li>
               </ul>
             </div>
-            <div className="user-box">
-              <div className="col mb-3">
-                <button
-                  type="button"
-                  className="btn-tambah px-5"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modaltambahDigital"
-                >
-                  Tambah
-                </button>
+            {role == "staff umum" ? (
+              <div className="user-box">
+                <div className="col mb-3">
+                  <button
+                    type="button"
+                    className="btn-tambah px-5"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modaltambahDigital"
+                  >
+                    Tambah
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : role == "pegawai" ? (
+              <div className="user-box">
+                <div className="col mb-3">
+                  <button
+                    type="button"
+                    className="btn-pengajuan px-5 pb-2 pt-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalDigital"
+                  >
+                    Pengajuan Peminjaman
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           {children}
+          <div
+            className="modal fade"
+            id="modalDigital"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <div className="modal-dialog modal-dialog-scrollable">
+              <div className="modal-content">
+                <div className="modal-header" style={{ border: "none" }}>
+                  <h5 className="modal-title" style={{ paddingLeft: "15%" }}>
+                    Formulir Peminjaman Arsip Digital
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  />
+                </div>
+                <div className="modal-body pt-0">
+                  <img
+                    src="/assets/images/documents.png"
+                    style={{ width: 100, margin: "auto", display: "flex" }}
+                  />
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                      <label className="form-label">Nama Arsip</label>
+                      <select
+                        className="form-select mb-3"
+                        style={{ borderRadius: 30 }}
+                        name="arsip_uuid"
+                        value={formData.arsip_uuid}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Nama Arsip</option>
+                        {arsipDigital?.map((arsip) => (
+                          <option value={arsip.uuid}>
+                            {arsip.judul_arsip}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="form-label">Pilih Tujuan</label>
+                      <select
+                        className="form-select"
+                        style={{ borderRadius: 30 }}
+                        name="tujuan_uuid"
+                        value={formData.tujuan_uuid}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Pilih Tujuan</option>
+                        {tujuans?.map((tujuan) => (
+                          <option value={tujuan.uuid}>{tujuan.tujuan}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="modal-footer" style={{ border: "none" }}>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        style={{ width: "100%", borderRadius: 30 }}
+                      >
+                        Ajukan Peminjaman
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
           <div
             className="modal fade"
             id="modaltambahDigital"

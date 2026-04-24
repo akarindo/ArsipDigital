@@ -106,7 +106,7 @@ export default function ApprovalPetugas() {
   };
   const handleGetArsip = async (item) => {
     const waktuKembali = new Date();
-    waktuKembali.setMinutes(waktuKembali.getMinutes() + 1);
+    waktuKembali.setMinutes(waktuKembali.getHours() + 8);
     const dataToSend = {
       user_uuid: item.user_uuid,
       arsip_uuid: item.arsip_uuid,
@@ -254,41 +254,6 @@ export default function ApprovalPetugas() {
               </ul>
             </div>
           </div>
-          {/* <div className="dropdown bg-white my-3" style={{ height: 38 }}>
-            <div className="d-flex justify-content-between">
-              <a
-                href="#"
-                className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0"
-                style={{ border: "none" }}
-                data-bs-toggle="dropdown"
-                data-display="static"
-              >
-                Tipe
-                <i className="bx bxs-chevron-down ms-5" />
-              </a>
-              <a
-                href="#"
-                className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0"
-                style={{ border: "none" }}
-                data-bs-toggle="dropdown"
-                data-display="static"
-              >
-                Kategori
-                <i className="bx bxs-chevron-down ms-5" />
-              </a>
-              <a
-                href="#"
-                className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0"
-                style={{ border: "none" }}
-                data-bs-toggle="dropdown"
-                data-display="static"
-              >
-                Status
-                <i className="bx bxs-chevron-down ms-5" />
-              </a>
-            </div>
-          </div> */}
-
           <ApprovalFisik
             filterPinjaman={filterPinjaman}
             tujuans={tujuans}
