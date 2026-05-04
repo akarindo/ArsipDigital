@@ -189,9 +189,9 @@ export default function RakMaster() {
         {/* Header */}
         <div className="row mb-4 align-items-center">
           <div className="col">
-            <h4 className="fw-bold mb-0 text-dark">Data Master Lantai</h4>
+            <h4 className="fw-bold mb-0 text-dark">Data Master Rak</h4>
             <p className="text-muted small mb-0">
-              Manajemen level lantai pada setiap gedung penyimpanan.
+              Manajemen level rak pada setiap lemari penyimpanan.
             </p>
           </div>
           <div className="col-auto">
@@ -200,7 +200,7 @@ export default function RakMaster() {
               className="btn btn-primary shadow-sm px-4 d-flex align-items-center gap-2"
               style={{ borderRadius: "10px" }}
             >
-              <i className="bx bx-plus-circle"></i> Tambah Ruang
+              <i className="bx bx-plus-circle"></i> Tambah Rak
             </button>
           </div>
         </div>
@@ -232,12 +232,11 @@ export default function RakMaster() {
                   >
                     <div className="card-body d-flex align-items-center justify-content-between p-3">
                       <div className="d-flex align-items-center">
-                        <div className="bg-success bg-opacity-10 p-3 rounded-3 me-3">
-                          <img
-                            src="/assets/images/block.png"
-                            width={30}
-                            alt="rak"
-                          />
+                        <div
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                          style={{ width: "50px", height: "50px" }}
+                        >
+                          <i className="bx bx-box text-info fs-4"></i>
                         </div>
                         <div>
                           <h6 className="mb-1 fw-bold">{s.name}</h6>
@@ -259,15 +258,15 @@ export default function RakMaster() {
                       <div className="d-flex gap-2">
                         <button
                           onClick={() => handleOpenModal(s)}
-                          className="btn btn-sm btn-outline-primary rounded-pill px-3"
+                          className="btn btn-sm btn-light-primary px-3"
                         >
-                          Edit
+                          <i className="bx bx-edit-alt me-1"></i> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(s)}
-                          className="btn btn-sm btn-outline-danger rounded-pill px-3"
+                          className="btn btn-sm btn-light-danger px-3"
                         >
-                          Hapus
+                          <i className="bx bx-trash me-1"></i> Hapus
                         </button>
                       </div>
                     </div>
@@ -303,6 +302,13 @@ export default function RakMaster() {
 
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
+                  <div className="text-center mb-4">
+                    <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
+                      <i
+                        className={`bx ${isEdit ? "bx-edit" : "bx-box"} fs-1 text-info`}
+                      ></i>
+                    </div>
+                  </div>
                   <div className="mb-3">
                     <label className="form-label small fw-bold">Gedung</label>
                     <select
@@ -424,6 +430,16 @@ export default function RakMaster() {
           </div>
         </div>
       </div>
+      <style>{`
+        .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+        .btn-light-primary { background: #eef4ff; border: none; color: #0059ff;}
+        .btn-light-primary:hover { background: #0059ff; color: #ffff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; color: #f60000 }
+        .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
+        .extra-small { font-size: 11px; }
+        .bg-light { background-color: #f8f9fa !important; }
+      `}</style>
     </AdminLayout>
   );
 }

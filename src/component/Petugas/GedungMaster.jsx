@@ -147,13 +147,13 @@ export default function Gedung() {
                       <div className="d-flex gap-2">
                         <button
                           onClick={() => handleOpenModal(item)}
-                          className="btn btn-sm btn-light-primary text-primary px-3"
+                          className="btn btn-sm btn-light-primary px-3"
                         >
                           <i className="bx bx-edit-alt me-1"></i> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item)}
-                          className="btn btn-sm btn-light-danger text-danger px-3"
+                          className="btn btn-sm btn-light-danger px-3"
                         >
                           <i className="bx bx-trash me-1"></i> Hapus
                         </button>
@@ -193,7 +193,7 @@ export default function Gedung() {
                   <div className="text-center mb-4">
                     <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
                       <i
-                        className={`bx ${isEdit ? "bx-building" : "bx-plus-circle"} fs-1 text-success`}
+                        className={`bx ${isEdit ? "bx-edit" : "bx-buildings"} fs-1 text-success`}
                       ></i>
                     </div>
                     <p className="text-muted small">
@@ -243,9 +243,12 @@ export default function Gedung() {
       <style>{`
         .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
-        .btn-light-primary { background: #eef4ff; border: none; }
-        .btn-light-danger { background: #fff0f0; border: none; }
-        .extra-small { font-size: 11px; letter-spacing: 0.5px; }
+        .btn-light-primary { background: #eef4ff; border: none; color: #0059ff;}
+        .btn-light-primary:hover { background: #0059ff; color: #ffff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; color: #f60000 }
+        .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
+        .extra-small { font-size: 11px; }
+        .bg-light { background-color: #f8f9fa !important; }
       `}</style>
     </AdminLayout>
   );

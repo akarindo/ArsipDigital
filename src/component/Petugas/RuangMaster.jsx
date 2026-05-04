@@ -156,9 +156,9 @@ export default function RuangMaster() {
         {/* Header */}
         <div className="row mb-4 align-items-center">
           <div className="col">
-            <h4 className="fw-bold mb-0 text-dark">Data Master Lantai</h4>
+            <h4 className="fw-bold mb-0 text-dark">Data Master Ruang</h4>
             <p className="text-muted small mb-0">
-              Manajemen level lantai pada setiap gedung penyimpanan.
+              Manajemen level ruang pada setiap lantai penyimpanan.
             </p>
           </div>
           <div className="col-auto">
@@ -200,14 +200,10 @@ export default function RuangMaster() {
                     <div className="card-body d-flex align-items-center justify-content-between p-3">
                       <div className="d-flex align-items-center">
                         <div
-                          className="bg-primary bg-opacity-10 p-3 rounded-3 me-3 d-flex align-items-center justify-content-center"
-                          style={{ width: "60px", height: "60px" }}
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                          style={{ width: "50px", height: "50px" }}
                         >
-                          <img
-                            src="/assets/images/block.png"
-                            width={30}
-                            alt="icon"
-                          />
+                          <i className="bx bxs-door-open text-info fs-4"></i>
                         </div>
                         <div>
                           <h6 className="mb-0 fw-bold">{item.name}</h6>
@@ -221,13 +217,13 @@ export default function RuangMaster() {
                       <div className="d-flex gap-2">
                         <button
                           onClick={() => handleOpenModal(item)}
-                          className="btn btn-sm btn-light-primary text-primary px-3"
+                          className="btn btn-sm btn-light-primary px-3"
                         >
                           <i className="bx bx-edit-alt me-1"></i> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item)}
-                          className="btn btn-sm btn-light-danger text-danger px-3"
+                          className="btn btn-sm btn-light-danger px-3"
                         >
                           <i className="bx bx-trash me-1"></i> Hapus
                         </button>
@@ -254,7 +250,7 @@ export default function RuangMaster() {
             >
               <div className="modal-header border-0 pt-4 px-4">
                 <h5 className="fw-bold">
-                  {isEdit ? "Update Lantai" : "Tambah Lantai Baru"}
+                  {isEdit ? "Update Ruang" : "Tambah Ruang Baru"}
                 </h5>
                 <button
                   type="button"
@@ -265,15 +261,10 @@ export default function RuangMaster() {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
                   <div className="text-center mb-4">
-                    <div
-                      className="bg-primary bg-opacity-10 p-3 rounded-3 me-3 d-flex align-items-center justify-content-center"
-                      style={{ width: "60px", height: "60px" }}
-                    >
-                      <img
-                        src="/assets/images/block.png"
-                        width={30}
-                        alt="icon"
-                      />
+                    <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
+                      <i
+                        className={`bx ${isEdit ? "bx-edit" : "bxs-door-open"} fs-1 text-info`}
+                      ></i>
                     </div>
                   </div>
 
@@ -346,29 +337,25 @@ export default function RuangMaster() {
                       placeholder="Masukkan Ruang Arsip"
                     />
                   </div>
-                  <div className="p-3 pt-0">
-                    <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                      <div className="w-50">
-                        <button
-                          type="button"
-                          className="btn-batal"
-                          style={{ width: "100%" }}
-                        >
-                          Batal
-                        </button>
-                      </div>
-                      <div className="w-50">
-                        <button
-                          type="submit"
-                          className="btn-tambah"
-                          style={{ width: "100%" }}
-                        >
-                          Simpan
-                        </button>
-                      </div>
-                    </div>
                   </div>
+                  <div className="modal-footer border-0 pb-4 px-4 gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light flex-grow-1 py-2"
+                    data-bs-dismiss="modal"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary flex-grow-1 py-2"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Simpan Data
+                  </button>
                 </div>
+                
               </form>
             </div>
           </div>
@@ -378,9 +365,12 @@ export default function RuangMaster() {
       <style>{`
         .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
-        .btn-light-primary { background: #eef4ff; border: none; }
-        .btn-light-danger { background: #fff0f0; border: none; }
-        .extra-small { font-size: 11px; display: block; margin-top: 2px; }
+        .btn-light-primary { background: #eef4ff; border: none; color: #0059ff;}
+        .btn-light-primary:hover { background: #0059ff; color: #ffff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; color: #f60000 }
+        .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
+        .extra-small { font-size: 11px; }
+        .bg-light { background-color: #f8f9fa !important; }
       `}</style>
     </AdminLayout>
   );

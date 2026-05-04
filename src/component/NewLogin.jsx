@@ -39,6 +39,9 @@ export default function NewLogin() {
       );
 
       const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Email atau Password Salah");
+      }
       const { token, user } = result.data;
       refreshData();
       setUser(user);
@@ -48,9 +51,6 @@ export default function NewLogin() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
       localStorage.setItem("user", JSON.stringify(user));
-      if (!response.ok) {
-        throw new Error(result.message || "Email atau Password Salah");
-      }
       // refreshData();
       setShowSuccess(true);
     } catch (error) {

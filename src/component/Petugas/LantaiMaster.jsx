@@ -147,7 +147,7 @@ export default function LantaiMaster() {
                           className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
                           style={{ width: "50px", height: "50px" }}
                         >
-                          <i className="bx bx-layers text-info fs-4"></i>
+                          <i className="bx bx-layer text-info fs-4"></i>
                         </div>
                         <div>
                           <h6 className="mb-0 fw-bold">{item.name}</h6>
@@ -161,13 +161,13 @@ export default function LantaiMaster() {
                       <div className="d-flex gap-2">
                         <button
                           onClick={() => handleOpenModal(item)}
-                          className="btn btn-sm btn-light-primary text-primary px-3"
+                          className="btn btn-sm btn-light-primary px-3"
                         >
                           <i className="bx bx-edit-alt me-1"></i> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item)}
-                          className="btn btn-sm btn-light-danger text-danger px-3"
+                          className="btn btn-sm btn-light-danger px-3"
                         >
                           <i className="bx bx-trash me-1"></i> Hapus
                         </button>
@@ -207,7 +207,7 @@ export default function LantaiMaster() {
                   <div className="text-center mb-4">
                     <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
                       <i
-                        className={`bx ${isEdit ? "bx-edit" : "bx-layers"} fs-1 text-info`}
+                        className={`bx ${isEdit ? "bx-edit" : "bx-layer"} fs-1 text-info`}
                       ></i>
                     </div>
                   </div>
@@ -277,9 +277,12 @@ export default function LantaiMaster() {
       <style>{`
         .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
-        .btn-light-primary { background: #eef4ff; border: none; }
-        .btn-light-danger { background: #fff0f0; border: none; }
-        .extra-small { font-size: 11px; display: block; margin-top: 2px; }
+        .btn-light-primary { background: #eef4ff; border: none; color: #0059ff;}
+        .btn-light-primary:hover { background: #0059ff; color: #ffff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; color: #f60000 }
+        .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
+        .extra-small { font-size: 11px; }
+        .bg-light { background-color: #f8f9fa !important; }
       `}</style>
     </AdminLayout>
   );

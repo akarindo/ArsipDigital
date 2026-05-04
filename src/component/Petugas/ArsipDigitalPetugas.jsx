@@ -155,13 +155,13 @@ export default function ArsipDigitalPetugas({ children }) {
     }
 
     // Hapus backdrop secara manual
-    setTimeout(() => {
-      const backdrops = document.querySelectorAll(".modal-backdrop");
-      backdrops.forEach((backdrop) => backdrop.remove());
-      document.body.classList.remove("modal-open");
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    }, 100);
+    // setTimeout(() => {
+    //   const backdrops = document.querySelectorAll(".modal-backdrop");
+    //   backdrops.forEach((backdrop) => backdrop.remove());
+    //   document.body.classList.remove("modal-open");
+    //   document.body.style.overflow = "";
+    //   document.body.style.paddingRight = "";
+    // }, 100);
 
     // Tampilkan modal sukses
     setShowSuccessModal(true);
@@ -408,7 +408,9 @@ export default function ArsipDigitalPetugas({ children }) {
                   />
                 </div>
                 <div className="modal-body">
-                  <img src="/assets/images/documents.png" />
+                  <img src="/assets/images/documents.png"
+                  style={{ margin: "auto", display: "flex" }} 
+                   />
                   <form onSubmit={handleSubmitArsip}>
                     <div className="mb-3">
                       <label className="form-label">
@@ -543,7 +545,7 @@ export default function ArsipDigitalPetugas({ children }) {
                     )}
                     <label className="form-label mt-6">Kategori Arsip</label>
                     <div
-                      className="line-check mb-6"
+                      className="line-check mb-3"
                       style={{ display: "flex" }}
                     >
                       <div className="form-check" style={{ marginRight: 10 }}>
@@ -618,7 +620,7 @@ export default function ArsipDigitalPetugas({ children }) {
 
                     <div className="mb-3">
                       <label className="form-label">Keterangan</label>
-                      <input
+                      <textarea
                         type="text"
                         name="keterangan"
                         className="form-control radius-30"
@@ -629,6 +631,8 @@ export default function ArsipDigitalPetugas({ children }) {
                         <div className="w-50">
                           <button
                             type="button"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
                             className="btn btn-outline-primary radius-30"
                             style={{ width: "100%" }}
                           >
@@ -684,13 +688,13 @@ export default function ArsipDigitalPetugas({ children }) {
                         width: "100%",
                       }}
                     >
-                      <h5 className="modal-title" style={{ marginBottom: 15 }}>
+                      <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 17 }}>
                         Penambahan Data Arsip Digital
                       </h5>
                       <img src="/assets/images/pharmacy.png" />
                       <h6
                         className="modal-isi"
-                        style={{ marginBottom: 0, marginTop: 15 }}
+                        style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
                       >
                         Data arsip digital berhasil ditambahkan.
                       </h6>
@@ -699,6 +703,8 @@ export default function ArsipDigitalPetugas({ children }) {
                       <button
                         type="button"
                         className="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
                         style={{ width: "100%", borderRadius: 50 }}
                       >
                         Oke

@@ -201,13 +201,13 @@ export default function DataArsip({ children }) {
     }
 
     // Hapus backdrop secara manual
-    setTimeout(() => {
-      const backdrops = document.querySelectorAll(".modal-backdrop");
-      backdrops.forEach((backdrop) => backdrop.remove());
-      document.body.classList.remove("modal-open");
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    }, 100);
+    // setTimeout(() => {
+    //   const backdrops = document.querySelectorAll(".modal-backdrop");
+    //   backdrops.forEach((backdrop) => backdrop.remove());
+    //   document.body.classList.remove("modal-open");
+    //   document.body.style.overflow = "";
+    //   document.body.style.paddingRight = "";
+    // }, 100);
 
     // Tampilkan modal sukses
     setShowSuccessModal(true);
@@ -277,13 +277,13 @@ export default function DataArsip({ children }) {
     }
 
     // Hapus backdrop secara manual
-    setTimeout(() => {
-      const backdrops = document.querySelectorAll(".modal-backdrop");
-      backdrops.forEach((backdrop) => backdrop.remove());
-      document.body.classList.remove("modal-open");
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    }, 100);
+    // setTimeout(() => {
+    //   const backdrops = document.querySelectorAll(".modal-backdrop");
+    //   backdrops.forEach((backdrop) => backdrop.remove());
+    //   document.body.classList.remove("modal-open");
+    //   document.body.style.overflow = "";
+    //   document.body.style.paddingRight = "";
+    // }, 100);
   };
 
   const handleSuccessOke = () => {
@@ -412,7 +412,9 @@ export default function DataArsip({ children }) {
                   />
                 </div>
                 <div className="modal-body">
-                  <img src="assets/images/documents.png" />
+                  <img src="/assets/images/documents.png"
+                  style={{ margin: "auto", display: "flex" }} 
+                  />
                   <form onSubmit={handleSubmitArsip}>
                     <div className="mb-3">
                       <label className="form-label">Nama Arsip</label>
@@ -531,9 +533,9 @@ export default function DataArsip({ children }) {
                         </div>
                       </>
                     )}
-                    <label className="form-label mt-6">Kategori Arsip</label>
+                    <label className="form-label">Kategori Arsip</label>
                     <div
-                      className="line-check mb-6"
+                      className="line-check mb-3"
                       style={{ display: "flex" }}
                     >
                       <div className="form-check" style={{ marginRight: 10 }}>
@@ -588,8 +590,8 @@ export default function DataArsip({ children }) {
                         </label>
                       </div>
                     </div>
-                    <div className="line" style={{ display: "flex" }}>
-                      <div className="mb-3">
+                    <div className="line" style={{ display: "flex", justifyContent: "space-between" }}>
+                      <div className="mb-0">
                         <label className="form-label">Gedung</label>
                         <select
                           name="gedung_uuid"
@@ -615,7 +617,7 @@ export default function DataArsip({ children }) {
                           ))}
                         </select>
                       </div>
-                      <div className="mb-3">
+                      <div className="mb-0">
                         <label className="form-label">Lantai</label>
                         <select
                           name="lantai_uuid"
@@ -641,7 +643,7 @@ export default function DataArsip({ children }) {
                           ))}
                         </select>
                       </div>
-                      <div className="mb-3">
+                      <div className="mb-0">
                         <label className="form-label">Ruang</label>
                         <select
                           value={formDataArsip.ruang_uuid}
@@ -666,8 +668,8 @@ export default function DataArsip({ children }) {
                         </select>
                       </div>
                     </div>
-                    <div className="line" style={{ display: "flex" }}>
-                      <div className="mb-3">
+                    <div className="line" style={{ display: "flex", justifyContent: "space-between" }}>
+                      <div className="mb-0">
                         <label className="form-label">Lemari</label>
                         <select
                           value={formDataArsip.lemari_uuid}
@@ -693,7 +695,7 @@ export default function DataArsip({ children }) {
                           ))}
                         </select>
                       </div>
-                      <div className="mb-3">
+                      <div className="mb-0">
                         <label className="form-label">Rak</label>
                         <select
                           name="rak_uuid"
@@ -717,7 +719,7 @@ export default function DataArsip({ children }) {
                           ))}
                         </select>
                       </div>
-                      <div className="mb-3">
+                      <div className="mb-0">
                         <label className="form-label">Folder</label>
                         <select
                           name="folder_uuid"
@@ -743,7 +745,7 @@ export default function DataArsip({ children }) {
                     </div>
                     <div className="mb-3">
                       <label className="form-label">Keterangan</label>
-                      <input
+                      <textarea
                         name="keterangan"
                         onChange={(e) => handleInputChangeArsip(e)}
                         value={formDataArsip.keterangan}
@@ -757,6 +759,8 @@ export default function DataArsip({ children }) {
                           <button
                             type="button"
                             className="btn btn-outline-primary radius-30"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
                             style={{ width: "100%" }}
                           >
                             Batal
@@ -877,13 +881,13 @@ export default function DataArsip({ children }) {
                     width: "100%",
                   }}
                 >
-                  <h5 className="modal-title" style={{ marginBottom: 15 }}>
+                  <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 18 }}>
                     Penambahan Data Arsip Fisik
                   </h5>
-                  <img src="assets/images/pharmacy.png" />
+                  <img src="/assets/images/pharmacy.png" />
                   <h6
                     className="modal-isi"
-                    style={{ marginBottom: 0, marginTop: 15 }}
+                    style={{ marginBottom: 0, marginTop: 15, fontSize: 14 }}
                   >
                     Data arsip fisik berhasil ditambahkan.
                   </h6>
@@ -892,6 +896,8 @@ export default function DataArsip({ children }) {
                   <button
                     type="button"
                     className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
                     style={{ width: "100%", borderRadius: 50 }}
                   >
                     Oke

@@ -157,9 +157,9 @@ export default function LemariMaster() {
         {/* Header */}
         <div className="row mb-4 align-items-center">
           <div className="col">
-            <h4 className="fw-bold mb-0 text-dark">Data Master Lantai</h4>
+            <h4 className="fw-bold mb-0 text-dark">Data Master Lemari</h4>
             <p className="text-muted small mb-0">
-              Manajemen level lantai pada setiap gedung penyimpanan.
+              Manajemen level lemari pada setiap ruang penyimpanan.
             </p>
           </div>
           <div className="col-auto">
@@ -168,7 +168,7 @@ export default function LemariMaster() {
               className="btn btn-primary shadow-sm px-4 d-flex align-items-center gap-2"
               style={{ borderRadius: "10px" }}
             >
-              <i className="bx bx-plus-circle"></i> Tambah Ruang
+              <i className="bx bx-plus-circle"></i> Tambah Lemari
             </button>
           </div>
         </div>
@@ -195,20 +195,16 @@ export default function LemariMaster() {
               {cabinets?.map((c) => (
                 <div key={c.uuid} className="col-12 mb-3">
                   <div
-                    className="card border-0 shadow-sm transition-all"
+                    className="card border-0 shadow-sm transition-hover"
                     style={{ borderRadius: "12px" }}
                   >
                     <div className="card-body d-flex align-items-center justify-content-between p-3">
                       <div className="d-flex align-items-center">
                         <div
-                          className="bg-primary bg-opacity-10 p-3 rounded-3 me-3 d-flex align-items-center justify-content-center"
-                          style={{ width: "60px", height: "60px" }}
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                          style={{ width: "50px", height: "50px" }}
                         >
-                          <img
-                            src="/assets/images/block.png"
-                            width={30}
-                            alt="icon"
-                          />
+                          <i className="bx bxs-cabinet text-info fs-4"></i>
                         </div>
                         <div>
                           <h6 className="mb-1 fw-bold text-dark">{c.name}</h6>
@@ -230,15 +226,15 @@ export default function LemariMaster() {
                       <div className="d-flex gap-2">
                         <button
                           onClick={() => handleOpenModal(c)}
-                          className="btn btn-sm btn-outline-primary px-3 rounded-pill"
+                          className="btn btn-sm btn-light-primary px-3"
                         >
-                          Edit
+                          <i className="bx bx-edit-alt me-1"></i> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(c)}
-                          className="btn btn-sm btn-outline-danger px-3 rounded-pill"
+                          className="btn btn-sm btn-light-danger px-3"
                         >
-                          Hapus
+                          <i className="bx bx-trash me-1"></i> Hapus
                         </button>
                       </div>
                     </div>
@@ -263,7 +259,7 @@ export default function LemariMaster() {
             >
               <div className="modal-header border-0 pt-4 px-4">
                 <h5 className="fw-bold">
-                  {isEdit ? "Update Lantai" : "Tambah Lantai Baru"}
+                  {isEdit ? "Update Lemari" : "Tambah Lemari Baru"}
                 </h5>
                 <button
                   type="button"
@@ -274,12 +270,11 @@ export default function LemariMaster() {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
                   <div className="text-center mb-4">
-                    <img
-                      src="/assets/images/documents.png"
-                      width="60"
-                      className="mb-2"
-                      alt=""
-                    />
+                    <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
+                      <i
+                        className={`bx ${isEdit ? "bx-edit" : "bxs-cabinet"} fs-1 text-info`}
+                      ></i>
+                    </div>
                     <p className="small text-muted">
                       Lengkapi detail lokasi penempatan lemari.
                     </p>
@@ -380,6 +375,16 @@ export default function LemariMaster() {
           </div>
         </div>
       </div>
+      <style>{`
+        .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+        .btn-light-primary { background: #eef4ff; border: none; color: #0059ff;}
+        .btn-light-primary:hover { background: #0059ff; color: #ffff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; color: #f60000 }
+        .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
+        .extra-small { font-size: 11px; }
+        .bg-light { background-color: #f8f9fa !important; }
+      `}</style>
     </AdminLayout>
   );
 }

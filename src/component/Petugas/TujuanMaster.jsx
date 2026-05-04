@@ -122,7 +122,7 @@ export default function TujuanMaster() {
               className="btn btn-primary shadow-sm px-4 d-flex align-items-center gap-2"
               style={{ borderRadius: "10px" }}
             >
-              <i className="bx bx-plus-circle"></i> Tambah +
+              <i className="bx bx-plus-circle"></i> Tambah Tujuan
             </button>
           </div>
         </div>
@@ -155,58 +155,29 @@ export default function TujuanMaster() {
                     className="kiri"
                     style={{ display: "flex", alignItems: "center" }}
                   >
-                    <div className>
-                      <img
-                        src="/assets/images/searchdoc.png"
-                        width={65}
-                        height={50}
-                        alt
-                      />
-                    </div>
-                    <div className="ms-3">
-                      <h6 className="mb-1 font-14">{tujuan.tujuan}</h6>
-                    </div>
-                  </div>
-                  <div className="kanan" style={{ display: "flex" }}>
-                    <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                      <div className>
-                        <h7 className="mb-1">Aksi:</h7>
-                      </div>
-                      <button
-                        onClick={() => handleEdit(tujuan)}
-                        type="button"
-                        className="btn-edit pt-1 pb-1"
-                        data-bs-toggle="modal"
-                        data-bs-target="#tambahTujuanMaster"
-                        style={{ width: "100%" }}
-                      >
-                        <img
-                          src="/assets/images/edit.png"
-                          alt=""
-                          width="15px"
-                          height="15px"
-                          style={{ marginRight: 8 }}
-                        />
-                        Edit
-                      </button>
-                      <div className="w-45">
-                        <button
-                          onClick={() => handleDelete(tujuan)}
-                          type="submit"
-                          className="btn-hapus pt-1 pb-1"
-                          style={{ width: "100%" }}
+                    <div
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                          style={{ width: "50px", height: "50px" }}
                         >
-                          <img
-                            src="/assets/images/hapus.png"
-                            width="15px"
-                            height="15px"
-                            style={{ marginRight: 8 }}
-                            alt
-                          />
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
+                          <i className="bx bx-bullseye text-info fs-4"></i>
+                        </div>
+                    
+                      <h6 className="mb-1 fw-bold">{tujuan.tujuan}</h6>
+                    
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button
+                      onClick={() => handleOpenModal(tujuan)}
+                      className="btn btn-sm btn-light-primary px-3"
+                    >
+                      <i className="bx bx-edit-alt me-1"></i> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(tujuan)}
+                      className="btn btn-sm btn-light-danger px-3"
+                    >
+                      <i className="bx bx-trash me-1"></i> Hapus
+                    </button>
                   </div>
                 </div>
               ))}
@@ -225,7 +196,7 @@ export default function TujuanMaster() {
               >
                 <div className="modal-header border-0 pt-4 px-4">
                   <h5 className="fw-bold">
-                    {isEdit ? "Update Rak" : "Tambah Rak Baru"}
+                    {isEdit ? "Update Tujuan" : "Tambah Tujuan Baru"}
                   </h5>
                   <button
                     type="button"
@@ -236,6 +207,13 @@ export default function TujuanMaster() {
 
                 <form onSubmit={handleSubmit}>
                   <div className="modal-body p-4">
+                    <div className="text-center mb-4">
+                    <div className="bg-light d-inline-block p-4 rounded-circle mb-3">
+                      <i
+                        className={`bx ${isEdit ? "bx-edit" : "bx-bullseye"} fs-1 text-info`}
+                      ></i>
+                    </div>
+                  </div>
                     <div className="mb-3">
                       <label className="form-label">Tujuan</label>
                       <input
@@ -247,35 +225,40 @@ export default function TujuanMaster() {
                         placeholder="Masukkan Tujuan"
                       />
                     </div>
-                    <div className="p-3 pt-0">
-                      <div className="d-flex align-items-center pb-0 pt-0 gap-3">
-                        <div className="w-50">
-                          <button
-                            type="button"
-                            className="btn-batal"
-                            style={{ width: "100%" }}
-                          >
-                            Batal
-                          </button>
-                        </div>
-                        <div className="w-50">
-                          <button
-                            type="submit"
-                            className="btn-tambah"
-                            style={{ width: "100%" }}
-                          >
-                            Simpan
-                          </button>
-                        </div>
-                      </div>
-                    </div>
                   </div>
+                  <div className="modal-footer border-0 pb-4 px-4 gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light flex-grow-1 py-2"
+                    data-bs-dismiss="modal"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary flex-grow-1 py-2"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Simpan Data
+                  </button>
+                </div>
                 </form>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <style>{`
+        .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+        .btn-light-primary { background: #eef4ff; border: none; color: #0059ff;}
+        .btn-light-primary:hover { background: #0059ff; color: #ffff; border: none; }
+        .btn-light-danger { background: #fff0f0; border: none; color: #f60000 }
+        .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
+        .extra-small { font-size: 11px; }
+        .bg-light { background-color: #f8f9fa !important; }
+      `}</style>
     </AdminLayout>
   );
 }
