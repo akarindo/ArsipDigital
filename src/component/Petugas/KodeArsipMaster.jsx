@@ -151,6 +151,11 @@ export default function KodeArsipMaster() {
       setCurrentUuid(null);
       refreshData();
       handleCloseModal();
+      if (isEdit) {
+        showAlert("info", "Diperbarui!", `Data "${kode.kode}" berhasil diperbarui.`);
+      } else {
+        showAlert("success", "Berhasil Ditambahkan!", `Data "${kode.kode}" berhasil disimpan.`);
+      }
     } catch (error) {
       console.error("Login Gagal:", error.message);
       handleCloseModal();
@@ -163,44 +168,47 @@ export default function KodeArsipMaster() {
       kode: kodeItem.kode,
     });
   };
-  const handleDelete = async (kodeItem) => {
-    if (
-      window.confirm(
-        "Peringatan: Menghapus item ini akan menghapus semua sub-item di dalamnya!",
-      )
-    ) {
-      try {
-        const response = await fetch(
-          import.meta.env.VITE_API_URL + "/api/kode/" + kodeItem.uuid,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+  
+  const [deleteTarget, setDeleteTarget] = React.useState(null);
+        
+          const getDeleteModal = () => {
+            const modalEl = document.getElementById("modalKonfirmasiHapus");
+            return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+          };
+        
+          const handleOpenDeleteModal = (item) => {
+            setDeleteTarget(item);
+            getDeleteModal().show();
+          };
+      
+          const handleConfirmDelete = async () => {
+          if (!deleteTarget) return;
+          try {
+            const response = await fetch(
+              `${import.meta.env.VITE_API_URL}/api/kode/${deleteTarget.uuid}`,
+              {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            
+            if (!response.ok) throw new Error("Gagal menghapus data");
+            getDeleteModal().hide();
+            refreshData();
+            showAlert("danger", "Dihapus!", `Data "${deleteTarget.kode}" berhasil dihapus.`);
+            setDeleteTarget(null);
+          } catch (error) {
+            showAlert("danger", "Gagal!", error.message);
+          }
+        };
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || "Login Gagal");
-        }
-        refreshData();
-      } catch (error) {
-        // 'error.message' akan berisi pesan dari 'throw new Error' di atas
-        console.error("Login Gagal:", error.message);
-      }
-    }
-  };
   const handleOpenModal = (data = null) => {
     if (data) {
       handleEdit(data);
-      const modal = new bootstrap.Modal(
-        document.getElementById("tambahKodeMaster"),
-      );
-      modal.show();
     } else {
       setIsEdit(false);
       setKode({
@@ -220,6 +228,7 @@ export default function KodeArsipMaster() {
   };
   return (
     <AdminLayout>
+      <Alert alerts={alerts} removeAlert={removeAlert} />
       <div className="page-wrapper px-4 py-4">
         {/* Header Section */}
         <div className="row mb-4 align-items-center">
@@ -286,7 +295,7 @@ export default function KodeArsipMaster() {
                       <i className="bx bx-edit-alt me-1"></i> Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(code)}
+                      onClick={() => handleOpenDeleteModal(code)}
                       className="btn btn-sm btn-light-danger px-3"
                     >
                       <i className="bx bx-trash me-1"></i> Hapus
@@ -296,6 +305,60 @@ export default function KodeArsipMaster() {
               ))}
             </div>
           </div>
+          
+          {/* Modal Konfirmasi Hapus */}
+          <div
+            className="modal fade"
+            id="modalKonfirmasiHapus"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <div className="modal-dialog modal-dialog-centered modal-sm">
+              <div
+                className="modal-content border-0 shadow-lg"
+                style={{ borderRadius: "20px" }}
+              >
+                <div className="modal-body p-4 text-center">
+                  {/* Icon */}
+                  <div
+                    className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                    style={{ width: "64px", height: "64px", background: "#fff0f0" }}
+                  >
+                    <i className="bx bx-trash text-danger" style={{ fontSize: "28px" }}></i>
+                  </div>
+
+                  <h5 className="fw-bold mb-1">Hapus Data?</h5>
+                  <p className="text-muted small mb-0">
+                    Data{" "}
+                    <span className="fw-semibold text-dark">
+                      "{deleteTarget?.kode}"
+                    </span>{" "}
+                    akan dihapus secara permanen dan tidak dapat dikembalikan.
+                  </p>
+                </div>
+
+                <div className="modal-footer border-0 pb-4 px-4 d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light flex-grow-1 py-2"
+                    data-bs-dismiss="modal"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmDelete}
+                    className="btn btn-danger flex-grow-1 py-2"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    <i className="bx bx-trash me-1"></i> Ya, Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Modal Tambah Kode Arsip */}
           <div
             className="modal fade"
@@ -371,6 +434,15 @@ export default function KodeArsipMaster() {
         .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
         .extra-small { font-size: 11px; }
         .bg-light { background-color: #f8f9fa !important; }
+
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
       `}</style>
     </AdminLayout>
   );

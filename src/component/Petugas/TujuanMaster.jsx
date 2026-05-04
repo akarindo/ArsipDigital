@@ -4,6 +4,103 @@ import AdminLayout from "../layouts/AdminLayout";
 import React from "react";
 import { PengajuanContext } from "../../context/PengajuanContext";
 
+function Alert({ alerts, removeAlert }) {
+  return (
+    <div style={{
+      position: "fixed",
+      top: "20px",
+      right: "20px",
+      zIndex: 9999,
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+      minWidth: "300px",
+    }}>
+      {alerts.map((alert) => (
+        <div
+          key={alert.id}
+          style={{
+            background: alert.type === "success" ? "#dcfce7"
+              : alert.type === "info" ? "#dbeafe"
+              : "#fee2e2",
+            borderLeft: `4px solid ${
+              alert.type === "success" ? "#16a34a"
+              : alert.type === "info" ? "#2563eb"
+              : "#dc2626"
+            }`,
+            borderRadius: "12px",
+            padding: "14px 16px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            animation: "slideIn 0.3s ease",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Icon */}
+          <div style={{
+            width: "32px",
+            height: "32px",
+            borderRadius: "50%",
+            background: alert.type === "success" ? "#16a34a"
+              : alert.type === "info" ? "#2563eb"
+              : "#dc2626",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <i className={`bx ${
+              alert.type === "success" ? "bx-check"
+              : alert.type === "info" ? "bx-edit"
+              : "bx-trash"
+            } text-white`} style={{ fontSize: "16px" }}></i>
+          </div>
+
+          {/* Text */}
+          <div style={{ flex: 1 }}>
+            <p style={{
+              margin: 0,
+              fontWeight: "700",
+              fontSize: "13px",
+              color: alert.type === "success" ? "#15803d"
+                : alert.type === "info" ? "#1d4ed8"
+                : "#b91c1c",
+            }}>
+              {alert.title}
+            </p>
+            <p style={{ margin: 0, fontSize: "12px", color: "#555", marginTop: "2px" }}>
+              {alert.message}
+            </p>
+          </div>
+
+          {/* Close Button */}
+          <button
+            onClick={() => removeAlert(alert.id)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#999", fontSize: "16px" }}
+          >
+            <i className="bx bx-x"></i>
+          </button>
+
+          {/* Progress Bar */}
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            height: "3px",
+            background: alert.type === "success" ? "#16a34a"
+              : alert.type === "info" ? "#2563eb"
+              : "#dc2626",
+            animation: "shrink 3s linear forwards",
+          }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function TujuanMaster() {
   const { tujuans, refreshData, token } = React.useContext(PengajuanContext);
   const [isEdit, setIsEdit] = React.useState(false);
@@ -11,6 +108,19 @@ export default function TujuanMaster() {
   const [tujuan, setTujuan] = React.useState({
     tujuan: "",
   });
+  const [alerts, setAlerts] = React.useState([]);
+
+  // Fungsi Alert
+  const showAlert = (type, title, message) => {
+    const id = Date.now();
+    setAlerts((prev) => [...prev, { id, type, title, message }]);
+    setTimeout(() => removeAlert(id), 3000);
+  };
+
+  const removeAlert = (id) => {
+    setAlerts((prev) => prev.filter((a) => a.id !== id));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -37,8 +147,13 @@ export default function TujuanMaster() {
       setTujuan({ tujuan: "" });
       setIsEdit(false);
       setCurrentUuid(null);
-      handleCloseModal();
       refreshData();
+      handleCloseModal();
+      if (isEdit) {
+        showAlert("info", "Diperbarui!", `Data "${tujuan.tujuan}" berhasil diperbarui.`);
+      } else {
+        showAlert("success", "Berhasil Ditambahkan!", `Data "${tujuan.tujuan}" berhasil disimpan.`);
+      }
     } catch (error) {
       console.error("Login Gagal:", error.message);
     }
@@ -50,44 +165,48 @@ export default function TujuanMaster() {
       tujuan: tujuanItem.tujuan,
     });
   };
-  const handleDelete = async (tujuanItem) => {
-    if (
-      window.confirm(
-        "Peringatan: Menghapus item ini akan menghapus semua sub-item di dalamnya!",
-      )
-    ) {
-      try {
-        const response = await fetch(
-          import.meta.env.VITE_API_URL + "/api/tujuans/" + tujuanItem.uuid,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || "Login Gagal");
+  
+  const [deleteTarget, setDeleteTarget] = React.useState(null);
+      
+        const getDeleteModal = () => {
+          const modalEl = document.getElementById("modalKonfirmasiHapus");
+          return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        };
+      
+        const handleOpenDeleteModal = (item) => {
+          setDeleteTarget(item);
+          getDeleteModal().show();
+        };
+    
+        const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/tujuans/${deleteTarget.uuid}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          
+          if (!response.ok) throw new Error("Gagal menghapus data");
+          getDeleteModal().hide();
+          refreshData();
+          showAlert("danger", "Dihapus!", `Data "${deleteTarget.tujuan}" berhasil dihapus.`);
+          setDeleteTarget(null);
+        } catch (error) {
+          showAlert("danger", "Gagal!", error.message);
         }
-        refreshData();
-      } catch (error) {
-        // 'error.message' akan berisi pesan dari 'throw new Error' di atas
-        console.error("Login Gagal:", error.message);
-      }
-    }
-  };
+      };
+  
+
   const handleOpenModal = (data = null) => {
     if (data) {
       handleEdit(data);
-      const modal = new bootstrap.Modal(
-        document.getElementById("tambahTujuanMaster"),
-      );
-      modal.show();
     } else {
       setIsEdit(false);
       setTujuan({
@@ -107,6 +226,7 @@ export default function TujuanMaster() {
   };
   return (
     <AdminLayout>
+      <Alert alerts={alerts} removeAlert={removeAlert} />
       <div className="page-wrapper px-4 py-4">
         {/* Header Section */}
         <div className="row mb-4 align-items-center">
@@ -173,7 +293,7 @@ export default function TujuanMaster() {
                       <i className="bx bx-edit-alt me-1"></i> Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(tujuan)}
+                      onClick={() => handleOpenDeleteModal(tujuan)}
                       className="btn btn-sm btn-light-danger px-3"
                     >
                       <i className="bx bx-trash me-1"></i> Hapus
@@ -183,6 +303,61 @@ export default function TujuanMaster() {
               ))}
             </div>
           </div>
+
+          {/* Modal Konfirmasi Hapus */}
+          <div
+            className="modal fade"
+            id="modalKonfirmasiHapus"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <div className="modal-dialog modal-dialog-centered modal-sm">
+              <div
+                className="modal-content border-0 shadow-lg"
+                style={{ borderRadius: "20px" }}
+              >
+                <div className="modal-body p-4 text-center">
+                  {/* Icon */}
+                  <div
+                    className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                    style={{ width: "64px", height: "64px", background: "#fff0f0" }}
+                  >
+                    <i className="bx bx-trash text-danger" style={{ fontSize: "28px" }}></i>
+                  </div>
+
+                  <h5 className="fw-bold mb-1">Hapus Data?</h5>
+                  <p className="text-muted small mb-0">
+                    Data{" "}
+                    <span className="fw-semibold text-dark">
+                      "{deleteTarget?.tujuan}"
+                    </span>{" "}
+                    akan dihapus secara permanen dan tidak dapat dikembalikan.
+                  </p>
+                </div>
+
+                <div className="modal-footer border-0 pb-4 px-4 d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-light flex-grow-1 py-2"
+                    data-bs-dismiss="modal"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmDelete}
+                    className="btn btn-danger flex-grow-1 py-2"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    <i className="bx bx-trash me-1"></i> Ya, Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Modal */}
           <div
             className="modal fade"
             id="tambahTujuanMaster"
@@ -258,6 +433,15 @@ export default function TujuanMaster() {
         .btn-light-danger:hover { background: #f60000; border: none; color: #ffff; }
         .extra-small { font-size: 11px; }
         .bg-light { background-color: #f8f9fa !important; }
+
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
       `}</style>
     </AdminLayout>
   );
