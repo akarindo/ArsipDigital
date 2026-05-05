@@ -216,7 +216,6 @@ export default function ArsipDigitalPetugas({ children }) {
       const successModal = new window.bootstrap.Modal(successModalEl);
       successModal.show();
     
-
     } catch (error) {
       console.error("Error:", error.message);
       alert("Terjadi kesalahan: " + error.message);
@@ -301,8 +300,6 @@ export default function ArsipDigitalPetugas({ children }) {
                   <button
                     type="button"
                     className="btn-tambah px-5"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modaltambahDigital"
                   >
                     Tambah
                   </button>
@@ -651,8 +648,7 @@ export default function ArsipDigitalPetugas({ children }) {
                           <button
                             type="submit"
                             className="btn btn-primary radius-30"
-                            style={{ width: "100%" }}
-                          >
+                            style={{ width: "100%" }}>
                             Tambah
                           </button>
                         </div>

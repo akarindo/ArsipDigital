@@ -270,30 +270,34 @@ export default function DataArsip({ children }) {
     });
 
     // Tutup modal form menggunakan Bootstrap
-    const modalElement = document.getElementById("modalFisik");
+    const modalElement = document.getElementById("modaltambahFisik");
     const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
     if (modalInstance) {
       modalInstance.hide();
     }
 
     // Hapus backdrop secara manual
-    // setTimeout(() => {
-    //   const backdrops = document.querySelectorAll(".modal-backdrop");
-    //   backdrops.forEach((backdrop) => backdrop.remove());
-    //   document.body.classList.remove("modal-open");
-    //   document.body.style.overflow = "";
-    //   document.body.style.paddingRight = "";
-    // }, 100);
+      // const backdrops = document.querySelectorAll(".modal-backdrop");
+      // backdrops.forEach((backdrop) => backdrop.remove());
+      // document.body.classList.remove("modal-open");
+      // document.body.style.overflow = "";
+      // document.body.style.paddingRight = "";
+
+      const successModal = new window.bootstrap.Modal(
+        document.getElementById("berhasilTambahFisik")
+      );
+      successModal.show();
   };
+
 
   const handleSuccessOke = () => {
     setShowSuccessModal(false);
 
-    const backdrops = document.querySelectorAll(".modal-backdrop");
-    backdrops.forEach((backdrop) => backdrop.remove());
-    document.body.classList.remove("modal-open");
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
+    // const backdrops = document.querySelectorAll(".modal-backdrop");
+    // backdrops.forEach((backdrop) => backdrop.remove());
+    // document.body.classList.remove("modal-open");
+    // document.body.style.overflow = "";
+    // document.body.style.paddingRight = "";
 
     navigate("/logPengajuanStaff");
   };
@@ -367,8 +371,6 @@ export default function DataArsip({ children }) {
                     type="button"
                     className="btn-tambah px-5"
                     onClick={handleOpenModal}
-                    // data-bs-toggle="modal"
-                    // data-bs-target="#modaltambahFisik"
                   >
                     Tambah
                   </button>
@@ -402,7 +404,7 @@ export default function DataArsip({ children }) {
               <div className="modal-content">
                 <div className="modal-header" style={{ border: "none" }}>
                   <h5 className="modal-title">
-                    Formulir Penambahan Data Arsip Fisik
+                    {isEdit ? "Formulir Edit Data Arsip Fisik" : "Formulir Penambahan Data Arsip Fisik"}
                   </h5>
                   <button
                     type="button"
@@ -425,7 +427,13 @@ export default function DataArsip({ children }) {
                         className="form-select mb-3 radius-30"
                         aria-label="Default select example"
                       >
+                        {isEdit ? (
+                          <option value="">
+                            {formDataArsip.name_uuid}
+                          </option>
+                        ) : (
                         <option selected>Pilih Arsip</option>
+                        )}
                         {names?.map((name) => (
                           <option key={name.uuid} value={name.uuid}>
                             {name.name}
@@ -439,7 +447,7 @@ export default function DataArsip({ children }) {
                       </span>
                       <input
                         type="text"
-                        value={formDataArsip.judul_arsip}
+                        value={formDataArsip.judul_arsip ?? ""}
                         onChange={(e) => handleInputChangeArsip(e)}
                         class="form-control"
                         name="judul_arsip"
@@ -452,7 +460,7 @@ export default function DataArsip({ children }) {
                       <label className="form-label">Tipe Arsip</label>
                       <select
                         name="tipe_arsip"
-                        value={formDataArsip.tipe_arsip}
+                        value={formDataArsip.tipe_arsip ?? ""}
                         className="form-select mb-3 radius-30"
                         onChange={(e) => {
                           handleType(e.target.value);
@@ -483,6 +491,7 @@ export default function DataArsip({ children }) {
                             <input
                               name="jenis_arsip"
                               value={"vital"}
+                              checked={formDataArsip.jenis_arsip === vital}
                               onChange={handleCheckboxChangeArsip}
                               className="form-check-input"
                               type="checkbox"
@@ -499,6 +508,7 @@ export default function DataArsip({ children }) {
                             <input
                               name="jenis_arsip"
                               value={"active"}
+                              checked={formDataArsip.jenis_arsip === active}
                               onChange={handleCheckboxChangeArsip}
                               className="form-check-input"
                               type="checkbox"
@@ -518,6 +528,7 @@ export default function DataArsip({ children }) {
                             <input
                               name="jenis_arsip"
                               value={"inactive"}
+                              checked={formDataArsip.jenis_arsip === inactive}
                               onChange={handleCheckboxChangeArsip}
                               className="form-check-input"
                               type="checkbox"
@@ -748,7 +759,7 @@ export default function DataArsip({ children }) {
                       <textarea
                         name="keterangan"
                         onChange={(e) => handleInputChangeArsip(e)}
-                        value={formDataArsip.keterangan}
+                        value={formDataArsip.keterangan ?? ""}
                         type="text"
                         className="form-control radius-30"
                       />
@@ -771,10 +782,8 @@ export default function DataArsip({ children }) {
                             type="submit"
                             className="btn btn-primary radius-30"
                             style={{ width: "100%" }}
-                            data-bs-toggle="modal"
-                            data-bs-target="#berhasilTambahFisik"
                           >
-                            Tambah
+                            {isEdit ? "Simpan Perubahan" : "Tambah"}
                           </button>
                         </div>
                       </div>
@@ -882,14 +891,16 @@ export default function DataArsip({ children }) {
                   }}
                 >
                   <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 18 }}>
-                    Penambahan Data Arsip Fisik
+                    {isEdit ? "Edit Data Arsip Digital" : "Penambahan Data Arsip Digital"}
                   </h5>
                   <img src="/assets/images/pharmacy.png" />
                   <h6
                     className="modal-isi"
                     style={{ marginBottom: 0, marginTop: 15, fontSize: 14 }}
                   >
-                    Data arsip fisik berhasil ditambahkan.
+                    {isEdit
+                        ? "Data arsip digital berhasil diperbarui."
+                        : "Data arsip digital berhasil ditambahkan."}
                   </h6>
                 </div>
                 <div className="modal-footer" style={{ borderTop: "none" }}>
@@ -945,7 +956,7 @@ export default function DataArsip({ children }) {
                   <h5 className="modal-title" style={{ marginBottom: 15 }}>
                     Peminjaman Arsip Fisik Berhasil
                   </h5>
-                  <img src="assets/images/checkmark.png" alt="Success" />
+                  <img src="/assets/images/checkmark.png" alt="Success" />
                   <h6
                     className="modal-isi"
                     style={{

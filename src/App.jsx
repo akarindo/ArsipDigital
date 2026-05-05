@@ -42,6 +42,7 @@ import ManajemenSurat from "./component/Petugas/ManajemenSurat.jsx";
 import CorporateMaster from "./component/Petugas/CorporateMaster.jsx";
 import RiwayatDisposisi from "./component/Pimpinan/RiwayatDisposisi.jsx";
 import NewLogin from "./component/NewLogin.jsx";
+import DataArsipStaff from "./component/Staff/DataArsipStaff.jsx";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
@@ -103,6 +104,15 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* <Route
+          path="/dataArsipStaff"
+          element={
+            <ProtectedRoute>
+              <DataArsipStaff />
+            </ProtectedRoute>
+          }
+        /> */}
 
         <Route
           path="/dataArsipStaff/ArsipDigitalStaff"
