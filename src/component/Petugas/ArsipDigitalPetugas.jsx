@@ -204,11 +204,19 @@ export default function ArsipDigitalPetugas({ children }) {
       const modal = window.bootstrap.Modal.getInstance(modalElement);
       if (modal) modal.hide();
 
-      // Tampilkan modal sukses
-      const successModal = new window.bootstrap.Modal(
-        document.getElementById("berhasilTambahDigital"),
-      );
+      
+      // Bersihkan backdrop
+      document.querySelectorAll(".modal-backdrop").forEach((el) => el.remove());
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+
+      // Buka modal sukses
+      const successModalEl = document.getElementById("berhasilTambahDigital");
+      const successModal = new window.bootstrap.Modal(successModalEl);
       successModal.show();
+    
+
     } catch (error) {
       console.error("Error:", error.message);
       alert("Terjadi kesalahan: " + error.message);
@@ -644,8 +652,6 @@ export default function ArsipDigitalPetugas({ children }) {
                             type="submit"
                             className="btn btn-primary radius-30"
                             style={{ width: "100%" }}
-                            data-bs-toggle="modal"
-                            data-bs-target="#berhasilTambahDigital"
                           >
                             Tambah
                           </button>

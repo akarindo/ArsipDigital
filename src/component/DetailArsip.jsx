@@ -196,8 +196,8 @@ export default function DetailArsip() {
                       <button
                         onClick={() => handleEdit(arsip)}
                         type="button"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modaltambahFisik"
+                        // data-bs-toggle="modal"
+                        // data-bs-target="#modaltambahFisik"
                         className="btn btn-info text-white flex-grow-1 rounded"
                       >
                         Edit Arsip

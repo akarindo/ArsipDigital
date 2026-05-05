@@ -175,10 +175,12 @@ a {
 	padding-right: 30px
 }
 .page-wrapper {
-	height: 100%;
-	margin-top: 60px;
-	margin-bottom: 30px;
-	margin-left: 250px;
+	height: auto !important;
+  min-height: 120vh !important;
+  overflow: visible !important;
+  margin-top: 60px;
+  margin-bottom: 30px;
+  margin-left: 250px;
 }
 .page-content {
 	padding: 1rem;
@@ -864,11 +866,11 @@ a {
 	}
 }
 .main-row {
-	height: 100vh
+	height: 100vh;
 }
 .main-col {
 	max-width: 500px;
-	min-height: 300px
+	min-height: 300px;
 }
 .todo-done {
 	text-decoration: line-through
