@@ -75,14 +75,14 @@ export default function LogPengajuanStaff() {
   };
   const fisik = pinjamans?.filter(
     (pinjaman) =>
-      pinjaman.status != "dikembalikan" && pinjaman.arsip.file == null,
+      pinjaman.status != "dikembalikan" && pinjaman?.arsip?.file == null,
   );
   const fisikHistory = pinjamans?.filter(
     (pinjaman) => pinjaman?.arsip?.file == null,
   );
   const digital = pinjamans?.filter(
     (pinjaman) =>
-      pinjaman.status != "dikembalikan" && pinjaman.arsip.file != null,
+      pinjaman.status != "dikembalikan" && pinjaman?.arsip?.file != null,
   );
   const digitalHistory = pinjamans?.filter(
     (pinjaman) => pinjaman?.arsip?.file != null,

@@ -299,6 +299,8 @@ export default function ArsipDigitalPetugas({ children }) {
                 <div className="col mb-3">
                   <button
                     type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modaltambahDigital"
                     className="btn-tambah px-5"
                   >
                     Tambah

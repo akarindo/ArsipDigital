@@ -373,7 +373,7 @@ export default function ApprovalFisik({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => navigate("/approvalPetugas")}
+                  data-bs-dismiss="modal"
                   style={{ width: "100%", borderRadius: 50 }}
                 >
                   Oke

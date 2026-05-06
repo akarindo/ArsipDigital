@@ -23,10 +23,64 @@ ChartJS.register(
   Legend,
 );
 
+function Alert({ alerts, removeAlert }) {
+  return (
+    <div style={{
+      position: "fixed", top: "20px", right: "20px", zIndex: 9999,
+      display: "flex", flexDirection: "column", gap: "10px", minWidth: "300px",
+    }}>
+      {alerts.map((alert) => (
+        <div key={alert.id} style={{
+          background: alert.type === "success" ? "#dcfce7" : alert.type === "info" ? "#dbeafe" : "#fee2e2",
+          borderLeft: `4px solid ${alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626"}`,
+          borderRadius: "12px", padding: "14px 16px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+          display: "flex", alignItems: "flex-start", gap: "12px",
+          animation: "slideIn 0.3s ease", position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            width: "32px", height: "32px", borderRadius: "50%",
+            background: alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <i className={`bx ${alert.type === "success" ? "bx-check" : alert.type === "info" ? "bx-edit" : "bx-trash"} text-white`} style={{ fontSize: "16px" }}></i>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontWeight: "700", fontSize: "13px",
+              color: alert.type === "success" ? "#15803d" : alert.type === "info" ? "#1d4ed8" : "#b91c1c",
+            }}>{alert.title}</p>
+            <p style={{ margin: 0, fontSize: "12px", color: "#555", marginTop: "2px" }}>{alert.message}</p>
+          </div>
+          <button onClick={() => removeAlert(alert.id)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#999", fontSize: "16px" }}>
+            <i className="bx bx-x"></i>
+          </button>
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, height: "3px",
+            background: alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626",
+            animation: "shrink 3s linear forwards",
+          }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function RiwayatDisposisi() {
   const { token } = useContext(PengajuanContext);
   const [loading, setLoading] = useState(false);
   const [disposisiList, setDisposisiList] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  
+    const showAlert = (type, title, message) => {
+      const id = Date.now();
+      setAlerts((prev) => [...prev, { id, type, title, message }]);
+      setTimeout(() => removeAlert(id), 3000);
+    };
+  
+    const removeAlert = (id) => {
+      setAlerts((prev) => prev.filter((a) => a.id !== id));
+    };
 
   const fetchData = async () => {
     setLoading(true);
@@ -46,26 +100,39 @@ export default function RiwayatDisposisi() {
       setLoading(false);
     }
   };
-  const handleDelete = async (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+
+  const [deleteTarget, setDeleteTarget] = useState(null);
+    const getDeleteModal = () => {
+      const modalEl = document.getElementById("modalKonfirmasiHapusRiwayat");
+      return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+    };
+    const handleOpenDeleteModal = (id, type) => {
+      setDeleteTarget({ id, type });
+      getDeleteModal().show();
+    };
+    const handleConfirmDelete = async () => {
+      if (!deleteTarget) return;
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/disposisi/${id}`,
+          `${import.meta.env.VITE_API_URL}/api/disposisi/${deleteTarget.id}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           },
         );
         if (response.ok) {
-          const data = await response.json(); // Konversi body menjadi JSON
-          alert(data.message);
-          fetchData(); // Panggil fungsi refresh data Anda
+          const data = await response.json();
+          getDeleteModal().hide();
+          fetchData();
+          showAlert("danger", "Dihapus!", `Data berhasil dihapus.`);
+          setDeleteTarget(null);
         }
       } catch (err) {
-        alert("Gagal menghapus data");
+        showAlert("danger", "Gagal!", "Gagal menghapus data");
       }
-    }
-  };
+    };
+
+  
 
   useEffect(() => {
     fetchData();
@@ -130,6 +197,7 @@ export default function RiwayatDisposisi() {
 
   return (
     <AdminLayout>
+      <Alert alerts={alerts} removeAlert={removeAlert} />
       <div className="page-wrapper">
         <div className="page-content py-4 bg-light">
           {/* HEADER */}
@@ -240,7 +308,7 @@ export default function RiwayatDisposisi() {
                         <td>
                           <button
                             className="btn btn-sm btn-outline-secondary shadow-none"
-                            onClick={() => handleDelete(item.uuid)}
+                            onClick={() => handleOpenDeleteModal(item.uuid)}
                           >
                             <i className="bx bx-trash"></i>
                           </button>
@@ -260,6 +328,54 @@ export default function RiwayatDisposisi() {
           </div>
         </div>
       </div>
+      {/* Modal Hapus */}
+      <div className="modal fade" id="modalKonfirmasiHapusRiwayat" tabIndex={-1} aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered modal-sm">
+          <div className="modal-content border-0 shadow-lg" style={{ borderRadius: "20px" }}>
+            <div className="modal-body p-4 text-center">
+              <div
+                className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                style={{ width: "64px", height: "64px", background: "#fff0f0" }}
+              >
+                <i className="bx bx-trash text-danger" style={{ fontSize: "28px" }}></i>
+              </div>
+              <h5 className="fw-bold mb-1">Hapus Data?</h5>
+              <p className="text-muted small mb-0">
+                Data surat ini akan dihapus secara permanen dan tidak dapat dikembalikan.
+              </p>
+            </div>
+            <div className="modal-footer border-0 pb-4 px-4 d-flex gap-2">
+              <button
+                type="button"
+                className="btn btn-light flex-grow-1 py-2"
+                data-bs-dismiss="modal"
+                style={{ borderRadius: "10px" }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="btn btn-danger flex-grow-1 py-2"
+                style={{ borderRadius: "10px" }}
+              >
+                <i className="bx bx-trash me-1"></i> Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }

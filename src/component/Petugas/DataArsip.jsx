@@ -890,13 +890,13 @@ export default function DataArsip({ children }) {
                     width: "100%",
                   }}
                 >
-                  <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 18 }}>
+                  <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 17 }}>
                     {isEdit ? "Edit Data Arsip Digital" : "Penambahan Data Arsip Digital"}
                   </h5>
                   <img src="/assets/images/pharmacy.png" />
                   <h6
                     className="modal-isi"
-                    style={{ marginBottom: 0, marginTop: 15, fontSize: 14 }}
+                    style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
                   >
                     {isEdit
                         ? "Data arsip digital berhasil diperbarui."
