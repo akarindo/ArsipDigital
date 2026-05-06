@@ -46,6 +46,26 @@ export default function RiwayatDisposisi() {
       setLoading(false);
     }
   };
+  const handleDelete = async (id) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/disposisi/${id}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        if (response.ok) {
+          const data = await response.json(); // Konversi body menjadi JSON
+          alert(data.message);
+          fetchData(); // Panggil fungsi refresh data Anda
+        }
+      } catch (err) {
+        alert("Gagal menghapus data");
+      }
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -174,6 +194,7 @@ export default function RiwayatDisposisi() {
                     <th>Tindak Lanjut</th>
                     <th>Prioritas</th>
                     <th>Batas Waktu</th>
+                    <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -216,6 +237,14 @@ export default function RiwayatDisposisi() {
                           </span>
                         </td>
                         <td>{item.batas_waktu}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-outline-secondary shadow-none"
+                            onClick={() => handleDelete(item.uuid)}
+                          >
+                            <i className="bx bx-trash"></i>
+                          </button>
+                        </td>
                       </tr>
                     ))
                   ) : (

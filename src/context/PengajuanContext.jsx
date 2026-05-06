@@ -87,7 +87,6 @@ export const PengajuanProvider = ({ children }) => {
       if (!authToken) return;
 
       try {
-        // Menjalankan semua request secara paralel (Jauh lebih cepat)
         const [
           gedungs,
           types,

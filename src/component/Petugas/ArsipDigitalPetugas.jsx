@@ -10,7 +10,7 @@ export default function ArsipDigitalPetugas({ children }) {
   const [isEdit, setIsEdit] = React.useState(false);
   const { names, codes, token, role, user, arsips, tujuans } =
     React.useContext(PengajuanContext);
-  const arsipDigital = arsips.filter((arsip) => arsip.file != null);
+  const arsipDigital = arsips?.filter((arsip) => arsip.file != null);
   const tab = location.pathname.includes("ArsipDigitalPetugas")
     ? "ArsipDigitalPetugas"
     : "Arsip Fisik";

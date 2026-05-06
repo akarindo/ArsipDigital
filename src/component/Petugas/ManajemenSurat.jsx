@@ -183,8 +183,9 @@ export default function ManajemenSurat() {
           },
         );
         if (response.ok) {
-          fetchData();
-          alert("Data berhasil dihapus");
+          const data = await response.json(); // Konversi body menjadi JSON
+          alert(data.message);
+          fetchData(); // Panggil fungsi refresh data Anda
         }
       } catch (err) {
         alert("Gagal menghapus data");
