@@ -49,6 +49,7 @@ export default function LogPengajuanStaff() {
     pinjamans,
     tujuans,
     gedungs,
+    refreshData,
     token,
     isLoading,
     floors,
@@ -183,7 +184,9 @@ export default function LogPengajuanStaff() {
       .format(date)
       .replace(".", ":"); // Mengganti titik pemisah jam menjadi titik dua jika perlu
   };
-
+  useEffect(() => {
+    refreshData();
+  }, []);
   return (
     <AdminLayout>
       <div className="page-wrapper" style={{ height: "500%" }}>
@@ -533,38 +536,39 @@ export default function LogPengajuanStaff() {
                         )}
                       </div>
                     </div>
-                    <div className="d-flex align-items-center p-3 pt-0">
-                      <img
-                        src="/assets/images/pin.png"
-                        width={15}
-                        height={15}
-                        className="me-2"
-                        alt="pin"
-                      />
+                    {!item?.arsip?.file && (
+                      <div className="d-flex align-items-center p-3 pt-0">
+                        <img
+                          src="/assets/images/pin.png"
+                          width={15}
+                          height={15}
+                          className="me-2"
+                          alt="pin"
+                        />
 
-                      {[
-                        filterGedung[0]?.name,
-                        filterLantai[0]?.name,
-                        filterRuang[0]?.name,
-                        filterLemari[0]?.name,
-                        filterRak[0]?.name,
-                        filterFolder[0]?.name,
-                      ].map((location, index, array) => (
-                        <React.Fragment key={index}>
-                          <p className="mb-0 small me-1">{location}</p>
-                          {index < array.length - 1 && (
-                            <img
-                              src="/assets/images/Vector.png"
-                              width={5}
-                              height={10}
-                              className="me-1"
-                              alt="arrow"
-                            />
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-
+                        {[
+                          filterGedung[0]?.name,
+                          filterLantai[0]?.name,
+                          filterRuang[0]?.name,
+                          filterLemari[0]?.name,
+                          filterRak[0]?.name,
+                          filterFolder[0]?.name,
+                        ].map((location, index, array) => (
+                          <React.Fragment key={index}>
+                            <p className="mb-0 small me-1">{location}</p>
+                            {index < array.length - 1 && (
+                              <img
+                                src="/assets/images/Vector.png"
+                                width={5}
+                                height={10}
+                                className="me-1"
+                                alt="arrow"
+                              />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
                     {/* Action Buttons */}
                     {item.status === "approve" &&
                     item.telah_diterima != null ? (

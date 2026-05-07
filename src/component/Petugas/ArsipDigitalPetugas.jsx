@@ -2,12 +2,150 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
 import { PengajuanContext, usePengajuan } from "../../context/PengajuanContext";
 import React from "react";
+function Alert({ alerts, removeAlert }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        minWidth: "300px",
+      }}
+    >
+      {alerts.map((alert) => (
+        <div
+          key={alert.id}
+          style={{
+            background:
+              alert.type === "success"
+                ? "#dcfce7"
+                : alert.type === "info"
+                  ? "#dbeafe"
+                  : "#fee2e2",
+            borderLeft: `4px solid ${
+              alert.type === "success"
+                ? "#16a34a"
+                : alert.type === "info"
+                  ? "#2563eb"
+                  : "#dc2626"
+            }`,
+            borderRadius: "12px",
+            padding: "14px 16px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            animation: "slideIn 0.3s ease",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Icon */}
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              background:
+                alert.type === "success"
+                  ? "#16a34a"
+                  : alert.type === "info"
+                    ? "#2563eb"
+                    : "#dc2626",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <i
+              className={`bx ${
+                alert.type === "success"
+                  ? "bx-check"
+                  : alert.type === "info"
+                    ? "bx-edit"
+                    : "bx-trash"
+              } text-white`}
+              style={{ fontSize: "16px" }}
+            ></i>
+          </div>
+
+          {/* Text */}
+          <div style={{ flex: 1 }}>
+            <p
+              style={{
+                margin: 0,
+                fontWeight: "700",
+                fontSize: "13px",
+                color:
+                  alert.type === "success"
+                    ? "#15803d"
+                    : alert.type === "info"
+                      ? "#1d4ed8"
+                      : "#b91c1c",
+              }}
+            >
+              {alert.title}
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "12px",
+                color: "#555",
+                marginTop: "2px",
+              }}
+            >
+              {alert.message}
+            </p>
+          </div>
+
+          {/* Close Button */}
+          <button
+            onClick={() => removeAlert(alert.id)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              color: "#999",
+              fontSize: "16px",
+            }}
+          >
+            <i className="bx bx-x"></i>
+          </button>
+
+          {/* Progress Bar */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              height: "3px",
+              background:
+                alert.type === "success"
+                  ? "#16a34a"
+                  : alert.type === "info"
+                    ? "#2563eb"
+                    : "#dc2626",
+              animation: "shrink 3s linear forwards",
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function ArsipDigitalPetugas({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [type, setType] = React.useState(null);
   const [isEdit, setIsEdit] = React.useState(false);
+  const [showSuccessModal, setShowSuccessModal] = React.useState(false);
   const { names, codes, token, role, user, arsips, tujuans } =
     React.useContext(PengajuanContext);
   const arsipDigital = arsips?.filter((arsip) => arsip.file != null);
@@ -38,6 +176,18 @@ export default function ArsipDigitalPetugas({ children }) {
       type: "statis",
     },
   ];
+  const [alerts, setAlerts] = React.useState([]);
+
+  // Fungsi Alert
+  const showAlert = (type, title, message) => {
+    const id = Date.now();
+    setAlerts((prev) => [...prev, { id, type, title, message }]);
+    setTimeout(() => removeAlert(id), 3000);
+  };
+
+  const removeAlert = (id) => {
+    setAlerts((prev) => prev.filter((a) => a.id !== id));
+  };
   const [formDataArsip, setFormDataArsip] = React.useState({
     file: null,
     name_uuid: null,
@@ -60,6 +210,11 @@ export default function ArsipDigitalPetugas({ children }) {
     tujuan_uuid: "",
     status: "pending",
   });
+  const handleSuccessOke = () => {
+    setShowSuccessModal(false);
+
+    navigate("/dataArsip");
+  };
   const handleCheckboxChangeArsip = (e) => {
     const { name, value, checked } = e.target;
 
@@ -125,17 +280,16 @@ export default function ArsipDigitalPetugas({ children }) {
       });
 
       const result = await response.json();
-
+      // navigate("/dataArsip");
       if (!response.ok) {
         throw new Error(result.message || "Login Gagal");
       }
       // setGedung({ building_uuid: "", name: "" });
       setIsEdit(false);
-      setCurrentUuid(null);
-      refreshData();
-      const modalElement = document.getElementById("tambahGedungMaster");
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      modal.hide();
+      // setCurrentUuid(null);
+      // refreshData();
+      setShowSuccessModal(true);
+      // navigate("/dataArsipPetugas/ArsipDigitalPetugas");
     } catch (error) {
       console.error("Login Gagal:", error.message);
     }
@@ -153,17 +307,6 @@ export default function ArsipDigitalPetugas({ children }) {
     if (modalInstance) {
       modalInstance.hide();
     }
-
-    // Hapus backdrop secara manual
-    // setTimeout(() => {
-    //   const backdrops = document.querySelectorAll(".modal-backdrop");
-    //   backdrops.forEach((backdrop) => backdrop.remove());
-    //   document.body.classList.remove("modal-open");
-    //   document.body.style.overflow = "";
-    //   document.body.style.paddingRight = "";
-    // }, 100);
-
-    // Tampilkan modal sukses
     setShowSuccessModal(true);
   };
   const handleSubmitArsip = async (e) => {
@@ -198,32 +341,11 @@ export default function ArsipDigitalPetugas({ children }) {
         throw new Error(result.message || "Gagal menyimpan data");
       }
 
-      // Reset dan tutup modal
-      resetForm(); // Buat fungsi helper untuk reset
-      const modalElement = document.getElementById("modaltambahDigital");
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      if (modal) modal.hide();
-
-      
-      // Bersihkan backdrop
-      document.querySelectorAll(".modal-backdrop").forEach((el) => el.remove());
-      document.body.classList.remove("modal-open");
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-
-      // Buka modal sukses
-      const successModalEl = document.getElementById("berhasilTambahDigital");
-      const successModal = new window.bootstrap.Modal(successModalEl);
-      successModal.show();
-    
+      setIsEdit(false);
     } catch (error) {
       console.error("Error:", error.message);
       alert("Terjadi kesalahan: " + error.message);
     }
-  };
-
-  // Helper untuk reset form
-  const resetForm = () => {
     setFormDataArsip({
       file: null,
       name_uuid: null,
@@ -240,7 +362,16 @@ export default function ArsipDigitalPetugas({ children }) {
       kode_arsip: null,
       keterangan: null,
     });
-    document.getElementById("unggah_file").value = ""; // Reset input file fisik
+    document.getElementById("unggah_file").value = "";
+    const modalElement = document.getElementById("modaltambahDigital");
+    const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+    const successModal = new window.bootstrap.Modal(
+      document.getElementById("berhasilTambahDigital"),
+    );
+    successModal.show();
   };
   return (
     <AdminLayout>
@@ -415,9 +546,10 @@ export default function ArsipDigitalPetugas({ children }) {
                   />
                 </div>
                 <div className="modal-body">
-                  <img src="/assets/images/documents.png"
-                  style={{ margin: "auto", display: "flex" }} 
-                   />
+                  <img
+                    src="/assets/images/documents.png"
+                    style={{ margin: "auto", display: "flex" }}
+                  />
                   <form onSubmit={handleSubmitArsip}>
                     <div className="mb-3">
                       <label className="form-label">
@@ -650,7 +782,8 @@ export default function ArsipDigitalPetugas({ children }) {
                           <button
                             type="submit"
                             className="btn btn-primary radius-30"
-                            style={{ width: "100%" }}>
+                            style={{ width: "100%" }}
+                          >
                             Tambah
                           </button>
                         </div>
@@ -661,60 +794,129 @@ export default function ArsipDigitalPetugas({ children }) {
               </div>
             </div>
           </div>
-          <div className="col">
-            {/* Modal Berhasil Tambah Digital*/}
-            <div className="col">
-              <div
-                className="modal fade"
-                id="berhasilTambahDigital"
-                tabIndex={-1}
-                aria-hidden="true"
-              >
-                <div className="modal-dialog modal-sm">
-                  <div className="modal-content">
-                    <div
-                      className="modal-header"
-                      style={{ borderBottom: "none" }}
-                    >
-                      <button
-                        type="button"
-                        className="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      />
-                    </div>
-                    <div
-                      className="modal-body"
+          {showSuccessModal && (
+            <div
+              className="modal fade show"
+              style={{
+                display: "block",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                zIndex: 9999,
+              }}
+              tabIndex={-1}
+              onClick={(e) => {
+                // Tutup modal jika klik di luar modal content
+                if (e.target.classList.contains("modal")) {
+                  handleSuccessOke();
+                }
+              }}
+            >
+              <div className="modal-dialog modal-cols-lg-2">
+                <div className="modal-content">
+                  <div
+                    className="modal-header"
+                    style={{ borderBottom: "none" }}
+                  >
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={handleSuccessOke}
+                      aria-label="Close"
+                    />
+                  </div>
+                  <div
+                    className="modal-body"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <h5 className="modal-title" style={{ marginBottom: 15 }}>
+                      Peminjaman Arsip Digital Berhasil
+                    </h5>
+                    <img src="/assets/images/checkmark.png" alt="Success" />
+                    <h6
+                      className="modal-isi"
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        width: "100%",
+                        marginBottom: 0,
+                        marginTop: 15,
+                        textAlign: "center",
                       }}
                     >
-                      <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 17 }}>
-                        Penambahan Data Arsip Digital
-                      </h5>
-                      <img src="/assets/images/pharmacy.png" />
-                      <h6
-                        className="modal-isi"
-                        style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
-                      >
-                        Data arsip digital berhasil ditambahkan.
-                      </h6>
-                    </div>
-                    <div className="modal-footer" style={{ borderTop: "none" }}>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                        style={{ width: "100%", borderRadius: 50 }}
-                      >
-                        Oke
-                      </button>
-                    </div>
+                      Pengajuan peminjaman arsip digital telah berhasil. Harap
+                      menunggu persetujuan.
+                    </h6>
                   </div>
+                  <div className="modal-footer" style={{ borderTop: "none" }}>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleSuccessOke}
+                      style={{ width: "100%", borderRadius: 50 }}
+                    >
+                      Oke
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div
+            className="modal fade"
+            id="berhasilTambahDigital"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <div className="modal-dialog modal-sm">
+              <div className="modal-content">
+                <div className="modal-header" style={{ borderBottom: "none" }}>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    onClick={handleSuccessOke}
+                    aria-label="Close"
+                  />
+                </div>
+                <div
+                  className="modal-body"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <h5
+                    className="modal-title"
+                    style={{ marginBottom: 15, fontSize: 17 }}
+                  >
+                    {isEdit
+                      ? "Edit Data Arsip Digital"
+                      : "Penambahan Data Arsip Digital"}
+                  </h5>
+                  <img src="/assets/images/pharmacy.png" />
+                  <h6
+                    className="modal-isi"
+                    style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
+                  >
+                    {isEdit
+                      ? "Data arsip digital berhasil diperbarui."
+                      : "Data arsip digital berhasil ditambahkan."}
+                  </h6>
+                </div>
+                <div className="modal-footer" style={{ borderTop: "none" }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    onClick={handleSuccessOke}
+                    style={{ width: "100%", borderRadius: 50 }}
+                  >
+                    Oke
+                  </button>
                 </div>
               </div>
             </div>

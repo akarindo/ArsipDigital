@@ -11,6 +11,7 @@ export default function DetailArsip() {
     arsips,
     handleDelete,
     isLoading,
+    refreshData,
     role,
     handleEdit,
     gedungs,
@@ -25,6 +26,24 @@ export default function DetailArsip() {
   const arsipFisik = arsips?.filter((arsip) => arsip.file == null);
   const arsipDigital = arsips?.filter((arsip) => arsip.file != null);
   const filterArsip = param == "fisik" ? arsipFisik : arsipDigital;
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+      .format(date)
+      .replace(".", ":"); // Mengganti titik pemisah jam menjadi titik dua jika perlu
+  };
+  React.useEffect(() => {
+    refreshData();
+  }, []);
   return (
     <DataArsip>
       <div className="dropdown">
@@ -69,7 +88,7 @@ export default function DetailArsip() {
               const filterFolder = folders?.filter(
                 (folder) => folder.uuid == arsip?.folder_uuid,
               );
-              console.log("arsip", filterFolder[0]);
+              console.log("arsip", arsip);
               return (
                 <div
                   className="customers-list-item shadow cursor-pointer rounded bg-white"
@@ -150,13 +169,13 @@ export default function DetailArsip() {
                     <div className="info-kanan">
                       <div className="mb-1">
                         <span className="fw-bold">Keterangan</span> :{" "}
-                        <span className="text-secondary">File QC</span>
+                        <span className="text-secondary">
+                          {arsip.keterangan ?? "-"}
+                        </span>
                       </div>
                       <div>
                         <span className="fw-bold">Waktu Upload</span> :{" "}
-                        <span className="text-secondary">
-                          17 Maret 2025 | 09:58
-                        </span>
+                        {formatDate(arsip.created_at)}
                       </div>
                     </div>
                   </div>

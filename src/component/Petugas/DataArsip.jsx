@@ -277,18 +277,17 @@ export default function DataArsip({ children }) {
     }
 
     // Hapus backdrop secara manual
-      // const backdrops = document.querySelectorAll(".modal-backdrop");
-      // backdrops.forEach((backdrop) => backdrop.remove());
-      // document.body.classList.remove("modal-open");
-      // document.body.style.overflow = "";
-      // document.body.style.paddingRight = "";
+    // const backdrops = document.querySelectorAll(".modal-backdrop");
+    // backdrops.forEach((backdrop) => backdrop.remove());
+    // document.body.classList.remove("modal-open");
+    // document.body.style.overflow = "";
+    // document.body.style.paddingRight = "";
 
-      const successModal = new window.bootstrap.Modal(
-        document.getElementById("berhasilTambahFisik")
-      );
-      successModal.show();
+    const successModal = new window.bootstrap.Modal(
+      document.getElementById("berhasilTambahFisik"),
+    );
+    successModal.show();
   };
-
 
   const handleSuccessOke = () => {
     setShowSuccessModal(false);
@@ -299,7 +298,7 @@ export default function DataArsip({ children }) {
     // document.body.style.overflow = "";
     // document.body.style.paddingRight = "";
 
-    navigate("/logPengajuanStaff");
+    navigate("/dataArsipPetugas/ArsipDigitalPetugas");
   };
 
   useEffect(() => {
@@ -404,7 +403,9 @@ export default function DataArsip({ children }) {
               <div className="modal-content">
                 <div className="modal-header" style={{ border: "none" }}>
                   <h5 className="modal-title">
-                    {isEdit ? "Formulir Edit Data Arsip Fisik" : "Formulir Penambahan Data Arsip Fisik"}
+                    {isEdit
+                      ? "Formulir Edit Data Arsip Fisik"
+                      : "Formulir Penambahan Data Arsip Fisik"}
                   </h5>
                   <button
                     type="button"
@@ -414,8 +415,9 @@ export default function DataArsip({ children }) {
                   />
                 </div>
                 <div className="modal-body">
-                  <img src="/assets/images/documents.png"
-                  style={{ margin: "auto", display: "flex" }} 
+                  <img
+                    src="/assets/images/documents.png"
+                    style={{ margin: "auto", display: "flex" }}
                   />
                   <form onSubmit={handleSubmitArsip}>
                     <div className="mb-3">
@@ -428,11 +430,9 @@ export default function DataArsip({ children }) {
                         aria-label="Default select example"
                       >
                         {isEdit ? (
-                          <option value="">
-                            {formDataArsip.name_uuid}
-                          </option>
+                          <option value="">{formDataArsip.name_uuid}</option>
                         ) : (
-                        <option selected>Pilih Arsip</option>
+                          <option selected>Pilih Arsip</option>
                         )}
                         {names?.map((name) => (
                           <option key={name.uuid} value={name.uuid}>
@@ -491,7 +491,7 @@ export default function DataArsip({ children }) {
                             <input
                               name="jenis_arsip"
                               value={"vital"}
-                              checked={formDataArsip.jenis_arsip === vital}
+                              checked={formDataArsip.jenis_arsip === "vital"}
                               onChange={handleCheckboxChangeArsip}
                               className="form-check-input"
                               type="checkbox"
@@ -508,7 +508,7 @@ export default function DataArsip({ children }) {
                             <input
                               name="jenis_arsip"
                               value={"active"}
-                              checked={formDataArsip.jenis_arsip === active}
+                              checked={formDataArsip.jenis_arsip === "active"}
                               onChange={handleCheckboxChangeArsip}
                               className="form-check-input"
                               type="checkbox"
@@ -528,7 +528,7 @@ export default function DataArsip({ children }) {
                             <input
                               name="jenis_arsip"
                               value={"inactive"}
-                              checked={formDataArsip.jenis_arsip === inactive}
+                              checked={formDataArsip.jenis_arsip === "inactive"}
                               onChange={handleCheckboxChangeArsip}
                               className="form-check-input"
                               type="checkbox"
@@ -601,7 +601,13 @@ export default function DataArsip({ children }) {
                         </label>
                       </div>
                     </div>
-                    <div className="line" style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div
+                      className="line"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
                       <div className="mb-0">
                         <label className="form-label">Gedung</label>
                         <select
@@ -679,7 +685,13 @@ export default function DataArsip({ children }) {
                         </select>
                       </div>
                     </div>
-                    <div className="line" style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div
+                      className="line"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
                       <div className="mb-0">
                         <label className="form-label">Lemari</label>
                         <select
@@ -890,8 +902,13 @@ export default function DataArsip({ children }) {
                     width: "100%",
                   }}
                 >
-                  <h5 className="modal-title" style={{ marginBottom: 15, fontSize: 17 }}>
-                    {isEdit ? "Edit Data Arsip Digital" : "Penambahan Data Arsip Digital"}
+                  <h5
+                    className="modal-title"
+                    style={{ marginBottom: 15, fontSize: 17 }}
+                  >
+                    {isEdit
+                      ? "Edit Data Arsip Fisik"
+                      : "Penambahan Data Arsip Fisik"}
                   </h5>
                   <img src="/assets/images/pharmacy.png" />
                   <h6
@@ -899,8 +916,8 @@ export default function DataArsip({ children }) {
                     style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
                   >
                     {isEdit
-                        ? "Data arsip digital berhasil diperbarui."
-                        : "Data arsip digital berhasil ditambahkan."}
+                      ? "Data arsip fisik berhasil diperbarui."
+                      : "Data arsip fisik berhasil ditambahkan."}
                   </h6>
                 </div>
                 <div className="modal-footer" style={{ borderTop: "none" }}>
