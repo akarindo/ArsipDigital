@@ -144,10 +144,23 @@ export default function ArsipDigitalPetugas({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [type, setType] = React.useState(null);
-  const [isEdit, setIsEdit] = React.useState(false);
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
-  const { names, codes, token, role, user, arsips, tujuans } =
-    React.useContext(PengajuanContext);
+  const [successModal, setSuccessModal] = React.useState(false);
+  const {
+    names,
+    codes,
+    token,
+    currentUuid,
+    role,
+    formDataArsip,
+    setFormDataArsip,
+    refreshData,
+    user,
+    arsips,
+    tujuans,
+    isEdit,
+    setIsEdit,
+  } = React.useContext(PengajuanContext);
   const arsipDigital = arsips?.filter((arsip) => arsip.file != null);
   const tab = location.pathname.includes("ArsipDigitalPetugas")
     ? "ArsipDigitalPetugas"
@@ -188,22 +201,6 @@ export default function ArsipDigitalPetugas({ children }) {
   const removeAlert = (id) => {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
   };
-  const [formDataArsip, setFormDataArsip] = React.useState({
-    file: null,
-    name_uuid: null,
-    tipe_arsip: null,
-    judul_arsip: null,
-    jenis_arsip: null,
-    kategori_arsip: null,
-    gedung_uuid: null,
-    lantai_uuid: null,
-    ruang_uuid: null,
-    lemari_uuid: null,
-    rak_uuid: null,
-    folder_uuid: null,
-    kode_arsip: null,
-    keterangan: null,
-  });
   const [formData, setFormData] = React.useState({
     user_uuid: user?.uuid,
     arsip_uuid: "",
@@ -212,8 +209,40 @@ export default function ArsipDigitalPetugas({ children }) {
   });
   const handleSuccessOke = () => {
     setShowSuccessModal(false);
+    navigate("/dataArsip");
+  };
+  const handleSuccess = () => {
+    setSuccessModal(false);
 
     navigate("/dataArsip");
+  };
+  const getModal = () => {
+    const modalEl = document.getElementById("modaltambahDigital");
+    return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+  };
+  const handleOpenModal = () => {
+    setIsEdit(false);
+
+    setFormDataArsip({
+      file: null,
+      name_uuid: "",
+      tipe_arsip: "",
+      judul_arsip: "",
+      jenis_arsip: "",
+      kategori_arsip: "",
+      gedung_uuid: "",
+      lantai_uuid: "",
+      ruang_uuid: "",
+      lemari_uuid: "",
+      rak_uuid: "",
+      folder_uuid: "",
+      kode_arsip: "",
+      keterangan: "",
+    });
+
+    setTimeout(() => {
+      getModal().show();
+    }, 300); // delay 300ms
   };
   const handleCheckboxChangeArsip = (e) => {
     const { name, value, checked } = e.target;
@@ -332,7 +361,7 @@ export default function ArsipDigitalPetugas({ children }) {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formDataArsip), // file sudah otomatis terkirim sebagai string base64
+        body: JSON.stringify(formDataArsip),
       });
 
       const result = await response.json();
@@ -340,7 +369,7 @@ export default function ArsipDigitalPetugas({ children }) {
       if (!response.ok) {
         throw new Error(result.message || "Gagal menyimpan data");
       }
-
+      setSuccessModal(true);
       setIsEdit(false);
     } catch (error) {
       console.error("Error:", error.message);
@@ -368,10 +397,8 @@ export default function ArsipDigitalPetugas({ children }) {
     if (modalInstance) {
       modalInstance.hide();
     }
-    const successModal = new window.bootstrap.Modal(
-      document.getElementById("berhasilTambahDigital"),
-    );
-    successModal.show();
+    setSuccessModal(true);
+    refreshData();
   };
   return (
     <AdminLayout>
@@ -430,8 +457,7 @@ export default function ArsipDigitalPetugas({ children }) {
                 <div className="col mb-3">
                   <button
                     type="button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modaltambahDigital"
+                    onClick={handleOpenModal}
                     className="btn-tambah px-5"
                   >
                     Tambah
@@ -536,7 +562,9 @@ export default function ArsipDigitalPetugas({ children }) {
               <div className="modal-content">
                 <div className="modal-header" style={{ border: "none" }}>
                   <h5 className="modal-title">
-                    Formulir Penambahan Data Arsip Digital
+                    {isEdit
+                      ? "Formulir Edit Data Arsip Fisik"
+                      : "Formulir Penambahan Data Arsip Fisik"}
                   </h5>
                   <button
                     type="button"
@@ -549,33 +577,38 @@ export default function ArsipDigitalPetugas({ children }) {
                   <img
                     src="/assets/images/documents.png"
                     style={{ margin: "auto", display: "flex" }}
+                    alt="documents"
                   />
                   <form onSubmit={handleSubmitArsip}>
+                    {/* Unggah File */}
                     <div className="mb-3">
                       <label className="form-label">
-                        Unduh File(Hanya PDF)
+                        Unggah File (Hanya PDF)
                       </label>
                       <input
                         onChange={handleInputChangeArsip}
                         type="file"
                         name="file"
                         id="unggah_file"
+                        className="form-control"
                         accept=".pdf"
+                        required={!isEdit}
                       />
                     </div>
-                    {/* <div className="mb-3">
-                        <label className="form-label">Size File(Mb)</label>
-                        <input type="number" id="jumlah_item" name="jumlah_item" min={1} max={10} placeholder="Masukkan dalam bentuk MB" />
-                      </div> */}
+
+                    {/* Nama Arsip */}
                     <div className="mb-3">
                       <label className="form-label">Nama Arsip</label>
                       <select
                         name="name_uuid"
+                        value={formDataArsip.name_uuid ?? ""}
                         onChange={(e) => handleInputChangeArsip(e)}
                         className="form-select mb-3 radius-30"
-                        aria-label="Default select example"
+                        required
                       >
-                        <option selected>Pilih Arsip</option>
+                        <option value="" disabled>
+                          Pilih Arsip
+                        </option>
                         {names?.map((name) => (
                           <option key={name.uuid} value={name.uuid}>
                             {name.name}
@@ -583,30 +616,37 @@ export default function ArsipDigitalPetugas({ children }) {
                         ))}
                       </select>
                     </div>
-                    <div class="input-group mb-3">
-                      <span class="input-group-text" id="basic-addon1">
+
+                    {/* Judul Arsip */}
+                    <div className="input-group mb-3">
+                      <span className="input-group-text" id="basic-addon1">
                         Judul Arsip
                       </span>
                       <input
                         type="text"
-                        value={formDataArsip.judul_arsip}
+                        value={formDataArsip.judul_arsip ?? ""}
                         onChange={(e) => handleInputChangeArsip(e)}
-                        class="form-control"
+                        className="form-control"
                         name="judul_arsip"
                         placeholder="Judul Arsip"
-                        aria-label="Username"
+                        required
+                        aria-label="Judul Arsip"
                         aria-describedby="basic-addon1"
                       />
                     </div>
+
+                    {/* Tipe Arsip */}
                     <div className="mb-3">
                       <label className="form-label">Tipe Arsip</label>
                       <select
                         name="tipe_arsip"
+                        value={formDataArsip.tipe_arsip ?? ""}
                         className="form-select mb-3 radius-30"
                         onChange={(e) => {
                           handleType(e.target.value);
                           handleInputChangeArsip(e);
-                        }} // PINDAHKAN KE SINI
+                        }}
+                        required
                       >
                         <option value="">Pilih Tipe Arsip</option>
                         {jenisArsip?.map((arsip) => (
@@ -616,6 +656,8 @@ export default function ArsipDigitalPetugas({ children }) {
                         ))}
                       </select>
                     </div>
+
+                    {/* Jenis Arsip (Khusus Dinamis) - SEKARANG RADIO */}
                     {type === "dinamis" && (
                       <>
                         <label className="form-label mt-6">
@@ -631,13 +673,18 @@ export default function ArsipDigitalPetugas({ children }) {
                           >
                             <input
                               name="jenis_arsip"
-                              value={"vital"}
-                              onChange={handleCheckboxChangeArsip}
+                              value="vital"
+                              checked={formDataArsip.jenis_arsip === "vital"}
+                              onChange={handleInputChangeArsip} // Menggunakan handle standar untuk radio tunggal
                               className="form-check-input"
-                              type="checkbox"
-                              id="vital"
+                              type="radio"
+                              id="vital_digital"
+                              required
                             />
-                            <label className="form-check-label" htmlFor="vital">
+                            <label
+                              className="form-check-label"
+                              htmlFor="vital_digital"
+                            >
                               Vital
                             </label>
                           </div>
@@ -647,15 +694,16 @@ export default function ArsipDigitalPetugas({ children }) {
                           >
                             <input
                               name="jenis_arsip"
-                              value={"active"}
-                              onChange={handleCheckboxChangeArsip}
+                              value="active"
+                              checked={formDataArsip.jenis_arsip === "active"}
+                              onChange={handleInputChangeArsip}
                               className="form-check-input"
-                              type="checkbox"
-                              id="active"
+                              type="radio"
+                              id="active_digital"
                             />
                             <label
                               className="form-check-label"
-                              htmlFor="active"
+                              htmlFor="active_digital"
                             >
                               Active
                             </label>
@@ -666,15 +714,16 @@ export default function ArsipDigitalPetugas({ children }) {
                           >
                             <input
                               name="jenis_arsip"
-                              value={"inactive"}
-                              onChange={handleCheckboxChangeArsip}
+                              value="inactive"
+                              checked={formDataArsip.jenis_arsip === "inactive"}
+                              onChange={handleInputChangeArsip}
                               className="form-check-input"
-                              type="checkbox"
-                              id="inactive"
+                              type="radio"
+                              id="inactive_digital"
                             />
                             <label
                               className="form-check-label"
-                              htmlFor="inactive"
+                              htmlFor="inactive_digital"
                             >
                               Inactive
                             </label>
@@ -682,6 +731,8 @@ export default function ArsipDigitalPetugas({ children }) {
                         </div>
                       </>
                     )}
+
+                    {/* Kategori Arsip - SEKARANG RADIO */}
                     <label className="form-label mt-6">Kategori Arsip</label>
                     <div
                       className="line-check mb-3"
@@ -690,16 +741,17 @@ export default function ArsipDigitalPetugas({ children }) {
                       <div className="form-check" style={{ marginRight: 10 }}>
                         <input
                           name="kategori_arsip"
-                          value={"surat"}
-                          onChange={handleCheckboxChangeArsip}
+                          value="surat"
+                          checked={formDataArsip.kategori_arsip === "surat"}
+                          onChange={handleInputChangeArsip}
                           className="form-check-input"
-                          type="checkbox"
-                          defaultValue
-                          id="flexCheckDefault"
+                          type="radio"
+                          id="katSurat_digital"
+                          required
                         />
                         <label
                           className="form-check-label"
-                          htmlFor="flexCheckDefault"
+                          htmlFor="katSurat_digital"
                         >
                           Surat
                         </label>
@@ -707,16 +759,16 @@ export default function ArsipDigitalPetugas({ children }) {
                       <div className="form-check" style={{ marginRight: 10 }}>
                         <input
                           name="kategori_arsip"
-                          value={"laporan"}
-                          onChange={handleCheckboxChangeArsip}
+                          value="laporan"
+                          checked={formDataArsip.kategori_arsip === "laporan"}
+                          onChange={handleInputChangeArsip}
                           className="form-check-input"
-                          type="checkbox"
-                          defaultValue
-                          id="flexCheckDefault"
+                          type="radio"
+                          id="katLaporan_digital"
                         />
                         <label
                           className="form-check-label"
-                          htmlFor="flexCheckDefault"
+                          htmlFor="katLaporan_digital"
                         >
                           Laporan
                         </label>
@@ -724,31 +776,33 @@ export default function ArsipDigitalPetugas({ children }) {
                       <div className="form-check" style={{ marginRight: 10 }}>
                         <input
                           name="kategori_arsip"
-                          value={"file"}
-                          onChange={handleCheckboxChangeArsip}
+                          value="file"
+                          checked={formDataArsip.kategori_arsip === "file"}
+                          onChange={handleInputChangeArsip}
                           className="form-check-input"
-                          type="checkbox"
-                          defaultValue
-                          id="flexCheckDefault"
+                          type="radio"
+                          id="katFile_digital"
                         />
                         <label
                           className="form-check-label"
-                          htmlFor="flexCheckDefault"
+                          htmlFor="katFile_digital"
                         >
                           File
                         </label>
                       </div>
                     </div>
+
+                    {/* Kode Arsip */}
                     <div className="mb-3">
                       <label className="form-label">Kode Arsip</label>
                       <select
                         name="kode_arsip"
+                        value={formDataArsip.kode_arsip ?? ""}
                         className="form-select mb-3 radius-30"
-                        onChange={(e) => {
-                          handleInputChangeArsip(e);
-                        }} // PINDAHKAN KE SINI
+                        onChange={handleInputChangeArsip}
+                        required
                       >
-                        <option value="">Pilih Tipe Arsip</option>
+                        <option value="">Pilih Kode Arsip</option>
                         {codes?.map((code) => (
                           <option key={code.uuid} value={code.uuid}>
                             {code.kode}
@@ -757,21 +811,26 @@ export default function ArsipDigitalPetugas({ children }) {
                       </select>
                     </div>
 
+                    {/* Keterangan */}
                     <div className="mb-3">
                       <label className="form-label">Keterangan</label>
                       <textarea
-                        type="text"
                         name="keterangan"
+                        value={formDataArsip.keterangan ?? ""}
+                        onChange={handleInputChangeArsip}
                         className="form-control radius-30"
+                        placeholder="Tambahkan keterangan..."
+                        required
                       />
                     </div>
+
+                    {/* Tombol Aksi */}
                     <div className="p-3 pt-0">
                       <div className="d-flex align-items-center pb-0 pt-0 gap-3">
                         <div className="w-50">
                           <button
                             type="button"
                             data-bs-dismiss="modal"
-                            aria-label="Close"
                             className="btn btn-outline-primary radius-30"
                             style={{ width: "100%" }}
                           >
@@ -784,7 +843,7 @@ export default function ArsipDigitalPetugas({ children }) {
                             className="btn btn-primary radius-30"
                             style={{ width: "100%" }}
                           >
-                            Tambah
+                            {isEdit ? "Simpan Perubahan" : "Tambah"}
                           </button>
                         </div>
                       </div>
@@ -862,65 +921,75 @@ export default function ArsipDigitalPetugas({ children }) {
               </div>
             </div>
           )}
-          <div
-            className="modal fade"
-            id="berhasilTambahDigital"
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            <div className="modal-dialog modal-sm">
-              <div className="modal-content">
-                <div className="modal-header" style={{ borderBottom: "none" }}>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    onClick={handleSuccessOke}
-                    aria-label="Close"
-                  />
-                </div>
-                <div
-                  className="modal-body"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    width: "100%",
-                  }}
-                >
-                  <h5
-                    className="modal-title"
-                    style={{ marginBottom: 15, fontSize: 17 }}
+          {successModal && (
+            <div
+              className="modal fade"
+              tabIndex={-1}
+              onClick={(e) => {
+                // Tutup modal jika klik di luar modal content
+                if (e.target.classList.contains("modal")) {
+                  handleSuccess();
+                }
+              }}
+              aria-hidden="true"
+            >
+              <div className="modal-dialog modal-sm">
+                <div className="modal-content">
+                  <div
+                    className="modal-header"
+                    style={{ borderBottom: "none" }}
                   >
-                    {isEdit
-                      ? "Edit Data Arsip Digital"
-                      : "Penambahan Data Arsip Digital"}
-                  </h5>
-                  <img src="/assets/images/pharmacy.png" />
-                  <h6
-                    className="modal-isi"
-                    style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
+                    <button
+                      type="button"
+                      className="btn-close"
+                      data-bs-dismiss="modal"
+                      onClick={handleSuccess}
+                      aria-label="Close"
+                    />
+                  </div>
+                  <div
+                    className="modal-body"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
                   >
-                    {isEdit
-                      ? "Data arsip digital berhasil diperbarui."
-                      : "Data arsip digital berhasil ditambahkan."}
-                  </h6>
-                </div>
-                <div className="modal-footer" style={{ borderTop: "none" }}>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                    onClick={handleSuccessOke}
-                    style={{ width: "100%", borderRadius: 50 }}
-                  >
-                    Oke
-                  </button>
+                    <h5
+                      className="modal-title"
+                      style={{ marginBottom: 15, fontSize: 17 }}
+                    >
+                      {isEdit
+                        ? "Edit Data Arsip Digital"
+                        : "Penambahan Data Arsip Digital"}
+                    </h5>
+                    <img src="/assets/images/pharmacy.png" />
+                    <h6
+                      className="modal-isi"
+                      style={{ marginBottom: 0, marginTop: 15, fontSize: 13 }}
+                    >
+                      {isEdit
+                        ? "Data arsip digital berhasil diperbarui."
+                        : "Data arsip digital berhasil ditambahkan."}
+                    </h6>
+                  </div>
+                  <div className="modal-footer" style={{ borderTop: "none" }}>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      onClick={handleSuccess}
+                      style={{ width: "100%", borderRadius: 50 }}
+                    >
+                      Oke
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </AdminLayout>

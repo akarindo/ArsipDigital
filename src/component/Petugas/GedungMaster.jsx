@@ -3,30 +3,36 @@ import { PengajuanContext } from "../../context/PengajuanContext";
 import Sidebar from "../Sidebar";
 import AdminLayout from "../layouts/AdminLayout";
 
-
 function Alert({ alerts, removeAlert }) {
   return (
-    <div style={{
-      position: "fixed",
-      top: "20px",
-      right: "20px",
-      zIndex: 9999,
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-      minWidth: "300px",
-    }}>
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        minWidth: "300px",
+      }}
+    >
       {alerts.map((alert) => (
         <div
           key={alert.id}
           style={{
-            background: alert.type === "success" ? "#dcfce7"
-              : alert.type === "info" ? "#dbeafe"
-              : "#fee2e2",
+            background:
+              alert.type === "success"
+                ? "#dcfce7"
+                : alert.type === "info"
+                  ? "#dbeafe"
+                  : "#fee2e2",
             borderLeft: `4px solid ${
-              alert.type === "success" ? "#16a34a"
-              : alert.type === "info" ? "#2563eb"
-              : "#dc2626"
+              alert.type === "success"
+                ? "#16a34a"
+                : alert.type === "info"
+                  ? "#2563eb"
+                  : "#dc2626"
             }`,
             borderRadius: "12px",
             padding: "14px 16px",
@@ -40,38 +46,60 @@ function Alert({ alerts, removeAlert }) {
           }}
         >
           {/* Icon */}
-          <div style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "50%",
-            background: alert.type === "success" ? "#16a34a"
-              : alert.type === "info" ? "#2563eb"
-              : "#dc2626",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}>
-            <i className={`bx ${
-              alert.type === "success" ? "bx-check"
-              : alert.type === "info" ? "bx-edit"
-              : "bx-trash"
-            } text-white`} style={{ fontSize: "16px" }}></i>
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              background:
+                alert.type === "success"
+                  ? "#16a34a"
+                  : alert.type === "info"
+                    ? "#2563eb"
+                    : "#dc2626",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <i
+              className={`bx ${
+                alert.type === "success"
+                  ? "bx-check"
+                  : alert.type === "info"
+                    ? "bx-edit"
+                    : "bx-trash"
+              } text-white`}
+              style={{ fontSize: "16px" }}
+            ></i>
           </div>
 
           {/* Text */}
           <div style={{ flex: 1 }}>
-            <p style={{
-              margin: 0,
-              fontWeight: "700",
-              fontSize: "13px",
-              color: alert.type === "success" ? "#15803d"
-                : alert.type === "info" ? "#1d4ed8"
-                : "#b91c1c",
-            }}>
+            <p
+              style={{
+                margin: 0,
+                fontWeight: "700",
+                fontSize: "13px",
+                color:
+                  alert.type === "success"
+                    ? "#15803d"
+                    : alert.type === "info"
+                      ? "#1d4ed8"
+                      : "#b91c1c",
+              }}
+            >
               {alert.title}
             </p>
-            <p style={{ margin: 0, fontSize: "12px", color: "#555", marginTop: "2px" }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "12px",
+                color: "#555",
+                marginTop: "2px",
+              }}
+            >
               {alert.message}
             </p>
           </div>
@@ -79,22 +107,34 @@ function Alert({ alerts, removeAlert }) {
           {/* Close Button */}
           <button
             onClick={() => removeAlert(alert.id)}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#999", fontSize: "16px" }}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              color: "#999",
+              fontSize: "16px",
+            }}
           >
             <i className="bx bx-x"></i>
           </button>
 
           {/* Progress Bar */}
-          <div style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            height: "3px",
-            background: alert.type === "success" ? "#16a34a"
-              : alert.type === "info" ? "#2563eb"
-              : "#dc2626",
-            animation: "shrink 3s linear forwards",
-          }} />
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              height: "3px",
+              background:
+                alert.type === "success"
+                  ? "#16a34a"
+                  : alert.type === "info"
+                    ? "#2563eb"
+                    : "#dc2626",
+              animation: "shrink 3s linear forwards",
+            }}
+          />
         </div>
       ))}
     </div>
@@ -156,13 +196,20 @@ export default function Gedung() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.message || "Gagal memproses data");
-
       getModal().hide();
       refreshData();
       if (isEdit) {
-        showAlert("info", "Diperbarui!", `Data "${gedung.name}" berhasil diperbarui.`);
+        showAlert(
+          "info",
+          "Diperbarui!",
+          `Data "${gedung.name}" berhasil diperbarui.`,
+        );
       } else {
-        showAlert("success", "Berhasil Ditambahkan!", `Data "${gedung.name}" berhasil disimpan.`);
+        showAlert(
+          "success",
+          "Berhasil Ditambahkan!",
+          `Data "${gedung.name}" berhasil disimpan.`,
+        );
       }
     } catch (error) {
       alert("Error: " + error.message);
@@ -170,41 +217,45 @@ export default function Gedung() {
   };
 
   const [deleteTarget, setDeleteTarget] = React.useState(null);
-      
-        const getDeleteModal = () => {
-          const modalEl = document.getElementById("modalKonfirmasiHapus");
-          return window.bootstrap.Modal.getOrCreateInstance(modalEl);
-        };
-      
-        const handleOpenDeleteModal = (item) => {
-          setDeleteTarget(item);
-          getDeleteModal().show();
-        };
-    
-        const handleConfirmDelete = async () => {
-        if (!deleteTarget) return;
-        try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/buildings/${deleteTarget.uuid}`,
-            {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          
-          if (!response.ok) throw new Error("Gagal menghapus data");
-          getDeleteModal().hide();
-          refreshData();
-          showAlert("danger", "Dihapus!", `Data "${deleteTarget.name}" berhasil dihapus.`);
-          setDeleteTarget(null);
-        } catch (error) {
-          showAlert("danger", "Gagal!", error.message);
-        }
-      };
+
+  const getDeleteModal = () => {
+    const modalEl = document.getElementById("modalKonfirmasiHapus");
+    return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+  };
+
+  const handleOpenDeleteModal = (item) => {
+    setDeleteTarget(item);
+    getDeleteModal().show();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/buildings/${deleteTarget.uuid}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) throw new Error("Gagal menghapus data");
+      getDeleteModal().hide();
+      refreshData();
+      showAlert(
+        "danger",
+        "Dihapus!",
+        `Data "${deleteTarget.name}" berhasil dihapus.`,
+      );
+      setDeleteTarget(null);
+    } catch (error) {
+      showAlert("danger", "Gagal!", error.message);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -308,9 +359,16 @@ export default function Gedung() {
                 {/* Icon */}
                 <div
                   className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-                  style={{ width: "64px", height: "64px", background: "#fff0f0" }}
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    background: "#fff0f0",
+                  }}
                 >
-                  <i className="bx bx-trash text-danger" style={{ fontSize: "28px" }}></i>
+                  <i
+                    className="bx bx-trash text-danger"
+                    style={{ fontSize: "28px" }}
+                  ></i>
                 </div>
 
                 <h5 className="fw-bold mb-1">Hapus Data?</h5>

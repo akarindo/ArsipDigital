@@ -74,6 +74,7 @@ export default function ApprovalFisik({
         const filterTujuan = tujuans?.filter(
           (tujuan) => tujuan.uuid == pinjam.tujuan_uuid,
         );
+        console.log("filter", filterPinjaman);
         return (
           <div
             key={pinjam.uuid}
@@ -228,6 +229,10 @@ export default function ApprovalFisik({
                     {formatDate(pinjam.waktu_diterima) || "..."}
                   </h7>
                 </div>
+                <div>
+                  <h7 className="mb-1 font-weight-bold">Pengaju</h7> :{" "}
+                  <h7 className="mb-0 text-secondary">{pinjam.user?.name}</h7>
+                </div>
               </div>
               <div>
                 <div>
@@ -286,7 +291,7 @@ export default function ApprovalFisik({
                     type="button"
                     className="btn btn-success px-5 radius-30 w-100"
                     data-bs-toggle="modal"
-                    data-bs-target="#notifikasiKembali"
+                    data-bs-target="#notifikasiAmbil"
                   >
                     Arsip Telah Diambil
                   </button>
@@ -367,6 +372,57 @@ export default function ApprovalFisik({
                   style={{ marginBottom: 0, marginTop: 15 }}
                 >
                   Peminjaman berhasil disetujui
+                </h6>
+              </div>
+              <div className="modal-footer" style={{ borderTop: "none" }}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-bs-dismiss="modal"
+                  style={{ width: "100%", borderRadius: 50 }}
+                >
+                  Oke
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="col">
+        <div
+          className="modal fade"
+          id="notifikasiAmbil"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          <div className="modal-dialog modal-sm">
+            <div className="modal-content">
+              <div className="modal-header" style={{ borderBottom: "none" }}>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                />
+              </div>
+              <div
+                className="modal-body"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "100%",
+                }}
+              >
+                <h5 className="modal-title" style={{ marginBottom: 15 }}>
+                  Notifikasi Pengambilan
+                </h5>
+                <img src="/assets/images/bell icon.png" />
+                <h6
+                  className="modal-isi"
+                  style={{ marginBottom: 0, marginTop: 15 }}
+                >
+                  Arsip telah diambil
                 </h6>
               </div>
               <div className="modal-footer" style={{ borderTop: "none" }}>

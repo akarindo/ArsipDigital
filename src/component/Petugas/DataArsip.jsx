@@ -1,7 +1,8 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { PengajuanContext } from "../../context/PengajuanContext";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AdminLayout from "../layouts/AdminLayout";
+import TabComponent from "../base/TabComponent";
 
 export default function DataArsip({ children }) {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function DataArsip({ children }) {
     isEdit,
     currentUuid,
     formDataArsip,
+    refreshData,
     setIsEdit,
     setFormDataArsip,
     floorBuild,
@@ -25,6 +27,11 @@ export default function DataArsip({ children }) {
     roomBuild,
     cabinetBuild,
     shelfBuild,
+    setFloorBuild,
+    setFolderBuild,
+    setRoomBuild,
+    setCabinetBuild,
+    setShelfBuild,
     handleChangeBuild,
     handleChangeFloor,
     handleChangeRoom,
@@ -36,30 +43,6 @@ export default function DataArsip({ children }) {
   const tab = location.pathname.includes("ArsipDigitalPetugas")
     ? "ArsipDigitalPetugas"
     : "Arsip Fisik";
-  // const handleEdit = (item) => {
-  //   handleChangeBuild(item.building_uuid);
-  //   handleChangeFloor(item.floor_uuid);
-  //   handleChangeRoom(item.room_uuid);
-  //   handleChangeCabinet(item.cabinet_uuid);
-  //   setIsEdit(true);
-  //   setFormDataArsip({
-  //     file: item.file,
-  //     name_uuid: item?.names?.name,
-  //     tipe_arsip: item.tipe_arsip,
-  //     judul_arsip: item.judul_arsip,
-  //     jenis_arsip: item.jenis_arsip,
-  //     kategori_arsip: item.kategori_arsip,
-  //     gedung_uuid: item?.gedung?.name,
-  //     lantai_uuid: item?.lantai?.name,
-  //     ruang_uuid: item?.ruang?.name,
-  //     lemari_uuid: item?.lemari?.name,
-  //     rak_uuid: item?.shelf?.name,
-  //     folder_uuid: item?.folder?.name,
-  //     kode_arsip: item.kode_arsip,
-  //     keterangan: item.keterangan,
-  //   });
-  //   // setFormDataArsip({ ...item });
-  // };
   function handleType(value) {
     if (value === "dinamis") {
       setType("dinamis");
@@ -100,24 +83,13 @@ export default function DataArsip({ children }) {
       [name]: value,
     }));
   };
-  const handleCheckboxChangeArsip = (e) => {
-    const { name, value, checked } = e.target;
+  const handleRadioChangeArsip = (e) => {
+    const { name, value } = e.target;
 
-    setFormDataArsip((prev) => {
-      // Ambil array yang sudah ada atau buat array kosong jika belum ada
-      const currentList = prev[name] || [];
-
-      if (checked) {
-        // Tambahkan nilai jika dicentang
-        return { ...prev, [name]: value };
-      } else {
-        // Hapus nilai jika centang dilepas
-        return {
-          ...prev,
-          [name]: currentList.filter((item) => item !== value),
-        };
-      }
-    });
+    setFormDataArsip((prev) => ({
+      ...prev,
+      [name]: value, // Langsung timpa nilainya dengan string baru
+    }));
   };
   const getModal = () => {
     const modalEl = document.getElementById("modaltambahFisik");
@@ -128,19 +100,19 @@ export default function DataArsip({ children }) {
 
     setFormDataArsip({
       file: null,
-      name_uuid: null,
+      name_uuid: "",
       tipe_arsip: "",
       judul_arsip: "",
-      jenis_arsip: null,
-      kategori_arsip: null,
-      gedung_uuid: null,
-      lantai_uuid: null,
-      ruang_uuid: null,
-      lemari_uuid: null,
-      rak_uuid: null,
-      folder_uuid: null,
-      kode_arsip: null,
-      keterangan: null,
+      jenis_arsip: "",
+      kategori_arsip: "",
+      gedung_uuid: "",
+      lantai_uuid: "",
+      ruang_uuid: "",
+      lemari_uuid: "",
+      rak_uuid: "",
+      folder_uuid: "",
+      kode_arsip: "",
+      keterangan: "",
     });
 
     setTimeout(() => {
@@ -175,13 +147,9 @@ export default function DataArsip({ children }) {
       if (!response.ok) {
         throw new Error(result.message || "Login Gagal");
       }
-      // setGedung({ building_uuid: "", name: "" });
       setIsEdit(false);
       setCurrentUuid(null);
       refreshData();
-      const modalElement = document.getElementById("tambahGedungMaster");
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      modal.hide();
     } catch (error) {
       console.error("Login Gagal:", error.message);
     }
@@ -199,27 +167,17 @@ export default function DataArsip({ children }) {
     if (modalInstance) {
       modalInstance.hide();
     }
-
-    // Hapus backdrop secara manual
-    // setTimeout(() => {
-    //   const backdrops = document.querySelectorAll(".modal-backdrop");
-    //   backdrops.forEach((backdrop) => backdrop.remove());
-    //   document.body.classList.remove("modal-open");
-    //   document.body.style.overflow = "";
-    //   document.body.style.paddingRight = "";
-    // }, 100);
-
-    // Tampilkan modal sukses
     setShowSuccessModal(true);
   };
-
+  const resetPlace = () => {
+    setFloorBuild([]);
+    setFolderBuild([]);
+    setRoomBuild([]);
+    setCabinetBuild([]);
+    setShelfBuild([]);
+  };
   const handleSubmitArsip = async (e) => {
     e.preventDefault();
-    // Validasi form
-    // if (!formData.namaPetugas || !formData.namaArsip || !formData.tujuan) {
-    //   alert("Mohon lengkapi semua field yang wajib diisi!");
-    //   return;
-    // }
     try {
       const url = isEdit
         ? `${import.meta.env.VITE_API_URL}/api/arsips/${currentUuid}`
@@ -241,63 +199,40 @@ export default function DataArsip({ children }) {
       if (!response.ok) {
         throw new Error(result.message || "Login Gagal");
       }
-      // setGedung({ building_uuid: "", name: "" });
-      setIsEdit(false);
       setCurrentUuid(null);
-      refreshData();
-      const modalElement = document.getElementById("tambahGedungMaster");
-      const modal = window.bootstrap.Modal.getInstance(modalElement);
-      modal.hide();
     } catch (error) {
       console.error("Login Gagal:", error.message);
     }
-
     setFormDataArsip({
       file: null,
-      name_uuid: null,
-      tipe_arsip: null,
-      judul_arsip: null,
-      jenis_arsip: null,
-      kategori_arsip: null,
-      gedung_uuid: null,
-      lantai_uuid: null,
-      ruang_uuid: null,
-      lemari_uuid: null,
-      rak_uuid: null,
-      folder_uuid: null,
-      kode_arsip: null,
-      keterangan: null,
+      name_uuid: "",
+      tipe_arsip: "",
+      judul_arsip: "",
+      jenis_arsip: "",
+      kategori_arsip: "",
+      gedung_uuid: "",
+      lantai_uuid: "",
+      ruang_uuid: "",
+      lemari_uuid: "",
+      rak_uuid: "",
+      folder_uuid: "",
+      kode_arsip: "",
+      keterangan: "",
     });
-
-    // Tutup modal form menggunakan Bootstrap
     const modalElement = document.getElementById("modaltambahFisik");
     const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
     if (modalInstance) {
       modalInstance.hide();
     }
-
-    // Hapus backdrop secara manual
-    // const backdrops = document.querySelectorAll(".modal-backdrop");
-    // backdrops.forEach((backdrop) => backdrop.remove());
-    // document.body.classList.remove("modal-open");
-    // document.body.style.overflow = "";
-    // document.body.style.paddingRight = "";
-
     const successModal = new window.bootstrap.Modal(
       document.getElementById("berhasilTambahFisik"),
     );
     successModal.show();
+    // setIsEdit(false);
   };
 
   const handleSuccessOke = () => {
     setShowSuccessModal(false);
-
-    // const backdrops = document.querySelectorAll(".modal-backdrop");
-    // backdrops.forEach((backdrop) => backdrop.remove());
-    // document.body.classList.remove("modal-open");
-    // document.body.style.overflow = "";
-    // document.body.style.paddingRight = "";
-
     navigate("/dataArsipPetugas/ArsipDigitalPetugas");
   };
 
@@ -310,90 +245,35 @@ export default function DataArsip({ children }) {
       document.body.style.paddingRight = "";
     };
   }, []);
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    const modalElement = modalRef.current;
+    if (modalElement) {
+      const handleModalClose = () => {
+        resetPlace();
+      };
+      modalElement.addEventListener("hidden.bs.modal", handleModalClose);
+      return () => {
+        modalElement.removeEventListener("hidden.bs.modal", handleModalClose);
+      };
+    }
+  }, []);
   return (
     <AdminLayout>
       <div className="page-wrapper">
         <div className="page-content">
-          <div className="d-flex align-items-center">
-            <div className="search-bar flex-grow-1">
-              <h4>Data Arsip</h4>
-            </div>
-          </div>
-          <div className="d-flex align-items-center">
-            <div className="search-bar flex-grow-1">
-              <ul className="nav nav-pills mb-3" role="tablist">
-                <li
-                  onClick={() => navigate("/dataArsip")}
-                  className={`nav-item ${tab === "Arsip Fisik" ? "active" : ""}`}
-                  role="presentation"
-                  style={{ width: "50%", cursor: "pointer" }}
-                >
-                  <div
-                    className="nav-link active"
-                    data-bs-toggle="pill"
-                    href="#primary-pills-home"
-                    role="tab"
-                    aria-selected="true"
-                  >
-                    <div className="d-flex align-items-center justify-content-center">
-                      <div className="tab-title">Arsip Fisik</div>
-                    </div>
-                  </div>
-                </li>
-                <li
-                  onClick={() =>
-                    navigate("/dataArsipPetugas/ArsipDigitalPetugas")
-                  }
-                  className={`nav-item ${tab === "ArsipDigitalPetugas" ? "active" : ""}`}
-                  role="presentation"
-                  style={{ width: "50%", cursor: "pointer" }}
-                >
-                  <div
-                    className="nav-link"
-                    data-bs-toggle="pill"
-                    href="#primary-pills-profile"
-                    role="tab"
-                    aria-selected="false"
-                  >
-                    <div className="d-flex align-items-center justify-content-center">
-                      <div className="tab-title">Arsip Digital</div>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            {role == "staff umum" ? (
-              <div className="user-box">
-                <div className="col mb-3">
-                  <button
-                    type="button"
-                    className="btn-tambah px-5"
-                    onClick={handleOpenModal}
-                  >
-                    Tambah
-                  </button>
-                </div>
-              </div>
-            ) : role == "pegawai" ? (
-              <div className="user-box">
-                <div className="col mb-3">
-                  <button
-                    type="button"
-                    className="btn-pengajuan px-5 pb-2 pt-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modalFisik"
-                  >
-                    Pengajuan Peminjaman
-                  </button>
-                </div>
-              </div>
-            ) : null}
-          </div>
+          <TabComponent
+            role={role}
+            navigate={navigate}
+            tab={tab}
+            handleOpenModal={handleOpenModal}
+          />
           {children}
 
           {/* Modal Tambah Fisik */}
           <div
+            ref={modalRef}
             className="modal fade"
             id="modaltambahFisik"
             tabIndex={-1}
@@ -412,14 +292,17 @@ export default function DataArsip({ children }) {
                     className="btn-close"
                     data-bs-dismiss="modal"
                     aria-label="Close"
+                    onClick={() => resetPlace()}
                   />
                 </div>
                 <div className="modal-body">
                   <img
                     src="/assets/images/documents.png"
                     style={{ margin: "auto", display: "flex" }}
+                    alt="documents"
                   />
                   <form onSubmit={handleSubmitArsip}>
+                    {/* Nama Arsip */}
                     <div className="mb-3">
                       <label className="form-label">Nama Arsip</label>
                       <select
@@ -427,13 +310,13 @@ export default function DataArsip({ children }) {
                         onChange={(e) => handleInputChangeArsip(e)}
                         value={formDataArsip.name_uuid}
                         className="form-select mb-3 radius-30"
-                        aria-label="Default select example"
+                        required // Tambah Required
                       >
-                        {isEdit ? (
+                        {/* {isEdit ? (
                           <option value="">{formDataArsip.name_uuid}</option>
-                        ) : (
-                          <option selected>Pilih Arsip</option>
-                        )}
+                        ) : ( */}
+                        <option value="">Pilih Arsip</option>
+                        {/* )} */}
                         {names?.map((name) => (
                           <option key={name.uuid} value={name.uuid}>
                             {name.name}
@@ -441,21 +324,26 @@ export default function DataArsip({ children }) {
                         ))}
                       </select>
                     </div>
-                    <div class="input-group mb-3">
-                      <span class="input-group-text" id="basic-addon1">
+
+                    {/* Judul Arsip */}
+                    <div className="input-group mb-3">
+                      <span className="input-group-text" id="basic-addon1">
                         Judul Arsip
                       </span>
                       <input
                         type="text"
                         value={formDataArsip.judul_arsip ?? ""}
                         onChange={(e) => handleInputChangeArsip(e)}
-                        class="form-control"
+                        className="form-control"
                         name="judul_arsip"
                         placeholder="Judul Arsip"
-                        aria-label="Username"
+                        required // Tambah Required
+                        aria-label="Judul Arsip"
                         aria-describedby="basic-addon1"
                       />
                     </div>
+
+                    {/* Tipe Arsip */}
                     <div className="mb-3">
                       <label className="form-label">Tipe Arsip</label>
                       <select
@@ -466,6 +354,7 @@ export default function DataArsip({ children }) {
                           handleType(e.target.value);
                           handleInputChangeArsip(e);
                         }}
+                        required // Tambah Required
                       >
                         <option value="">Pilih Tipe Arsip</option>
                         {jenisArsip?.map((arsip) => (
@@ -475,6 +364,8 @@ export default function DataArsip({ children }) {
                         ))}
                       </select>
                     </div>
+
+                    {/* Jenis Arsip (Radio) */}
                     {type === "dinamis" && (
                       <>
                         <label className="form-label mt-6">
@@ -490,12 +381,13 @@ export default function DataArsip({ children }) {
                           >
                             <input
                               name="jenis_arsip"
-                              value={"vital"}
+                              value="vital"
                               checked={formDataArsip.jenis_arsip === "vital"}
-                              onChange={handleCheckboxChangeArsip}
+                              onChange={handleRadioChangeArsip}
                               className="form-check-input"
-                              type="checkbox"
+                              type="radio"
                               id="vital"
+                              required // Tambah Required (cukup satu di grup radio yang sama)
                             />
                             <label className="form-check-label" htmlFor="vital">
                               Vital
@@ -507,11 +399,11 @@ export default function DataArsip({ children }) {
                           >
                             <input
                               name="jenis_arsip"
-                              value={"active"}
+                              value="active"
                               checked={formDataArsip.jenis_arsip === "active"}
-                              onChange={handleCheckboxChangeArsip}
+                              onChange={handleRadioChangeArsip}
                               className="form-check-input"
-                              type="checkbox"
+                              type="radio"
                               id="active"
                             />
                             <label
@@ -527,11 +419,11 @@ export default function DataArsip({ children }) {
                           >
                             <input
                               name="jenis_arsip"
-                              value={"inactive"}
+                              value="inactive"
                               checked={formDataArsip.jenis_arsip === "inactive"}
-                              onChange={handleCheckboxChangeArsip}
+                              onChange={handleRadioChangeArsip}
                               className="form-check-input"
-                              type="checkbox"
+                              type="radio"
                               id="inactive"
                             />
                             <label
@@ -544,6 +436,8 @@ export default function DataArsip({ children }) {
                         </div>
                       </>
                     )}
+
+                    {/* Kategori Arsip (Radio) */}
                     <label className="form-label">Kategori Arsip</label>
                     <div
                       className="line-check mb-3"
@@ -552,33 +446,31 @@ export default function DataArsip({ children }) {
                       <div className="form-check" style={{ marginRight: 10 }}>
                         <input
                           name="kategori_arsip"
-                          value={"surat"}
-                          onChange={handleCheckboxChangeArsip}
+                          value="surat"
+                          onChange={handleRadioChangeArsip}
+                          checked={formDataArsip.kategori_arsip === "surat"}
                           className="form-check-input"
-                          type="checkbox"
-                          defaultValue
-                          id="flexCheckDefault"
+                          type="radio"
+                          id="katSurat"
+                          required // Tambah Required
                         />
-                        <label
-                          className="form-check-label"
-                          htmlFor="flexCheckDefault"
-                        >
+                        <label className="form-check-label" htmlFor="katSurat">
                           Surat
                         </label>
                       </div>
                       <div className="form-check" style={{ marginRight: 10 }}>
                         <input
                           name="kategori_arsip"
-                          value={"laporan"}
-                          onChange={handleCheckboxChangeArsip}
+                          value="laporan"
+                          onChange={handleRadioChangeArsip}
+                          checked={formDataArsip.kategori_arsip === "laporan"}
                           className="form-check-input"
-                          type="checkbox"
-                          defaultValue
-                          id="flexCheckDefault"
+                          type="radio"
+                          id="katLaporan"
                         />
                         <label
                           className="form-check-label"
-                          htmlFor="flexCheckDefault"
+                          htmlFor="katLaporan"
                         >
                           Laporan
                         </label>
@@ -586,21 +478,20 @@ export default function DataArsip({ children }) {
                       <div className="form-check" style={{ marginRight: 10 }}>
                         <input
                           name="kategori_arsip"
-                          value={"file"}
-                          onChange={handleCheckboxChangeArsip}
+                          value="file"
+                          onChange={handleRadioChangeArsip}
+                          checked={formDataArsip.kategori_arsip === "file"}
                           className="form-check-input"
-                          type="checkbox"
-                          defaultValue
-                          id="flexCheckDefault"
+                          type="radio"
+                          id="katFile"
                         />
-                        <label
-                          className="form-check-label"
-                          htmlFor="flexCheckDefault"
-                        >
+                        <label className="form-check-label" htmlFor="katFile">
                           File
                         </label>
                       </div>
                     </div>
+
+                    {/* Lokasi Fisik */}
                     <div
                       className="line"
                       style={{
@@ -618,15 +509,9 @@ export default function DataArsip({ children }) {
                             handleInputChangeArsip(e);
                           }}
                           className="form-select mb-3 radius-30"
-                          aria-label="Default select example"
+                          required // Tambah Required
                         >
-                          {isEdit ? (
-                            <option value="">
-                              {formDataArsip.gedung_uuid}
-                            </option>
-                          ) : (
-                            <option selected>Pilih Gedung</option>
-                          )}
+                          <option value="">Pilih Gedung</option>
                           {gedungs?.map((gedung) => (
                             <option key={gedung.uuid} value={gedung.uuid}>
                               {gedung.name}
@@ -644,15 +529,9 @@ export default function DataArsip({ children }) {
                             handleInputChangeArsip(e);
                           }}
                           className="form-select mb-3 radius-30"
-                          aria-label="Default select example"
+                          required // Tambah Required
                         >
-                          {isEdit ? (
-                            <option value="">
-                              {formDataArsip.lantai_uuid}
-                            </option>
-                          ) : (
-                            <option selected>Pilih Lantai</option>
-                          )}
+                          <option value="">Pilih Lantai</option>
                           {floorBuild?.map((floor) => (
                             <option key={floor.uuid} value={floor.uuid}>
                               {floor.name}
@@ -670,13 +549,9 @@ export default function DataArsip({ children }) {
                             handleInputChangeArsip(e);
                           }}
                           className="form-select mb-3 radius-30"
-                          aria-label="Default select example"
+                          required // Tambah Required
                         >
-                          {isEdit ? (
-                            <option value="">{formDataArsip.ruang_uuid}</option>
-                          ) : (
-                            <option selected>Pilih Ruang</option>
-                          )}
+                          <option value="">Pilih Ruang</option>
                           {roomBuild?.map((room) => (
                             <option key={room.uuid} value={room.uuid}>
                               {room.name}
@@ -685,6 +560,7 @@ export default function DataArsip({ children }) {
                         </select>
                       </div>
                     </div>
+
                     <div
                       className="line"
                       style={{
@@ -702,15 +578,9 @@ export default function DataArsip({ children }) {
                             handleInputChangeArsip(e);
                           }}
                           className="form-select mb-3 radius-30"
-                          aria-label="Default select example"
+                          required // Tambah Required
                         >
-                          {isEdit ? (
-                            <option value="">
-                              {formDataArsip.lemari_uuid}
-                            </option>
-                          ) : (
-                            <option selected>Pilih Lemari</option>
-                          )}
+                          <option value="">Pilih Lemari</option>
                           {cabinetBuild?.map((cabinet) => (
                             <option key={cabinet.uuid} value={cabinet.uuid}>
                               {cabinet.name}
@@ -728,13 +598,9 @@ export default function DataArsip({ children }) {
                             handleInputChangeArsip(e);
                           }}
                           className="form-select mb-3 radius-30"
-                          aria-label="Default select example"
+                          required // Tambah Required
                         >
-                          {isEdit ? (
-                            <option value="">{formDataArsip.rak_uuid}</option>
-                          ) : (
-                            <option selected>Pilih Rak</option>
-                          )}
+                          <option value="">Pilih Rak</option>
                           {shelfBuild?.map((shelf) => (
                             <option key={shelf.uuid} value={shelf.uuid}>
                               {shelf.name}
@@ -749,15 +615,9 @@ export default function DataArsip({ children }) {
                           value={formDataArsip.folder_uuid}
                           onChange={(e) => handleInputChangeArsip(e)}
                           className="form-select mb-3 radius-30"
-                          aria-label="Default select example"
+                          required // Tambah Required
                         >
-                          {isEdit ? (
-                            <option value="">
-                              {formDataArsip.folder_uuid}
-                            </option>
-                          ) : (
-                            <option selected>Pilih Folder</option>
-                          )}
+                          <option value="">Pilih Folder</option>
                           {folderBuild?.map((folder) => (
                             <option key={folder.uuid} value={folder.uuid}>
                               {folder.name}
@@ -766,16 +626,21 @@ export default function DataArsip({ children }) {
                         </select>
                       </div>
                     </div>
+
+                    {/* Keterangan */}
                     <div className="mb-3">
                       <label className="form-label">Keterangan</label>
                       <textarea
                         name="keterangan"
                         onChange={(e) => handleInputChangeArsip(e)}
                         value={formDataArsip.keterangan ?? ""}
-                        type="text"
                         className="form-control radius-30"
+                        required // Tambah Required
+                        placeholder="Tambahkan keterangan..."
                       />
                     </div>
+
+                    {/* Tombol Aksi */}
                     <div className="p-3 pt-0">
                       <div className="d-flex align-items-center pb-0 pt-0 gap-3">
                         <div className="w-50">
@@ -783,7 +648,6 @@ export default function DataArsip({ children }) {
                             type="button"
                             className="btn btn-outline-primary radius-30"
                             data-bs-dismiss="modal"
-                            aria-label="Close"
                             style={{ width: "100%" }}
                           >
                             Batal
@@ -926,6 +790,7 @@ export default function DataArsip({ children }) {
                     className="btn btn-primary"
                     data-bs-dismiss="modal"
                     aria-label="Close"
+                    onClick={() => refreshData()}
                     style={{ width: "100%", borderRadius: 50 }}
                   >
                     Oke

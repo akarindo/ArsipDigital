@@ -11,7 +11,7 @@ export default function ApprovalPetugas() {
   const tab = location.pathname.includes("Arsip Digital")
     ? "Arsip Digital"
     : "Arsip Fisik";
-  const { pinjamans, tujuans, token, isLoading } = usePengajuan();
+  const { pinjamans, tujuans, token, isLoading, refreshData } = usePengajuan();
   const fisik = pinjamans?.filter((pinjaman) => pinjaman?.arsip?.file == null);
   const digital = pinjamans?.filter(
     (pinjaman) => pinjaman?.arsip?.file != null,
@@ -258,10 +258,18 @@ export default function ApprovalPetugas() {
             filterPinjaman={filterPinjaman}
             tujuans={tujuans}
             isLoading={isLoading}
-            handleApprove={(item) => handleApprove(item)}
-            handleTolak={(item) => handleTolak(item)}
+            handleApprove={(item) => {
+              handleApprove(item);
+              refreshData();
+            }}
+            handleTolak={(item) => {
+              handleTolak(item);
+            }}
             formatDate={(string) => formatDate(string)}
-            handleGetArsip={(item) => handleGetArsip(item)}
+            handleGetArsip={(item) => {
+              handleGetArsip(item);
+              refreshData();
+            }}
           />
         </div>
       </div>
@@ -298,9 +306,12 @@ export default function ApprovalPetugas() {
                 <button
                   className="btn btn-primary"
                   disabled={!alasanTolak.trim()} // Tombol mati jika alasan kosong
-                  onClick={() => handleReject(selectedItem, alasanTolak)}
+                  onClick={() => {
+                    handleReject(selectedItem, alasanTolak);
+                    refreshData();
+                  }}
                 >
-                  Kirim & Kembalikan
+                  Tolak
                 </button>
               </div>
             </div>

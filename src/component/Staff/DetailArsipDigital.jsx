@@ -3,6 +3,7 @@ import { PengajuanContext } from "../../context/PengajuanContext";
 import React, { useState } from "react";
 import ArsipDigitalPetugas from "../Petugas/ArsipDigitalPetugas";
 import SkeletonItem from "../SkeletonItem";
+import ArchiveDigitalCard from "../base/ArchiveDigitalCard";
 
 export default function DetailArsipDigital() {
   const { uuid } = useParams();
@@ -11,6 +12,7 @@ export default function DetailArsipDigital() {
     handleDelete,
     role,
     isLoading,
+    handleEdit,
     pinjamans,
     refreshData,
     user,
@@ -24,9 +26,6 @@ export default function DetailArsipDigital() {
     let pdfUrl = base64String.includes("data:application/pdf")
       ? base64String
       : `data:application/pdf;base64,${base64String}`;
-
-    // Tambahkan parameter untuk menyembunyikan toolbar
-    // Catatan: base64 harus diconvert ke Blob URL agar parameter ini bekerja lebih stabil
     const byteCharacters = atob(pdfUrl.split(",")[1]);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
@@ -60,14 +59,6 @@ export default function DetailArsipDigital() {
   return (
     <ArsipDigitalPetugas>
       <div className="dropdown">
-        <a
-          href="#"
-          className="btn btn-white btn-sm my-3 mt-0 p-2 pe-0"
-          data-bs-toggle="dropdown"
-        >
-          Semua Arsip <i className="bx bxs-chevron-down ms-5" />
-        </a>
-
         {viewPdf && (
           <div className="card mb-4 shadow-sm">
             <div className="card-header d-flex justify-content-between align-items-center bg-dark text-white">
@@ -124,146 +115,19 @@ export default function DetailArsipDigital() {
               );
 
               return (
-                <div
-                  key={index}
-                  className="customers-list-item shadow-sm cursor-pointer bg-white"
-                  style={{ marginBottom: 15 }}
-                >
-                  <div className="top d-flex align-items-center justify-content-between p-3">
-                    <div className="kiri">
-                      <img
-                        src="/assets/images/iconpdf.png"
-                        width={60}
-                        height={60}
-                        alt="pdf"
-                      />
-                    </div>
-                    {role != "pegawai" && (
-                      <div className="kanan">
-                        {/* Tombol Lihat (Hanya Lihat yang tersisa) */}
-                        <div
-                          onClick={() => handlePreview(arsip.file)}
-                          className="d-flex align-items-center border px-3 radius-10 text-white"
-                          style={{
-                            height: 35,
-                            backgroundColor: "#386CFF",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <span className="me-2 mb-0">Lihat</span>
-                          <img
-                            src="/assets/images/eye.png"
-                            width={15}
-                            height={10}
-                            alt="eye"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {isPinjam.length > 0 && (
-                      <div className="kanan">
-                        {/* Tombol Lihat (Hanya Lihat yang tersisa) */}
-                        <div
-                          onClick={() => handlePreview(arsip.file)}
-                          className="d-flex align-items-center border px-3 radius-10 text-white"
-                          style={{
-                            height: 35,
-                            backgroundColor: "#386CFF",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <span className="me-2 mb-0">Lihat</span>
-                          <img
-                            src="/assets/images/eye.png"
-                            width={15}
-                            height={10}
-                            alt="eye"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <h6 className="ms-3 mb-0 fw-bold">{arsip.judul_arsip}</h6>
-
-                  <div className="d-flex justify-content-between p-3 py-2">
-                    <div>
-                      <div className="mb-1">
-                        <span className="fw-bold">Jenis Arsip</span> :{" "}
-                        <span className="text-secondary">
-                          {arsip.jenis_arsip}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="fw-bold">Kategori</span> :{" "}
-                        <span className="text-secondary">
-                          {arsip.kategori_arsip}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="mb-1">
-                        <span className="fw-bold">Tipe</span> :{" "}
-                        <span className="text-secondary">
-                          {arsip.tipe_arsip}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="fw-bold">Waktu Upload</span> :{" "}
-                        <span className="text-secondary">
-                          {formatDate(arsip.created_at)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  {role == "staff umum" && (
-                    <div className="d-flex p-3 pt-0 gap-3">
-                      <button
-                        onClick={() => handleEdit(arsip)}
-                        type="button"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modaltambahFisik"
-                        className="btn btn-info text-white flex-grow-1 rounded"
-                      >
-                        Edit Arsip
-                      </button>
-                      <button
-                        onClick={() => handleDelete(arsip)}
-                        type="button"
-                        className="btn btn-danger text-white flex-grow-1 rounded"
-                      >
-                        Hapus Arsip
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <ArchiveDigitalCard
+                  role={role}
+                  isPinjam={isPinjam}
+                  index={index}
+                  arsip={arsip}
+                  handlePreview={handlePreview}
+                  formatDate={formatDate}
+                  handleDelete={handleDelete}
+                  handleEdit={handleEdit}
+                />
               );
             })
           )}
-
-          {/* Pagination tetep ada di bawah */}
-          <nav
-            aria-label="Page navigation"
-            className="d-flex justify-content-center mt-4"
-          >
-            <ul className="pagination">
-              <li className="page-item">
-                <a className="page-link" href="#">
-                  «
-                </a>
-              </li>
-              <li className="page-item active">
-                <a className="page-link" href="#">
-                  1
-                </a>
-              </li>
-              <li className="page-item">
-                <a className="page-link" href="#">
-                  »
-                </a>
-              </li>
-            </ul>
-          </nav>
         </div>
       </div>
     </ArsipDigitalPetugas>

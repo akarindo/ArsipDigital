@@ -14,7 +14,6 @@ export default function LantaiStaff() {
       setFloorBuild(filtered);
     }
   }, [floors]);
-  console.log("floor", floorBuild);
   return (
     <DataArsip>
       <div className="customers-list mb-3">
@@ -79,11 +78,6 @@ export default function LantaiStaff() {
             </div>
           </div>
         ))}
-        <div className="col">
-          <button type="button" className="btn btn-secondary px-5 w-100">
-            Lantai Dasar
-          </button>
-        </div>
       </div>
     </DataArsip>
   );

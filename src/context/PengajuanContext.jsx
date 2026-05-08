@@ -189,25 +189,57 @@ export const PengajuanProvider = ({ children }) => {
     );
     setFolderBuild(filterFolder);
   }
-  // --- Handlers ---
   const handleEdit = (item) => {
+    flattenedGedung.floors?.map((floor) => {
+      if (floor.building_uuid == item.gedung_uuid) {
+        floorBuild.push(floor);
+      }
+    });
+    floorBuild?.map((flr) => {
+      flr.rooms?.map((room) => {
+        if (room.floor_uuid == item.lantai_uuid) {
+          roomBuild.push(room);
+        }
+      });
+    });
+    roomBuild?.map((room) => {
+      room.cabinets?.map((cabinet) => {
+        if (cabinet.room_uuid == item.ruang_uuid) {
+          cabinetBuild.push(cabinet);
+        }
+      });
+    });
+    cabinetBuild?.map((cabinet) => {
+      cabinet.shelves?.map((shelf) => {
+        if (shelf.cabinet_uuid == item.lemari_uuid) {
+          shelfBuild.push(shelf);
+        }
+      });
+    });
+    shelfBuild?.map((shelf) => {
+      shelf.folders?.map((folder) => {
+        if (folder.shelf_uuid == item.rak_uuid) {
+          folderBuild.push(folder);
+        }
+      });
+    });
     setIsEdit(true);
     setCurrentUuid(item.uuid);
     setFormDataArsip({
-      file: item.file,
-      name_uuid: item?.names?.name,
-      tipe_arsip: item.tipe_arsip,
-      judul_arsip: item.judul_arsip,
-      jenis_arsip: item.jenis_arsip,
-      kategori_arsip: item.kategori_arsip,
-      gedung_uuid: item?.gedung?.name,
-      lantai_uuid: item?.lantai?.name,
-      ruang_uuid: item?.ruang?.name,
-      lemari_uuid: item?.lemari?.name,
-      rak_uuid: item?.shelf?.name,
-      folder_uuid: item?.folder?.name,
-      kode_arsip: item.kode_arsip,
-      keterangan: item.keterangan,
+      file: item?.file,
+      name_uuid: item?.name_uuid,
+      tipe_arsip: item?.tipe_arsip,
+      judul_arsip: item?.judul_arsip,
+      jenis_arsip: item?.jenis_arsip,
+      kategori_arsip: item?.kategori_arsip,
+      gedung_uuid: item?.gedung_uuid,
+      lantai_uuid: item?.lantai_uuid,
+      ruang_uuid: item?.ruang_uuid,
+      lemari_uuid: item?.lemari_uuid,
+      rak_uuid: item?.rak_uuid,
+      folder_uuid: item?.folder_uuid,
+      kode_arsip: item?.kode_arsip,
+      keterangan: item?.keterangan,
     });
     // setFormDataArsip({ ...item });
   };
@@ -268,6 +300,11 @@ export const PengajuanProvider = ({ children }) => {
       roomBuild,
       cabinetBuild,
       shelfBuild,
+      setFloorBuild,
+      setFolderBuild,
+      setRoomBuild,
+      setCabinetBuild,
+      setShelfBuild,
       setToken,
       setRole,
       setUser,
@@ -293,6 +330,11 @@ export const PengajuanProvider = ({ children }) => {
       roomBuild,
       cabinetBuild,
       shelfBuild,
+      setFloorBuild,
+      setFolderBuild,
+      setRoomBuild,
+      setCabinetBuild,
+      setShelfBuild,
       handleChangeBuild,
       handleChangeFloor,
       handleChangeRoom,
