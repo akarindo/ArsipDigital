@@ -99,7 +99,7 @@ export default function NewLogin() {
 
             <div className="card border-0 shadow-sm rounded-4">
               <div className="card-body p-4 p-sm-5">
-                <h4 className="fw-bold mb-1">Sign In</h4>
+                <h4 className="fw-bold mb-1">Login</h4>
                 <p className="text-muted small mb-4">
                   Silakan masukkan akun Anda untuk melanjutkan
                 </p>
