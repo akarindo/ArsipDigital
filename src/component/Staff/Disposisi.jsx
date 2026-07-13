@@ -34,14 +34,21 @@ export default function Disposisi() {
       setLoading(false);
     }
   }
-
+  function getLocalDateTimeString() {
+    const tzoffset = new Date().getTimezoneOffset() * 60000; // offset dalam milidetik
+    const localISOTime = new Date(Date.now() - tzoffset)
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+    return localISOTime; // Hasil: "2026-07-13 17:00:00"
+  }
   // Fungsi untuk update status "Diterima"
   async function handleTerimaSurat(item) {
     let form = [];
     if (item.parent_uuid) {
-      form = { ...item, read_at: new Date().toISOString() };
+      form = { ...item, read_at: getLocalDateTimeString() };
     } else {
-      form = { ...item, tanggal_direspon: new Date().toISOString() };
+      form = { ...item, tanggal_direspon: getLocalDateTimeString() };
     }
     try {
       const response = await fetch(

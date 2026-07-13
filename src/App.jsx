@@ -85,6 +85,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/dashboarddireksi"
+          element={
+            <ProtectedRoute allowedRoles={["direksi"]}>
+              <DashboardPetugas />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Dashboard untuk Pimpinan */}
         <Route
