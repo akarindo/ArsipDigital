@@ -145,11 +145,21 @@ export default function Disposisi() {
     if (prio === "segera") return "bg-warning text-dark";
     return "bg-info text-white";
   };
-  const previewPDF = (base64String) => {
-    const newTab = window.open();
-    newTab.document.write(
-      `<iframe src="${base64String}" width="100%" height="100%" style="border:none;"></iframe>`,
-    );
+  const previewPDF = (filePath) => {
+    // 1. Cek apakah file_path adalah data Base64 lama
+    if (filePath.startsWith("data:")) {
+      // Jalankan cara lama menggunakan iframe untuk Base64
+      const newTab = window.open();
+      newTab.document.write(
+        `<iframe src="${filePath}" width="100%" height="100%" style="border:none;"></iframe>`,
+      );
+    }
+    // 2. Jika bukan Base64, berarti ini file fisik baru (URL Path)
+    else {
+      // Gabungkan dengan domain API dan buka langsung di tab baru
+      const fileUrl = `${import.meta.env.VITE_API_URL}${filePath}`;
+      window.open(fileUrl, "_blank");
+    }
   };
   return (
     <AdminLayout>

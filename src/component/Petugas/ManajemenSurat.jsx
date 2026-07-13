@@ -28,41 +28,117 @@ ChartJS.register(
 
 function Alert({ alerts, removeAlert }) {
   return (
-    <div style={{
-      position: "fixed", top: "20px", right: "20px", zIndex: 9999,
-      display: "flex", flexDirection: "column", gap: "10px", minWidth: "300px",
-    }}>
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        minWidth: "300px",
+      }}
+    >
       {alerts.map((alert) => (
-        <div key={alert.id} style={{
-          background: alert.type === "success" ? "#dcfce7" : alert.type === "info" ? "#dbeafe" : "#fee2e2",
-          borderLeft: `4px solid ${alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626"}`,
-          borderRadius: "12px", padding: "14px 16px",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-          display: "flex", alignItems: "flex-start", gap: "12px",
-          animation: "slideIn 0.3s ease", position: "relative", overflow: "hidden",
-        }}>
-          <div style={{
-            width: "32px", height: "32px", borderRadius: "50%",
-            background: alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <i className={`bx ${alert.type === "success" ? "bx-check" : alert.type === "info" ? "bx-edit" : "bx-trash"} text-white`} style={{ fontSize: "16px" }}></i>
+        <div
+          key={alert.id}
+          style={{
+            background:
+              alert.type === "success"
+                ? "#dcfce7"
+                : alert.type === "info"
+                  ? "#dbeafe"
+                  : "#fee2e2",
+            borderLeft: `4px solid ${alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626"}`,
+            borderRadius: "12px",
+            padding: "14px 16px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            animation: "slideIn 0.3s ease",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              background:
+                alert.type === "success"
+                  ? "#16a34a"
+                  : alert.type === "info"
+                    ? "#2563eb"
+                    : "#dc2626",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <i
+              className={`bx ${alert.type === "success" ? "bx-check" : alert.type === "info" ? "bx-edit" : "bx-trash"} text-white`}
+              style={{ fontSize: "16px" }}
+            ></i>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: "700", fontSize: "13px",
-              color: alert.type === "success" ? "#15803d" : alert.type === "info" ? "#1d4ed8" : "#b91c1c",
-            }}>{alert.title}</p>
-            <p style={{ margin: 0, fontSize: "12px", color: "#555", marginTop: "2px" }}>{alert.message}</p>
+            <p
+              style={{
+                margin: 0,
+                fontWeight: "700",
+                fontSize: "13px",
+                color:
+                  alert.type === "success"
+                    ? "#15803d"
+                    : alert.type === "info"
+                      ? "#1d4ed8"
+                      : "#b91c1c",
+              }}
+            >
+              {alert.title}
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "12px",
+                color: "#555",
+                marginTop: "2px",
+              }}
+            >
+              {alert.message}
+            </p>
           </div>
-          <button onClick={() => removeAlert(alert.id)}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#999", fontSize: "16px" }}>
+          <button
+            onClick={() => removeAlert(alert.id)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              color: "#999",
+              fontSize: "16px",
+            }}
+          >
             <i className="bx bx-x"></i>
           </button>
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, height: "3px",
-            background: alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626",
-            animation: "shrink 3s linear forwards",
-          }} />
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              height: "3px",
+              background:
+                alert.type === "success"
+                  ? "#16a34a"
+                  : alert.type === "info"
+                    ? "#2563eb"
+                    : "#dc2626",
+              animation: "shrink 3s linear forwards",
+            }}
+          />
         </div>
       ))}
     </div>
@@ -238,7 +314,8 @@ export default function ManajemenSurat() {
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     try {
-      const endpoint = deleteTarget.type === "masuk" ? "/surat-masuk" : "/surat-keluar";
+      const endpoint =
+        deleteTarget.type === "masuk" ? "/surat-masuk" : "/surat-keluar";
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api${endpoint}/${deleteTarget.id}`,
         {
@@ -257,7 +334,7 @@ export default function ManajemenSurat() {
       showAlert("danger", "Gagal!", "Gagal menghapus data");
     }
   };
-  
+
   const generateNoRegistrasi = (type) => {
     const date = new Date();
     const year = date.getFullYear();
@@ -270,36 +347,38 @@ export default function ManajemenSurat() {
   };
 
   // Fungsi Lihat PDF
-  const previewPDF = (base64String) => {
-    const newTab = window.open();
-    newTab.document.write(
-      `<iframe src="${base64String}" width="100%" height="100%" style="border:none;"></iframe>`,
-    );
+  const previewPDF = (filePath) => {
+    // 1. Cek apakah file_path adalah data Base64 lama
+    if (filePath.startsWith("data:")) {
+      // Jalankan cara lama menggunakan iframe untuk Base64
+      const newTab = window.open();
+      newTab.document.write(
+        `<iframe src="${filePath}" width="100%" height="100%" style="border:none;"></iframe>`,
+      );
+    }
+    // 2. Jika bukan Base64, berarti ini file fisik baru (URL Path)
+    else {
+      // Gabungkan dengan domain API dan buka langsung di tab baru
+      const fileUrl = `${import.meta.env.VITE_API_URL}${filePath}`;
+      window.open(fileUrl, "_blank");
+    }
   };
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (file && file.type === "application/pdf") {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        // Menghitung ukuran string Base64 dalam Bytes
-        const fileSizeInBytes = base64String.length;
-
-        if (type === "masuk") {
-          setFormMasuk({
-            ...formMasuk,
-            file_path: base64String,
-            file_size: fileSizeInBytes, // Simpan ukuran dalam Bytes
-          });
-        } else {
-          setFormKeluar({
-            ...formKeluar,
-            file_path: base64String,
-            file_size: fileSizeInBytes,
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+      if (type === "masuk") {
+        setFormMasuk({
+          ...formMasuk,
+          file_pdf: file, // Simpan objek file asli di sini, bukan base64 string
+          file_size: file.size, // file.size bawaan JavaScript sudah dalam bentuk Bytes
+        });
+      } else {
+        setFormKeluar({
+          ...formKeluar,
+          file_pdf: file,
+          file_size: file.size,
+        });
+      }
     } else {
       alert("Mohon pilih file format PDF!");
       e.target.value = null;
@@ -316,41 +395,75 @@ export default function ManajemenSurat() {
     const isEdit = !!selectedData;
     const payload = type === "masuk" ? formMasuk : formKeluar;
     const endpoint = type === "masuk" ? "/surat-masuk" : "/surat-keluar";
+
+    // Jika edit, arahkan ke endpoint POST tapi nanti kita timpa dengan _method PUT
     const url = isEdit
       ? `${import.meta.env.VITE_API_URL}/api${endpoint}/${selectedData.id}`
       : `${import.meta.env.VITE_API_URL}/api${endpoint}`;
 
+    // 1. Inisialisasi FormData
+    const formData = new FormData();
+
+    // 2. Masukkan semua text field ke FormData
+    Object.keys(payload).forEach((key) => {
+      // Pastikan kita tidak memasukkan file lama dalam bentuk string/null yang salah
+      if (
+        key !== "file_pdf" &&
+        payload[key] !== null &&
+        payload[key] !== undefined
+      ) {
+        formData.append(key, payload[key]);
+      }
+    });
+
+    // 3. Masukkan file PDF asli (jika ada inputan file baru)
+    if (payload.file_pdf instanceof File) {
+      formData.append("file_pdf", payload.file_pdf);
+    }
+
+    // 4. Solusi khusus Laravel spoofing untuk method PUT
+    if (isEdit) {
+      formData.append("_method", "PUT");
+    }
+
     try {
       const response = await fetch(url, {
-        method: isEdit ? "PUT" : "POST",
+        method: "POST", // Selalu POST jika mengirim file fisik via FormData
         headers: {
-          "Content-Type": "application/json",
+          // JANGAN gunakan "Content-Type": "application/json"
+          // Biarkan browser menentukan Content-Type multipart/form-data secara otomatis
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
         },
-        body: JSON.stringify(payload),
+        body: formData, // Kirim objek FormData
       });
 
       if (response.ok) {
         showAlert(
           isEdit ? "info" : "success",
           isEdit ? "Diperbarui!" : "Berhasil Disimpan!",
-          `Data berhasil ${isEdit ? "diperbarui" : "disimpan"}!`
+          `Data berhasil ${isEdit ? "diperbarui" : "disimpan"}!`,
         );
-        // Tutup Modal
+
         const modalId =
           type === "masuk" ? "modalSuratMasuk" : "modalSuratKeluar";
         window.bootstrap.Modal.getInstance(
           document.getElementById(modalId),
         ).hide();
 
-        setSelectedData(null); // Reset mode edit
+        setSelectedData(null);
         fetchData();
+      } else {
+        const errorData = await response.json();
+        showAlert(
+          "danger",
+          "Gagal!",
+          errorData.message || "Terjadi kesalahan validasi.",
+        );
       }
     } catch (err) {
-      showAlert("danger", "Gagal!", "Terjadi kesalahan.");
+      showAlert("danger", "Gagal!", "Terjadi kesalahan koneksi.");
     }
-    console.log("form", formMasuk);
   };
   const bulanLabel = [
     "Jan",
@@ -747,7 +860,9 @@ export default function ManajemenSurat() {
                               {/* Tombol Hapus */}
                               <button
                                 className="btn btn-sm btn-outline-secondary shadow-none"
-                                onClick={() => handleOpenDeleteModal(item.id, tab)}
+                                onClick={() =>
+                                  handleOpenDeleteModal(item.id, tab)
+                                }
                               >
                                 <i className="bx bx-trash"></i>
                               </button>
@@ -1344,19 +1459,31 @@ export default function ManajemenSurat() {
       </div>
 
       {/* Modal Hapus */}
-      <div className="modal fade" id="modalKonfirmasiHapusSurat" tabIndex={-1} aria-hidden="true">
+      <div
+        className="modal fade"
+        id="modalKonfirmasiHapusSurat"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
         <div className="modal-dialog modal-dialog-centered modal-sm">
-          <div className="modal-content border-0 shadow-lg" style={{ borderRadius: "20px" }}>
+          <div
+            className="modal-content border-0 shadow-lg"
+            style={{ borderRadius: "20px" }}
+          >
             <div className="modal-body p-4 text-center">
               <div
                 className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
                 style={{ width: "64px", height: "64px", background: "#fff0f0" }}
               >
-                <i className="bx bx-trash text-danger" style={{ fontSize: "28px" }}></i>
+                <i
+                  className="bx bx-trash text-danger"
+                  style={{ fontSize: "28px" }}
+                ></i>
               </div>
               <h5 className="fw-bold mb-1">Hapus Data?</h5>
               <p className="text-muted small mb-0">
-                Data surat ini akan dihapus secara permanen dan tidak dapat dikembalikan.
+                Data surat ini akan dihapus secara permanen dan tidak dapat
+                dikembalikan.
               </p>
             </div>
             <div className="modal-footer border-0 pb-4 px-4 d-flex gap-2">
