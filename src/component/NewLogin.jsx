@@ -70,6 +70,7 @@ export default function NewLogin() {
         pegawai: "/disposisistaff",
         hrd: "/disposisistaff",
         "staff umum": "/surat",
+        super_admin: "/surat",
         direksi: "/disposisi",
       };
 

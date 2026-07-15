@@ -43,6 +43,9 @@ import CorporateMaster from "./component/Petugas/CorporateMaster.jsx";
 import RiwayatDisposisi from "./component/Pimpinan/RiwayatDisposisi.jsx";
 import NewLogin from "./component/NewLogin.jsx";
 import DataArsipStaff from "./component/Staff/DataArsipStaff.jsx";
+import UserManagement from "./component/UserManagement.jsx";
+import BranchMaster from "./component/Petugas/BranchMaster.jsx";
+import Surat from "./component/Petugas/Surat.jsx";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
@@ -305,6 +308,30 @@ export default function App() {
           }
         />
         <Route
+          path="/kantor-cabang"
+          element={
+            <ProtectedRoute>
+              <BranchMaster />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pengguna"
+          element={
+            <ProtectedRoute>
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instansi"
+          element={
+            <ProtectedRoute>
+              <CorporateMaster />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/surat"
           element={
             <ProtectedRoute>
@@ -398,6 +425,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Disposisi />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gdrive"
+          element={
+            <ProtectedRoute>
+              <Surat />
             </ProtectedRoute>
           }
         />

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { PengajuanContext } from "../../context/PengajuanContext";
 import AdminLayout from "../layouts/AdminLayout";
+import Select from "react-select";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,6 +16,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
+import Alert from "../Alert";
 
 // Registrasi ChartJS
 ChartJS.register(
@@ -29,132 +31,12 @@ ChartJS.register(
   Legend,
 );
 
-function Alert({ alerts, removeAlert }) {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "20px",
-        right: "20px",
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        minWidth: "300px",
-      }}
-    >
-      {alerts.map((alert) => (
-        <div
-          key={alert.id}
-          style={{
-            background:
-              alert.type === "success"
-                ? "#dcfce7"
-                : alert.type === "info"
-                  ? "#dbeafe"
-                  : "#fee2e2",
-            borderLeft: `4px solid ${alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626"}`,
-            borderRadius: "12px",
-            padding: "14px 16px",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "12px",
-            animation: "slideIn 0.3s ease",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "50%",
-              background:
-                alert.type === "success"
-                  ? "#16a34a"
-                  : alert.type === "info"
-                    ? "#2563eb"
-                    : "#dc2626",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <i
-              className={`bx ${alert.type === "success" ? "bx-check" : alert.type === "info" ? "bx-edit" : "bx-trash"} text-white`}
-              style={{ fontSize: "16px" }}
-            ></i>
-          </div>
-          <div style={{ flex: 1 }}>
-            <p
-              style={{
-                margin: 0,
-                fontWeight: "700",
-                fontSize: "13px",
-                color:
-                  alert.type === "success"
-                    ? "#15803d"
-                    : alert.type === "info"
-                      ? "#1d4ed8"
-                      : "#b91c1c",
-              }}
-            >
-              {alert.title}
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "12px",
-                color: "#555",
-                marginTop: "2px",
-              }}
-            >
-              {alert.message}
-            </p>
-          </div>
-          <button
-            onClick={() => removeAlert(alert.id)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              color: "#999",
-              fontSize: "16px",
-            }}
-          >
-            <i className="bx bx-x"></i>
-          </button>
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              height: "3px",
-              background:
-                alert.type === "success"
-                  ? "#16a34a"
-                  : alert.type === "info"
-                    ? "#2563eb"
-                    : "#dc2626",
-              animation: "shrink 3s linear forwards",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function DisposisiSurat() {
   const { users, token } = useContext(PengajuanContext);
   const [suratMasukList, setSuratMasukList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const filterStaff = users?.filter(
-    (user) => user.role == "pegawai" || user.role == "hrd",
-  );
+  const filterStaff = users?.filter((user) => user.role != "super_admin");
+  console.log("users", users);
   const [alerts, setAlerts] = useState([]);
 
   const showAlert = (type, title, message) => {
@@ -170,14 +52,13 @@ export default function DisposisiSurat() {
   const [selectedSurat, setSelectedSurat] = useState(null);
   const [formDisposisi, setFormDisposisi] = useState({
     arsip_uuid: "",
-    user_id: "",
+    user_ids: [],
     tindak_lanjut: "",
     skala_prioritas: "biasa",
     intruksi: "",
-    batas_waktu: "", // Sekarang akan mendukung YYYY-MM-DDTHH:mm
+    batas_waktu: "",
     catatan: "",
   });
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -235,8 +116,6 @@ export default function DisposisiSurat() {
       ],
     };
   }, [suratMasukList]);
-
-  // 2. Data untuk Doughnut Chart (Distribusi Instansi)
   const corporateStats = useMemo(() => {
     const counts = {};
     suratMasukList.forEach((item) => {
@@ -268,32 +147,33 @@ export default function DisposisiSurat() {
 
   const handleOpenDisposisi = (surat) => {
     setSelectedSurat(surat);
+    const existingUserIds = surat.disposisi
+      ? surat.disposisi.map((d) => d.user_id)
+      : [];
+    const lastDisposisi = surat.disposisi?.[0] || {};
+
     setFormDisposisi({
       arsip_uuid: surat.uuid,
-      user_id: "",
-      tindak_lanjut: "",
-      skala_prioritas: "biasa",
-      intruksi: "",
-      batas_waktu: "",
-      catatan: "",
+      user_ids: existingUserIds,
+      tindak_lanjut: lastDisposisi.tindak_lanjut || "",
+      skala_prioritas: lastDisposisi.skala_prioritas || "biasa",
+      intruksi: lastDisposisi.intruksi || "",
+      batas_waktu: lastDisposisi.batas_waktu || "",
+      catatan: lastDisposisi.catatan || "",
     });
+
     const modal = new window.bootstrap.Modal(
       document.getElementById("modalDisposisi"),
     );
     modal.show();
   };
   const previewPDF = (filePath) => {
-    // 1. Cek apakah file_path adalah data Base64 lama
     if (filePath.startsWith("data:")) {
-      // Jalankan cara lama menggunakan iframe untuk Base64
       const newTab = window.open();
       newTab.document.write(
         `<iframe src="${filePath}" width="100%" height="100%" style="border:none;"></iframe>`,
       );
-    }
-    // 2. Jika bukan Base64, berarti ini file fisik baru (URL Path)
-    else {
-      // Gabungkan dengan domain API dan buka langsung di tab baru
+    } else {
       const fileUrl = `${import.meta.env.VITE_API_URL}${filePath}`;
       window.open(fileUrl, "_blank");
     }
@@ -301,7 +181,6 @@ export default function DisposisiSurat() {
 
   const handleSubmitDisposisi = async (e) => {
     e.preventDefault();
-    console.log("form", formDisposisi);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi`,
@@ -542,8 +421,6 @@ export default function DisposisiSurat() {
           </div>
         </div>
       </div>
-
-      {/* MODAL DISPOSISI MODERN */}
       <div
         className="modal fade"
         id="modalDisposisi"
@@ -587,62 +464,91 @@ export default function DisposisiSurat() {
                 )}
 
                 <div className="row g-4">
-                  {/* Step 1: Destination */}
                   <div className="col-md-12">
                     <label className="form-label fw-bold small text-uppercase">
-                      1. Teruskan Kepada
+                      1. Teruskan Kepada (Bisa pilih lebih dari 1)
                     </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <i className="bx bx-user"></i>
-                      </span>
-                      <select
-                        className="form-select border-start-0"
-                        required
-                        value={formDisposisi.user_id}
-                        onChange={(e) =>
-                          setFormDisposisi({
-                            ...formDisposisi,
-                            user_id: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Pilih Nama Staf...</option>
-                        {filterStaff?.map((user) => (
-                          <option key={user.uuid} value={user.uuid}>
-                            {user.name} ({user.role})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
 
-                  {/* Step 2: Deadline */}
-                  {/* <div className="col-md-6">
-                    <label className="form-label fw-bold small text-uppercase">
-                      2. Batas Waktu & Jam
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <i className="bx bx-time"></i>
-                      </span>
-                      <input
-                        type="datetime-local" // MENGUBAH KE TIMESTAMP (TANGGAL & JAM)
-                        className="form-control border-start-0"
-                        required
-                        value={formDisposisi.batas_waktu}
-                        onChange={(e) =>
-                          setFormDisposisi({
-                            ...formDisposisi,
-                            batas_waktu: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <small className="text-muted">
-                      Kapan staf harus menyelesaikan ini?
+                    <Select
+                      isMulti
+                      name="user_ids"
+                      placeholder="-- Pilih Staf (Bisa cari & pilih banyak) --"
+                      className="basic-multi-select text-dark"
+                      classNamePrefix="select"
+                      closeMenuOnSelect={false} // Tetap membuka dropdown setelah memilih (mirip select2)
+                      // 1. Mengubah array filterStaff menjadi format opsi react-select
+                      options={
+                        filterStaff?.map((user) => ({
+                          value: user.uuid,
+                          label: `${user.name} (${user.role.replace("_", " ")})`,
+                        })) || []
+                      }
+                      value={
+                        filterStaff
+                          ?.filter((user) =>
+                            // Tambahkan operator ?. setelah user_ids
+                            formDisposisi?.user_ids?.includes(user.uuid),
+                          )
+                          .map((user) => ({
+                            value: user.uuid,
+                            label: `${user.name} (${user.role.replace("_", " ")})`,
+                          })) || []
+                      }
+                      // 3. Menangani perubahan pilihan staf saat diklik/dihapus
+                      onChange={(selectedOptions) => {
+                        const selectedValues = selectedOptions
+                          ? selectedOptions.map((option) => option.value)
+                          : [];
+
+                        setFormDisposisi({
+                          ...formDisposisi,
+                          user_ids: selectedValues,
+                        });
+                      }}
+                      // 4. Custom styling agar selaras dengan Bootstrap 5 bawaan Anda
+                      styles={{
+                        control: (baseStyles, state) => ({
+                          ...baseStyles,
+                          borderColor: state.isFocused ? "#86b7fe" : "#dee2e6",
+                          boxShadow: state.isFocused
+                            ? "0 0 0 0.25rem rgba(13, 110, 253, 0.25)"
+                            : "none",
+                          borderRadius: "0.375rem",
+                          padding: "2px",
+                          "&:hover": {
+                            borderColor: "#86b7fe",
+                          },
+                        }),
+                        multiValue: (baseStyles) => ({
+                          ...baseStyles,
+                          backgroundColor: "rgba(13, 110, 253, 0.1)",
+                          color: "#0d6efd",
+                          borderRadius: "50px",
+                          paddingLeft: "6px",
+                        }),
+                        multiValueLabel: (baseStyles) => ({
+                          ...baseStyles,
+                          color: "#0d6efd",
+                          fontWeight: "500",
+                          fontSize: "13px",
+                        }),
+                        multiValueRemove: (baseStyles) => ({
+                          ...baseStyles,
+                          color: "#0d6efd",
+                          borderRadius: "50px",
+                          "&:hover": {
+                            backgroundColor: "#0d6efd",
+                            color: "white",
+                          },
+                        }),
+                      }}
+                    />
+
+                    <small className="text-muted d-block mt-1">
+                      Klik nama staf untuk memilih, ketik untuk mencari nama,
+                      atau klik tanda <code>×</code> untuk membatalkan.
                     </small>
-                  </div> */}
+                  </div>
                   <div className="col-md-12">
                     <label className="form-label fw-bold small text-uppercase">
                       3. Tindak Lanjut

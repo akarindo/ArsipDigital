@@ -1,16 +1,21 @@
 import AdminLayout from "../layouts/AdminLayout";
 import { usePengajuan } from "../../context/PengajuanContext";
 import React, { useState, useEffect } from "react";
+import Select from "react-select"; // Import react-select
 
 export default function Disposisi() {
   const { token, user, users } = usePengajuan();
-  const [semuaDisposisi, setSemuaDisposisi] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [pegawai, setPegawai] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedSurat, setSelectedSurat] = useState(null);
-  // const [selectedDisposisi, setSelectedDisposisi] = useState(null);
-  const filterStaff = users?.filter((user) => user.role == "pegawai");
+
+  // State baru untuk menampung data form multi-select pegawai
+  const [formDisposisi, setFormDisposisi] = useState({
+    user_ids: [],
+  });
+
+  const filterStaff = users?.filter((user) => user.role === "pegawai");
+
   async function getDisposisi() {
     try {
       setLoading(true);
@@ -23,26 +28,25 @@ export default function Disposisi() {
       const result = await response.json();
 
       if (response.ok) {
-        // setSemuaDisposisi(result);
-        // LANGSUNG FILTER DI SINI
-        const filtered = result.filter(
-          (d) => d?.user_id === user.uuid || d?.parent_uuid === user.uuid,
-        );
+        const filtered = result.filter((d) => d?.user_id === user.uuid);
         setFilteredData(filtered);
       }
+    } catch (error) {
+      console.error("Gagal mengambil data disposisi:", error);
     } finally {
       setLoading(false);
     }
   }
+
   function getLocalDateTimeString() {
-    const tzoffset = new Date().getTimezoneOffset() * 60000; // offset dalam milidetik
+    const tzoffset = new Date().getTimezoneOffset() * 60000;
     const localISOTime = new Date(Date.now() - tzoffset)
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
-    return localISOTime; // Hasil: "2026-07-13 17:00:00"
+    return localISOTime;
   }
-  // Fungsi untuk update status "Diterima"
+
   async function handleTerimaSurat(item) {
     let form = [];
     if (item.parent_uuid) {
@@ -54,7 +58,7 @@ export default function Disposisi() {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi/${item.uuid}`,
         {
-          method: "PUT", // atau POST sesuai route backend Anda
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -64,228 +68,281 @@ export default function Disposisi() {
         },
       );
       if (response.ok) {
-        getDisposisi(); // Refresh data
-        setSelectedDisposisi(null);
         setSelectedSurat(null);
+        getDisposisi();
       }
-      getDisposisi(); // Refresh data
     } catch (error) {
-      // alert("Gagal memperbarui status");
+      console.error(error);
     }
   }
+
   async function handleToPegawai(e) {
     e.preventDefault();
+
+    // Payload disesuaikan mengirim array user_ids ke backend Anda
     const form = {
       arsip_uuid: selectedSurat.arsip_uuid,
-      user_id: selectedSurat.user_id,
-      parent_uuid: pegawai,
+      user_ids: formDisposisi.user_ids,
+      parent_uuid: user.uuid, // Mengirim multi-select data
       tindak_lanjut: selectedSurat.tindak_lanjut,
       skala_prioritas: selectedSurat.skala_prioritas,
       intruksi: selectedSurat.intruksi,
-      batas_waktu: selectedSurat.batas_waktu, // Sekarang akan mendukung YYYY-MM-DDTHH:mm
+      batas_waktu: selectedSurat.batas_waktu,
       catatan: selectedSurat.catatan,
     };
+    const currentform = {
+      arsip_uuid: selectedSurat.arsip_uuid,
+      user_id: selectedSurat.user_id,
+      parent_uuid: user.uuid, // Mengirim multi-select data
+      tindak_lanjut: selectedSurat.tindak_lanjut,
+      skala_prioritas: selectedSurat.skala_prioritas,
+      intruksi: selectedSurat.intruksi,
+      batas_waktu: selectedSurat.batas_waktu,
+      catatan: selectedSurat.catatan,
+    };
+    console.log("formdis", formDisposisi);
+    console.log("form", form);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/disposisi`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(form),
+        },
+      );
+      if (response.ok) {
+        await updatedis(currentform);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  async function updatedis(defaultForm) {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi/${selectedSurat.uuid}`,
         {
-          method: "PUT", // atau POST sesuai route backend Anda
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(form),
+          body: JSON.stringify(defaultForm),
         },
       );
       if (response.ok) {
-        getDisposisi(); // Refresh data
         const modalElement = document.getElementById("modalDisposisi");
         const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
         if (modalInstance) {
           modalInstance.hide();
         }
-        setPegawai(null);
+        setFormDisposisi({ user_ids: [] }); // Reset Pilihan
         setSelectedSurat(null);
+        getDisposisi();
       }
-      getDisposisi();
     } catch (error) {
-      // alert("Gagal memperbarui status");
+      console.error(error);
     }
   }
-
-  // Gunakan useMemo agar filter otomatis berjalan saat semuaDisposisi atau user berubah
-  // const filterDisposisi = React.useMemo(() => {
-  //   if (!semuaDisposisi || !user?.uuid) return [];
-
-  //   return semuaDisposisi.filter(
-  //     (disposisi) =>
-  //       disposisi?.user_id === user.uuid ||
-  //       disposisi?.parent_uuid === user.uuid,
-  //   );
-  // }, [semuaDisposisi, user?.uuid]);
   const handleOpenDisposisi = (surat) => {
     setSelectedSurat(surat);
+    setFormDisposisi({ user_ids: [] }); // Reset input form lama saat modal dibuka baru
     const modal = new window.bootstrap.Modal(
       document.getElementById("modalDisposisi"),
     );
     modal.show();
   };
-  console.log("filter", filteredData);
-  console.log("user", user);
+
   useEffect(() => {
     if (token && user?.uuid) {
       getDisposisi();
     }
   }, [token, user]);
 
-  // Helper untuk warna prioritas
   const getPrioClass = (prio) => {
-    if (prio === "penting") return "bg-danger";
+    if (prio === "penting") return "bg-danger text-white";
     if (prio === "segera") return "bg-warning text-dark";
     return "bg-info text-white";
   };
+
   const previewPDF = (filePath) => {
-    // 1. Cek apakah file_path adalah data Base64 lama
     if (filePath.startsWith("data:")) {
-      // Jalankan cara lama menggunakan iframe untuk Base64
       const newTab = window.open();
       newTab.document.write(
         `<iframe src="${filePath}" width="100%" height="100%" style="border:none;"></iframe>`,
       );
-    }
-    // 2. Jika bukan Base64, berarti ini file fisik baru (URL Path)
-    else {
-      // Gabungkan dengan domain API dan buka langsung di tab baru
+    } else {
       const fileUrl = `${import.meta.env.VITE_API_URL}${filePath}`;
       window.open(fileUrl, "_blank");
     }
   };
+
   return (
     <AdminLayout>
-      <div className="page-wrapper">
-        <div
-          className="page-content py-4"
-          style={{ backgroundColor: "#f4f7fa", minHeight: "100vh" }}
-        >
-          <div className="row mb-4">
+      <div className="page-wrapper py-4 px-2 px-md-4 bg-light min-vh-100">
+        <div className="container-fluid">
+          {/* Header Section */}
+          <div className="row mb-4 align-items-center">
             <div className="col">
-              <h4 className="fw-bold mb-1">Tugas Disposisi Saya</h4>
-              <p className="text-muted small">
-                Kelola instruksi pimpinan dan tindak lanjut surat.
+              <h3 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <i className="bx bx-task text-primary"></i> Tugas Disposisi Saya
+              </h3>
+              <p className="text-muted mb-0 small text-wrap">
+                Kelola instruksi pimpinan dan lakukan tindak lanjut berkas surat
+                secara real-time.
               </p>
             </div>
           </div>
 
-          <div className="row g-4">
+          {/* Cards Grid */}
+          <div className="row g-3 g-md-4">
             {loading ? (
               <div className="col-12 text-center py-5">
                 <div
-                  className="spinner-border text-primary"
+                  className="spinner-border text-primary mb-3"
                   role="status"
                 ></div>
-                <p className="mt-2 text-muted">Sinkronisasi data...</p>
+                <p className="text-muted fw-medium">
+                  Menyelaraskan data tugas Anda...
+                </p>
               </div>
             ) : filteredData?.length > 0 ? (
               filteredData.map((item) => (
-                <div className="col-12 col-xl-6" key={item.id}>
-                  <div className="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
-                    <div className="card-body p-4">
-                      <div className="d-flex justify-content-between align-items-start mb-3">
-                        <span
-                          className={`badge rounded-pill ${getPrioClass(item.skala_prioritas)} px-3 py-2 text-capitalize`}
-                        >
-                          <i className="bx bxs-zap me-1"></i>{" "}
-                          {item.skala_prioritas}
-                        </span>
-                        {/* <div className="text-end text-muted small">
-                          <i className="bx bx-calendar me-1"></i>
-                          Deadline:{" "}
-                          <span className="text-danger fw-bold">
-                            {new Date(item.batas_waktu).toLocaleString("id-ID")}
+                <div
+                  className="col-12 col-md-6 col-xxl-4"
+                  key={item.uuid || item.id}
+                >
+                  <div className="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column transition-hover">
+                    <div
+                      className={`p-1 ${item.skala_prioritas === "penting" ? "bg-danger" : item.skala_prioritas === "segera" ? "bg-warning" : "bg-info"}`}
+                    />
+
+                    <div className="card-body p-4 d-flex flex-column justify-content-between">
+                      <div>
+                        <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                          <span
+                            className={`badge rounded-pill ${getPrioClass(item.skala_prioritas)} px-3 py-2 text-capitalize shadow-sm fs-7`}
+                          >
+                            <i className="bx bxs-zap me-1"></i>{" "}
+                            {item.skala_prioritas}
                           </span>
-                        </div> */}
-                      </div>
+                          {item.batas_waktu && (
+                            <div className="text-muted small d-flex align-items-center">
+                              <i className="bx bx-calendar-event me-1 text-danger"></i>
+                              <span className="text-secondary fw-semibold">
+                                {new Date(item.batas_waktu).toLocaleDateString(
+                                  "id-ID",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
+                              </span>
+                            </div>
+                          )}
+                        </div>
 
-                      {/* <h5 className="fw-bold text-dark mb-1">
-                        Intruksi: {item.tindak_lanjut}
-                      </h5> */}
-                      <p className="text-muted small mb-3 border-bottom pb-3">
-                        <i className="bx bx-envelope me-1"></i> Perihal:{" "}
-                        <strong>{item?.surat?.perihal || "No Perihal"}</strong>
-                      </p>
+                        <div className="mb-3">
+                          <label
+                            className="text-muted small text-uppercase fw-bold d-block mb-1"
+                            style={{ fontSize: "11px", letterSpacing: "0.5px" }}
+                          >
+                            Perihal Surat
+                          </label>
+                          <h6 className="text-dark fw-bold mb-0 text-truncate-2">
+                            {item?.surat?.perihal || "Tidak ada Perihal"}
+                          </h6>
+                        </div>
 
-                      <div className="instruction-box bg-light p-3 rounded-3 mb-4 border-start border-primary border-3">
-                        <small
-                          className="text-primary fw-bold d-block mb-1 text-uppercase"
-                          style={{ fontSize: "10px" }}
-                        >
-                          Instruksi Pimpinan:
-                        </small>
-                        <p className="mb-0 text-dark italic">
-                          "{item.intruksi}"
-                        </p>
-                      </div>
+                        <div className="bg-light p-3 rounded-3 mb-3 border-start border-primary border-3 shadow-inner">
+                          <small
+                            className="text-primary fw-bold d-block mb-1 text-uppercase"
+                            style={{ fontSize: "10px", letterSpacing: "0.5px" }}
+                          >
+                            Instruksi Pimpinan:
+                          </small>
+                          <p
+                            className="mb-0 text-dark italic small text-break"
+                            style={{ lineHeight: "1.5" }}
+                          >
+                            "{item.intruksi || "Tidak ada instruksi khusus."}"
+                          </p>
+                        </div>
 
-                      <div className="d-flex align-items-center justify-content-between mt-auto">
-                        <div className="d-flex align-items-center">
-                          <div className="avatar-sm bg-primary-subtle text-primary rounded-circle p-2 me-2">
-                            <i className="bx bx-note fs-5"></i>
-                          </div>
-                          <span className="small text-muted">
-                            <b> Catatan:</b>{" "}
-                            {item.catatan || "Tidak ada catatan"}
+                        <div className="d-flex align-items-start gap-2 bg-light-subtle p-2 rounded-2 mb-4">
+                          <i className="bx bx-notepad text-muted mt-1 fs-5"></i>
+                          <span className="small text-muted text-break">
+                            <strong className="text-secondary">Catatan:</strong>{" "}
+                            {item.catatan || "Tidak ada catatan tambahan."}
                           </span>
                         </div>
-                        {item?.parent_uuid !== user.uuid ? (
-                          item?.tanggal_direspon ? (
-                            <>
-                              <a
-                                onClick={() => previewPDF(item.surat.file_path)}
-                                target="_blank"
-                                className="btn btn-outline-primary rounded-pill px-4"
-                              >
-                                <i className="bx bx-show me-1"></i> Lihat Surat
-                              </a>
-                              {user.role == "hrd" && !item.parent_uuid ? (
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="mt-auto pt-2 border-top">
+                        <div className="d-flex flex-column flex-sm-row gap-2 justify-content-end">
+                          {item?.parent_uuid !== user.uuid ? (
+                            item?.tanggal_direspon ? (
+                              <>
                                 <button
-                                  onClick={() => handleOpenDisposisi(item)}
-                                  className="btn btn-success rounded-pill px-4 shadow-sm"
+                                  onClick={() =>
+                                    previewPDF(item.surat.file_path)
+                                  }
+                                  className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1"
                                 >
-                                  <i className="bx bx-check-double me-1"></i>{" "}
-                                  Teruskan Surat
+                                  <i className="bx bx-show fs-5"></i> Lihat
+                                  Surat
                                 </button>
-                              ) : null}
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handleTerimaSurat(item)}
-                              className="btn btn-primary rounded-pill px-4 shadow-sm"
-                            >
-                              <i className="bx bx-check-double me-1"></i> Surat
-                              Diterima
-                            </button>
-                          )
-                        ) : null}
-                        {item?.parent_uuid == user.uuid ? (
-                          item?.parent_uuid == user.uuid && item.read_at ? (
-                            <a
-                              onClick={() => previewPDF(item.surat.file_path)}
-                              target="_blank"
-                              className="btn btn-outline-primary rounded-pill px-4"
-                            >
-                              <i className="bx bx-show me-1"></i> Lihat Surat
-                            </a>
-                          ) : (
-                            <button
-                              onClick={() => handleTerimaSurat(item)}
-                              className="btn btn-primary rounded-pill px-4 shadow-sm"
-                            >
-                              <i className="bx bx-check-double me-1"></i> Surat
-                              Diterima
-                            </button>
-                          )
-                        ) : null}
+                                {(user.role === "hrd" ||
+                                  (user.role === "direksi" &&
+                                    !item.parent_uuid)) && (
+                                  <button
+                                    onClick={() => handleOpenDisposisi(item)}
+                                    className="btn btn-success btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                                  >
+                                    <i className="bx bx-share fs-5"></i>{" "}
+                                    Teruskan
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleTerimaSurat(item)}
+                                className="btn btn-primary btn-sm rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                              >
+                                <i className="bx bx-check-shield fs-5"></i>{" "}
+                                Konfirmasi Terima Surat
+                              </button>
+                            )
+                          ) : null}
+
+                          {item?.parent_uuid === user.uuid ? (
+                            item.read_at ? (
+                              <button
+                                onClick={() => previewPDF(item.surat.file_path)}
+                                className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1"
+                              >
+                                <i className="bx bx-show fs-5"></i> Lihat Surat
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleTerimaSurat(item)}
+                                className="btn btn-primary btn-sm rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                              >
+                                <i className="bx bx-check-shield fs-5"></i>{" "}
+                                Konfirmasi Terima Surat
+                              </button>
+                            )
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -293,101 +350,154 @@ export default function Disposisi() {
               ))
             ) : (
               <div className="col-12">
-                <div className="card border-0 shadow-sm rounded-4 py-5 text-center">
-                  <i className="bx bx-archive fs-1 text-muted mb-3"></i>
-                  <h6 className="text-muted">
-                    Belum ada disposisi untuk Anda hari ini.
-                  </h6>
+                <div className="card border-0 shadow-sm rounded-4 py-5 text-center bg-white">
+                  <div
+                    className="p-4 mx-auto bg-light rounded-circle mb-3"
+                    style={{ width: "max-content" }}
+                  >
+                    <i
+                      className="bx bx-box text-muted"
+                      style={{ fontSize: "3.5rem" }}
+                    ></i>
+                  </div>
+                  <h5 className="text-dark fw-bold mb-1">Semua Tugas Beres!</h5>
+                  <p className="text-muted small px-3">
+                    Belum ada dokumen disposisi baru yang ditugaskan kepada Anda
+                    hari ini.
+                  </p>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
-      {/* MODAL DISPOSISI MODERN */}
+
+      {/* MODAL DISPOSISI MODERN DENGAN REACT-SELECT MULTI */}
       <div
         className="modal fade"
         id="modalDisposisi"
         tabIndex="-1"
         aria-hidden="true"
       >
-        <div className="modal-dialog modal-lg modal-dialog-centered">
-          <div className="modal-content border-0 shadow-lg rounded-4">
-            <div className="modal-header border-bottom-0 pt-4 px-4">
-              <h5 className="modal-title fw-bold d-flex align-items-center">
-                <i className="bx bx-edit-alt me-2 text-primary"></i> Buat
-                Disposisi Baru
+        <div className="modal-dialog modal-md modal-dialog-centered px-3">
+          <div className="modal-content border-0 shadow rounded-4">
+            <div className="modal-header border-0 pt-4 px-4 pb-2">
+              <h5 className="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                <i className="bx bx-git-pull-request text-primary"></i>{" "}
+                Delegasikan Disposisi
               </h5>
               <button
                 type="button"
                 className="btn-close"
                 data-bs-dismiss="modal"
+                aria-label="Close"
               ></button>
             </div>
 
             <form onSubmit={handleToPegawai}>
-              <div className="modal-body px-4 pb-4">
-                {/* Information Callout */}
-                {/* {selectedSurat && (
-                  <div className="p-3 rounded-3 bg-light border-start border-primary border-4 mb-4">
-                    <div className="row">
-                      <div className="col-md-6 border-end">
-                        <small className="text-muted d-block">
-                          Asal Instansi:
-                        </small>
-                        <span className="fw-bold">
-                          {selectedSurat.corporate?.name}
-                        </span>
-                      </div>
-                      <div className="col-md-6 ps-md-4">
-                        <small className="text-muted d-block">Perihal:</small>
-                        <span className="fw-bold">{selectedSurat.perihal}</span>
-                      </div>
-                    </div>
-                  </div>
-                )} */}
+              <div className="modal-body px-4">
+                <div className="mb-3">
+                  <label
+                    className="form-label fw-bold text-secondary small text-uppercase"
+                    style={{ letterSpacing: "0.5px" }}
+                  >
+                    Pilih Staf Penerima (Bisa Banyak)
+                  </label>
 
-                <div className="row g-4">
-                  {/* Step 1: Destination */}
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold small text-uppercase">
-                      1. Teruskan Kepada
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <i className="bx bx-user"></i>
-                      </span>
-                      <select
-                        className="form-select border-start-0"
-                        required
-                        // value={formDisposisi.user_id}
-                        onChange={(e) => setPegawai(e.target.value)}
-                      >
-                        <option value="">Pilih Nama Staf...</option>
-                        {filterStaff?.map((user) => (
-                          <option key={user.uuid} value={user.uuid}>
-                            {user.name} ({user.role})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Integrasi Komponen React-Select Multi Pilihan Anda */}
+                  <Select
+                    isMulti
+                    name="user_ids"
+                    placeholder="-- Pilih Staf (Bisa cari & pilih banyak) --"
+                    className="basic-multi-select text-dark small"
+                    classNamePrefix="select"
+                    closeMenuOnSelect={false}
+                    options={
+                      filterStaff?.map((user) => ({
+                        value: user.uuid,
+                        label: `${user.name} (${user.role.replace("_", " ")})`,
+                      })) || []
+                    }
+                    value={
+                      filterStaff
+                        ?.filter((user) =>
+                          formDisposisi?.user_ids?.includes(user.uuid),
+                        )
+                        .map((user) => ({
+                          value: user.uuid,
+                          label: `${user.name} (${user.role.replace("_", " ")})`,
+                        })) || []
+                    }
+                    onChange={(selectedOptions) => {
+                      const selectedValues = selectedOptions
+                        ? selectedOptions.map((option) => option.value)
+                        : [];
+
+                      setFormDisposisi({
+                        ...formDisposisi,
+                        user_ids: selectedValues,
+                      });
+                    }}
+                    styles={{
+                      control: (baseStyles, state) => ({
+                        ...baseStyles,
+                        borderColor: state.isFocused ? "#86b7fe" : "#dee2e6",
+                        boxShadow: state.isFocused
+                          ? "0 0 0 0.25rem rgba(13, 110, 253, 0.25)"
+                          : "none",
+                        borderRadius: "0.5rem",
+                        padding: "4px",
+                        fontSize: "14px",
+                        "&:hover": {
+                          borderColor: "#86b7fe",
+                        },
+                      }),
+                      multiValue: (baseStyles) => ({
+                        ...baseStyles,
+                        backgroundColor: "rgba(13, 110, 253, 0.1)",
+                        color: "#0d6efd",
+                        borderRadius: "50px",
+                        paddingLeft: "6px",
+                      }),
+                      multiValueLabel: (baseStyles) => ({
+                        ...baseStyles,
+                        color: "#0d6efd",
+                        fontWeight: "500",
+                        fontSize: "12px",
+                      }),
+                      multiValueRemove: (baseStyles) => ({
+                        ...baseStyles,
+                        color: "#0d6efd",
+                        borderRadius: "50px",
+                        "&:hover": {
+                          backgroundColor: "#0d6efd",
+                          color: "white",
+                        },
+                      }),
+                    }}
+                  />
+
+                  <div className="form-text text-muted mt-2 small">
+                    Surat beserta riwayat instruksi pimpinan akan didelegasikan
+                    serentak ke seluruh staf yang Anda pilih.
                   </div>
                 </div>
               </div>
 
-              <div className="modal-footer border-top-0 px-4 pb-4">
+              <div className="modal-footer border-0 px-4 pb-4 gap-2">
                 <button
                   type="button"
-                  className="btn btn-light px-4 rounded-pill"
+                  className="btn btn-light rounded-pill px-4 py-2 flex-grow-1 flex-sm-grow-0"
                   data-bs-dismiss="modal"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary px-5 rounded-pill shadow"
+                  disabled={formDisposisi.user_ids.length === 0}
+                  className="btn btn-primary rounded-pill px-4 py-2 flex-grow-1 flex-sm-grow-0 shadow-sm d-flex align-items-center justify-content-center gap-2"
                 >
-                  Kirim Disposisi <i className="bx bx-paper-plane ms-1"></i>
+                  Kirim Sekarang <i className="bx bx-paper-plane"></i>
                 </button>
               </div>
             </form>

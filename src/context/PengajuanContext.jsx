@@ -27,6 +27,8 @@ export const PengajuanProvider = ({ children }) => {
   const [roomBuild, setRoomBuild] = useState([]);
   const [folderBuild, setFolderBuild] = useState([]);
   const [shelfBuild, setShelfBuild] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState({ totalUser: 0, totalPetugas: 0 });
   const [cabinetBuild, setCabinetBuild] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState(localStorage.getItem("role") || null);
@@ -37,7 +39,6 @@ export const PengajuanProvider = ({ children }) => {
     codes: [],
     categories: [],
     names: [],
-    users: [],
     tujuans: [],
     pinjamans: [],
     arsips: [],
@@ -80,7 +81,39 @@ export const PengajuanProvider = ({ children }) => {
       throw new Error(result.message || `Fetch ${endpoint} Gagal`);
     return result;
   }, []);
-
+  const fetchUsers = async () => {
+    // setLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        },
+      );
+      const resData = await response.json();
+      console.log("res", resData);
+      if (response.ok) {
+        setUsers(resData.data.users);
+        // Menghitung jumlah staff umum secara dinamis dari data api
+        const staffUmumCount = resData.data.users.filter(
+          (u) => u.role === "staff umum",
+        ).length;
+        setStats({
+          totalUser: resData.data.totalUser,
+          totalPetugas: staffUmumCount,
+        });
+      } else {
+        console.error("Gagal memuat data:", resData.message);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      // setLoading(false);
+    }
+  };
   // --- Core Fetch Function (Parallel) ---
   const getAllMasterData = useCallback(
     async (authToken) => {
@@ -94,7 +127,6 @@ export const PengajuanProvider = ({ children }) => {
           codes,
           categories,
           names,
-          users,
           tujuans,
           pinjamans,
           arsips,
@@ -105,7 +137,6 @@ export const PengajuanProvider = ({ children }) => {
           apiFetch("kode", authToken),
           apiFetch("kategori", authToken),
           apiFetch("names", authToken),
-          apiFetch("users", authToken),
           apiFetch("tujuans", authToken),
           apiFetch("peminjamans", authToken),
           apiFetch("arsips", authToken),
@@ -118,7 +149,6 @@ export const PengajuanProvider = ({ children }) => {
           codes,
           categories,
           names,
-          users,
           tujuans,
           pinjamans,
           arsips,
@@ -281,6 +311,7 @@ export const PengajuanProvider = ({ children }) => {
 
     if (token) {
       getAllMasterData(token);
+      fetchUsers();
     }
   }, [token, getAllMasterData]);
 
@@ -292,6 +323,8 @@ export const PengajuanProvider = ({ children }) => {
       role,
       user,
       token,
+      users,
+      stats,
       isEdit,
       isLoading,
       setIsEdit,
@@ -342,6 +375,8 @@ export const PengajuanProvider = ({ children }) => {
       handleChangeShelf,
       isLoading,
       token,
+      users,
+      stats,
       isEdit,
       setToken,
       setRole,

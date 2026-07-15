@@ -10,6 +10,7 @@ export default function DisposisiSurat() {
   const filterStaff = users?.filter((user) => user.role == "staff");
   const [param, setParam] = React.useState("fisik");
   const [arsip, setArsip] = React.useState(null);
+
   const arsipFisik = arsips?.filter(
     (arsip) => arsip.file == null && arsip.kategori_arsip == "surat",
   );

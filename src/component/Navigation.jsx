@@ -1,29 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-const Navigation = () => {
+const Navigation = ({ onNavigateMobile }) => {
   const [menus, setMenus] = useState([]);
-  const [role, setRole] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const petugasMenu = [
-    // { name: "Dashboard", path: "#", icon: "house.png" },
-    // { name: "Data Arsip", path: "#", icon: "clipboard-list.png" },
-    // {
-    //   name: "Data Master",
-    //   path: "#",
-    //   icon: "clipboard-list.png",
-    // },
-    // { name: "Approval", path: "#", icon: "history.png" },
     { name: "Dashboard", path: "/dashboardPetugas", icon: "house.png" },
     { name: "Data Arsip", path: "/dataArsip", icon: "clipboard-list.png" },
+    { name: "Data Master", path: "/instansi", icon: "clipboard-list.png" },
+    { name: "Data Pengguna", path: "/pengguna", icon: "clipboard-list.png" },
+    { name: "Approval", path: "/approvalPetugas", icon: "history.png" },
+    { name: "Master Surat", path: "/surat", icon: "history.png" },
+    { name: "Arsip Surat", path: "/gdrive", icon: "history.png" },
     {
-      name: "Data Master",
-      path: "/dataMaster/main",
+      name: "Disposisi Surat",
+      path: "/disposisi",
       icon: "clipboard-list.png",
     },
-    { name: "Approval", path: "/approvalPetugas", icon: "history.png" },
-    { name: "Manajemen Surat", path: "/surat", icon: "history.png" },
+    { name: "Riwayat Disposisi", path: "/riwayat", icon: "clipboard-list.png" },
   ];
 
   const staffMenu = [
@@ -35,73 +31,97 @@ const Navigation = () => {
       icon: "clipboard-list.png",
     },
     { name: "Log History", path: "/logHistoryStaff", icon: "history.png" },
-    // { name: "Dashboard", path: "#", icon: "house.png" },
-    // { name: "Data Arsip", path: "#", icon: "clipboard-list.png" },
-    // {
-    //   name: "Log Pengajuan",
-    //   path: "#",
-    //   icon: "clipboard-list.png",
-    // },
-    // { name: "Log History", path: "#", icon: "history.png" },
+    { name: "Manajemen Surat", path: "/surat", icon: "history.png" },
     {
       name: "Disposisi Surat",
       path: "/disposisistaff",
       icon: "clipboard-list.png",
     },
   ];
+
   const pimpinanMenu = [
     { name: "Dashboard", path: "/dashboardpegawai", icon: "house.png" },
     { name: "Data Arsip", path: "/dataArsip", icon: "clipboard-list.png" },
-    // { name: "Dashboard", path: "#", icon: "house.png" },
-    // { name: "Data Arsip", path: "#", icon: "clipboard-list.png" },
-    { name: "Disposisi Surat", path: "/disposisi", icon: "clipboard-list.png" },
+    { name: "Riwayat Disposisi", path: "/riwayat", icon: "clipboard-list.png" },
     {
-      name: "Riwayat Disposisi",
-      path: "/riwayat",
+      name: "Disposisi Masuk",
+      path: "/disposisistaff",
       icon: "clipboard-list.png",
     },
   ];
+
   function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
+    localStorage.clear();
     navigate("/");
   }
-  useEffect(() => {
-    // 1. Ambil role dari localStorage cukup sekali saat komponen pertama kali muncul
-    const userRole = localStorage.getItem("role");
-    setRole(userRole);
 
-    // 2. Set menu berdasarkan role di dalam useEffect agar tidak loop
-    if (userRole === "staff umum") {
+  useEffect(() => {
+    const userRole = localStorage.getItem("role");
+
+    if (userRole === "staff umum" || userRole === "super_admin") {
       setMenus(petugasMenu);
-    } else if (userRole === "pegawai" || userRole == "hrd") {
+    } else if (userRole === "pegawai" || userRole === "hrd") {
       setMenus(staffMenu);
     } else {
       setMenus(pimpinanMenu);
     }
-  }, []); // Dependency array kosong [] artinya hanya jalan 1x saat mount
+  }, []);
 
   return (
-    <ul className="metismenu p-3" id="menu">
-      <h6 className="ms-3 mb-3">MAIN MENU</h6>
-      {menus.map((menu) => (
-        <li key={menu.path}>
-          <Link to={menu.path} className="link">
-            <div className="parent-icon">
-              <img src={`/assets/images/${menu.icon}`} alt={menu.name} />
-            </div>
-            <div className="menu-title">{menu.name}</div>
-          </Link>
-        </li>
-      ))}
-      <button
-        onClick={handleLogout}
-        className="btn btn-primary text-white rounded mt-4"
+    <div className="d-flex flex-column justify-content-between h-100 pb-4">
+      <ul
+        className="metismenu p-3 mb-0"
+        id="menu"
+        style={{ listStyle: "none" }}
       >
-        Logout
-      </button>
-    </ul>
+        <h6
+          className="ms-3 mb-3 text-uppercase text-muted"
+          style={{ fontSize: "11px", fontWeight: "bold", letterSpacing: "1px" }}
+        >
+          Main Menu
+        </h6>
+        {menus.map((menu) => {
+          const isActive = location.pathname === menu.path;
+          return (
+            <li
+              key={menu.path}
+              className={`menu-item ${isActive ? "active" : ""}`}
+            >
+              <Link
+                to={menu.path}
+                // Menutup sidebar di mobile setelah item di-klik
+                onClick={onNavigateMobile}
+                className={`link d-flex align-items-center p-2 rounded mb-1 text-decoration-none ${
+                  isActive ? "bg-light text-primary fw-semibold" : "text-dark"
+                }`}
+              >
+                <div className="parent-icon me-3 d-flex align-items-center">
+                  <img
+                    src={`/assets/images/${menu.icon}`}
+                    alt={menu.name}
+                    width="20"
+                    height="20"
+                  />
+                </div>
+                <div className="menu-title">{menu.name}</div>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Bagian Tombol Logout */}
+      <div className="px-4 mt-auto">
+        <button
+          onClick={handleLogout}
+          className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 rounded py-2"
+          style={{ transition: "all 0.2s" }}
+        >
+          <i className="bx bx-log-out fs-5" />
+          <span>Keluar</span>
+        </button>
+      </div>
+    </div>
   );
 };
 
