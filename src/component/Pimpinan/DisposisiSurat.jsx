@@ -32,11 +32,12 @@ ChartJS.register(
 );
 
 export default function DisposisiSurat() {
-  const { users, token } = useContext(PengajuanContext);
+  const { users, token, user } = useContext(PengajuanContext);
   const [suratMasukList, setSuratMasukList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const filterStaff = users?.filter((user) => user.role != "super_admin");
-  console.log("users", users);
+  const filterStaff = users?.filter(
+    (user) => user.role != "super_admin" && user.role != "direksi",
+  );
   const [alerts, setAlerts] = useState([]);
 
   const showAlert = (type, title, message) => {
@@ -55,6 +56,7 @@ export default function DisposisiSurat() {
     user_ids: [],
     tindak_lanjut: "",
     skala_prioritas: "biasa",
+    parent_uuid: user?.uuid,
     intruksi: "",
     batas_waktu: "",
     catatan: "",
@@ -160,6 +162,7 @@ export default function DisposisiSurat() {
       intruksi: lastDisposisi.intruksi || "",
       batas_waktu: lastDisposisi.batas_waktu || "",
       catatan: lastDisposisi.catatan || "",
+      parent_uuid: user?.uuid,
     });
 
     const modal = new window.bootstrap.Modal(
@@ -480,7 +483,7 @@ export default function DisposisiSurat() {
                       options={
                         filterStaff?.map((user) => ({
                           value: user.uuid,
-                          label: `${user.name} (${user.role.replace("_", " ")})`,
+                          label: `${user.name} - ${user.branch ? user.branch?.name : "-"} (${user.role.replace("_", " ")})`,
                         })) || []
                       }
                       value={
@@ -491,7 +494,7 @@ export default function DisposisiSurat() {
                           )
                           .map((user) => ({
                             value: user.uuid,
-                            label: `${user.name} (${user.role.replace("_", " ")})`,
+                            label: `${user.name}(${user.role.replace("_", " ")})`,
                           })) || []
                       }
                       // 3. Menangani perubahan pilihan staf saat diklik/dihapus

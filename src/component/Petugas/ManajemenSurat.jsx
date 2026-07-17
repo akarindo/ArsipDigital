@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "../layouts/AdminLayout";
 import { usePengajuan } from "../../context/PengajuanContext";
+import Alert from "../Alert";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +15,7 @@ import {
 } from "chart.js";
 
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
+import Select from "react-select";
 
 ChartJS.register(
   CategoryScale,
@@ -26,131 +28,12 @@ ChartJS.register(
   Legend,
 );
 
-function Alert({ alerts, removeAlert }) {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "20px",
-        right: "20px",
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        minWidth: "300px",
-      }}
-    >
-      {alerts.map((alert) => (
-        <div
-          key={alert.id}
-          style={{
-            background:
-              alert.type === "success"
-                ? "#dcfce7"
-                : alert.type === "info"
-                  ? "#dbeafe"
-                  : "#fee2e2",
-            borderLeft: `4px solid ${alert.type === "success" ? "#16a34a" : alert.type === "info" ? "#2563eb" : "#dc2626"}`,
-            borderRadius: "12px",
-            padding: "14px 16px",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "12px",
-            animation: "slideIn 0.3s ease",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "50%",
-              background:
-                alert.type === "success"
-                  ? "#16a34a"
-                  : alert.type === "info"
-                    ? "#2563eb"
-                    : "#dc2626",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <i
-              className={`bx ${alert.type === "success" ? "bx-check" : alert.type === "info" ? "bx-edit" : "bx-trash"} text-white`}
-              style={{ fontSize: "16px" }}
-            ></i>
-          </div>
-          <div style={{ flex: 1 }}>
-            <p
-              style={{
-                margin: 0,
-                fontWeight: "700",
-                fontSize: "13px",
-                color:
-                  alert.type === "success"
-                    ? "#15803d"
-                    : alert.type === "info"
-                      ? "#1d4ed8"
-                      : "#b91c1c",
-              }}
-            >
-              {alert.title}
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "12px",
-                color: "#555",
-                marginTop: "2px",
-              }}
-            >
-              {alert.message}
-            </p>
-          </div>
-          <button
-            onClick={() => removeAlert(alert.id)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              color: "#999",
-              fontSize: "16px",
-            }}
-          >
-            <i className="bx bx-x"></i>
-          </button>
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              height: "3px",
-              background:
-                alert.type === "success"
-                  ? "#16a34a"
-                  : alert.type === "info"
-                    ? "#2563eb"
-                    : "#dc2626",
-              animation: "shrink 3s linear forwards",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function ManajemenSurat() {
   const [tab, setTab] = useState("masuk");
   const [loading, setLoading] = useState(false);
   const [dataSurat, setDataSurat] = useState([]);
   const [tabArsip, setTabArsip] = useState("eksternal"); // default eksternal sesuai form lama
-  const { token } = usePengajuan();
+  const { token, user, users } = usePengajuan();
   const [selectedData, setSelectedData] = useState(null);
   const [corporates, setCorporates] = useState([]);
   const [alerts, setAlerts] = useState([]);
@@ -164,6 +47,13 @@ export default function ManajemenSurat() {
   const removeAlert = (id) => {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
   };
+  const filterStaff = users?.filter((usr) => {
+    if (user.role == "super_admin" || user.role == "staff umum") {
+      return usr.role !== "super_admin" && usr.role !== "staff_umum";
+    } else {
+      return usr.role !== user.role && usr.role !== "super_admin";
+    }
+  });
 
   // State Form Surat Masuk
   const [formMasuk, setFormMasuk] = useState({
@@ -172,9 +62,10 @@ export default function ManajemenSurat() {
     sifat: "biasa",
     file_path: "",
     tanggal_surat: "",
+    current_user: user?.uuid,
     no_registrasi: "",
     perihal: "",
-    ditujukan_kepada: "",
+    ditujukan_kepada: [],
     tanggal_terima: "",
     file_size: 0,
   });
@@ -191,6 +82,7 @@ export default function ManajemenSurat() {
     tanggal_buat: "",
     no_resi: null,
     jenis_pengiriman: null,
+    current_user: user?.uuid,
     provider: null,
     type: tabArsip,
     penerima: null,
@@ -213,10 +105,18 @@ export default function ManajemenSurat() {
 
     if (tab === "masuk") {
       resetFormMasuk();
-      setFormMasuk((prev) => ({ ...prev, no_registrasi: newRegNo }));
+      setFormMasuk((prev) => ({
+        ...prev,
+        no_registrasi: newRegNo,
+        current_user: user?.uuid,
+      }));
     } else {
       resetFormKeluar();
-      setFormKeluar((prev) => ({ ...prev, no_registrasi: newRegNo }));
+      setFormKeluar((prev) => ({
+        ...prev,
+        no_registrasi: newRegNo,
+        current_user: user?.uuid,
+      }));
     }
 
     openModal(tab === "masuk" ? "modalSuratMasuk" : "modalSuratKeluar");
@@ -230,7 +130,7 @@ export default function ManajemenSurat() {
       sifat: "biasa",
       file_path: "",
       perihal: "",
-      ditujukan_kepada: "",
+      ditujukan_kepada: [],
       tanggal_terima: "",
       file_size: 0,
     });
@@ -275,7 +175,16 @@ export default function ManajemenSurat() {
       );
       const result = await response.json();
       if (response.ok) {
-        setDataSurat(result);
+        console.log(tab);
+        if (user?.role == "super_admin" || user?.role == "staff umum") {
+          setDataSurat(result);
+        } else {
+          const filterSurat = result?.filter(
+            (data) => data.current_user == user.uuid,
+          );
+          setDataSurat(filterSurat);
+        }
+        console.log("result", result);
       } else {
         throw new Error(result.message || "Gagal mengambil data");
       }
@@ -745,22 +654,16 @@ export default function ManajemenSurat() {
                 <table className="table table-hover align-middle">
                   <thead className="table-light text-secondary small uppercase">
                     <tr>
-                      <th>No</th>
-                      <th>No Registrasi</th>
-                      <th>Nomor Surat</th>
+                      <th style={{ width: "5%" }}>No</th>
+                      <th>No Registrasi / Surat</th>
                       <th>
                         {tab === "masuk" ? "Asal Instansi" : "Tujuan & Alamat"}
                       </th>
                       <th>Perihal</th>
-                      <th>File</th>
-                      <th>Ukuran</th>
-                      <th>
-                        {" "}
-                        {tab === "masuk"
-                          ? "Tanggal Diterima"
-                          : "Tanggal Dibuat"}
-                      </th>
-                      <th>Status/Sifat</th>
+                      {/* <th>File & Ukuran</th>
+                      <th>{tab === "masuk" ? "Tgl Diterima" : "Tgl Dibuat"}</th> */}
+                      <th>Sifat</th>
+                      <th>Dibuat Oleh</th> {/* Kolom Baru */}
                       <th className="text-center">Aksi</th>
                     </tr>
                   </thead>
@@ -768,7 +671,7 @@ export default function ManajemenSurat() {
                     {loading ? (
                       <tr>
                         <td
-                          colSpan="5"
+                          colSpan="9"
                           className="text-center py-5 text-muted small"
                         >
                           Sedang memproses data...
@@ -778,57 +681,62 @@ export default function ManajemenSurat() {
                       dataSurat.map((item, index) => (
                         <tr key={index}>
                           <td>{index + 1}</td>
-                          <td>{item.no_registrasi}</td>
+
+                          {/* NO REGIS & NO SURAT DIGABUNG AGAR MINIMIZE */}
                           <td>
-                            <div className="fw-bold">{item.nomor_surat}</div>
                             <div className="small text-muted">
-                              {tab === "masuk"
-                                ? item.tanggal_terima
-                                : item.tanggal_buat}
+                              {item.no_registrasi}
                             </div>
+                            <div className="fw-bold">{item.nomor_surat}</div>
                           </td>
+
                           <td style={{ maxWidth: "200px" }}>
-                            <div className="text-truncate">
-                              {tab === "masuk"
-                                ? item.corporate.name
-                                : item.corporate.name}
+                            <div className="text-truncate fw-semibold">
+                              {item.corporate?.name || "-"}
                             </div>
-                            {tab === "keluar" && (
+                            {tab === "keluar" && item.alamat_tujuan && (
                               <div className="small text-muted text-truncate">
                                 {item.alamat_tujuan}
                               </div>
                             )}
                           </td>
-                          <td>{item.perihal}</td>
+
                           <td>
-                            {item.file_path && (
-                              <button
-                                className="btn btn-sm btn-outline-danger shadow-none"
-                                onClick={() => previewPDF(item.file_path)}
-                                title="Lihat PDF"
-                              >
-                                <i className="bx bx-file-find"></i>
-                              </button>
-                            )}
+                            <span className="text-wrap">{item.perihal}</span>
                           </td>
-                          <td className="text-nowrap">
-                            <div className="d-flex align-items-center">
-                              <i className="bx bx-hdd me-1 text-muted"></i>
-                              <span className="small">
-                                {item.file_size
-                                  ? Math.round(
-                                      item.file_size / 1024,
-                                    ).toLocaleString()
-                                  : 0}{" "}
-                                KB
-                              </span>
+
+                          {/* KOLOM FILE & UKURAN DIGABUNG AGAR LEBIH RINGKAS */}
+                          {/* <td>
+                            <div className="d-flex align-items-center gap-2">
+                              {item.file_path ? (
+                                <>
+                                  <button
+                                    className="btn btn-sm btn-outline-danger shadow-none p-1"
+                                    onClick={() => previewPDF(item.file_path)}
+                                    title="Lihat PDF"
+                                  >
+                                    <i className="bx bx-file-find fs-5"></i>
+                                  </button>
+                                  <span className="small text-muted">
+                                    {item.file_size
+                                      ? `${Math.round(item.file_size / 1024).toLocaleString()} KB`
+                                      : "0 KB"}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-muted small">-</span>
+                              )}
                             </div>
                           </td>
+
                           <td>
-                            {tab == "masuk"
-                              ? item.tanggal_terima
-                              : item.tanggal_buat}
-                          </td>
+                            <span className="small">
+                              {tab === "masuk"
+                                ? item.tanggal_terima
+                                : item.tanggal_buat}
+                            </span>
+                          </td> */}
+
                           <td>
                             <span
                               className={`badge rounded-pill ${item.sifat === "penting" ? "bg-danger" : "bg-info"} opacity-75`}
@@ -836,10 +744,26 @@ export default function ManajemenSurat() {
                               {item.sifat}
                             </span>
                           </td>
+
+                          {/* MENAMPILKAN PEMBUAT SURAT (CURRENT USER) */}
+                          <td>
+                            <div className="d-flex flex-column">
+                              {/* Menampilkan nama user dari relasi 'creator' */}
+                              <span className="fw-semibold small text-dark">
+                                {item.creator?.name || "Tidak Diketahui"}
+                              </span>
+                              {/* Menampilkan role pembuat sebagai sub-info tambahan */}
+                              <span
+                                className="text-muted"
+                                style={{ fontSize: "10px" }}
+                              >
+                                {item.creator?.role || "Staff"}
+                              </span>
+                            </div>
+                          </td>
+
                           <td className="text-center">
                             <div className="btn-group">
-                              {/* Tombol Lihat PDF */}
-
                               {/* Tombol Edit */}
                               <button
                                 className="btn btn-sm btn-outline-primary shadow-none"
@@ -872,7 +796,7 @@ export default function ManajemenSurat() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="text-center py-5 text-muted">
+                        <td colSpan="9" className="text-center py-5 text-muted">
                           Belum ada data surat.
                         </td>
                       </tr>
@@ -1047,19 +971,85 @@ export default function ManajemenSurat() {
                       <span className="input-group-text bg-light border-0">
                         <i className="bx bx-user"></i>
                       </span>
-                      <input
-                        type="text"
-                        className="form-control bg-light border-0"
-                        placeholder="Nama pimpinan atau bagian"
-                        required
-                        value={formMasuk.ditujukan_kepada}
-                        onChange={(e) =>
-                          setFormMasuk({
-                            ...formMasuk,
-                            ditujukan_kepada: e.target.value,
-                          })
-                        }
-                      />
+                      <div style={{ flex: "1" }}>
+                        {" "}
+                        {/* Wrapper ini penting agar react-select melebar sempurna di dalam input-group Bootstrap */}
+                        <Select
+                          isMulti
+                          name="ditujukan_kepada"
+                          placeholder="-- Pilih Tujuan (Bisa cari & pilih banyak) --"
+                          className="basic-multi-select text-dark"
+                          classNamePrefix="select"
+                          closeMenuOnSelect={false}
+                          // 1. Format data staf yang sudah difilter ke format opsi react-select
+                          options={
+                            filterStaff?.map((user) => ({
+                              value: user.uuid,
+                              label: `${user.name} - ${user.branch ? user.branch?.name : "-"} (${user.role.replace("_", " ")})`,
+                            })) || []
+                          }
+                          // 2. Menampilkan nilai yang sedang terpilih di state formMasuk
+                          value={
+                            filterStaff
+                              ?.filter((user) =>
+                                formMasuk?.ditujukan_kepada?.includes(
+                                  user.uuid,
+                                ),
+                              )
+                              .map((user) => ({
+                                value: user.uuid,
+                                label: `${user.name} (${user.role.replace("_", " ")})`,
+                              })) || []
+                          }
+                          // 3. Update state formMasuk saat ada perubahan pilihan
+                          onChange={(selectedOptions) => {
+                            const selectedValues = selectedOptions
+                              ? selectedOptions.map((option) => option.value)
+                              : [];
+
+                            setFormMasuk({
+                              ...formMasuk,
+                              ditujukan_kepada: selectedValues,
+                            });
+                          }}
+                          // 4. Styling Bootstrap 5 terintegrasi dengan mulus
+                          styles={{
+                            control: (baseStyles, state) => ({
+                              ...baseStyles,
+                              backgroundColor: "#f8f9fa", // Menyamakan dengan kelas bg-light Bootstrap
+                              border: "none",
+                              boxShadow: state.isFocused
+                                ? "0 0 0 0.25rem rgba(13, 110, 253, 0.25)"
+                                : "none",
+                              borderRadius: "0 0.375rem 0.375rem 0", // Sudut melengkung sebelah kanan saja karena berdampingan dengan icon input-group
+                              padding: "2px",
+                              minHeight: "38px",
+                            }),
+                            multiValue: (baseStyles) => ({
+                              ...baseStyles,
+                              backgroundColor: "rgba(13, 110, 253, 0.1)",
+                              color: "#0d6efd",
+                              borderRadius: "50px",
+                              paddingLeft: "6px",
+                            }),
+                            multiValueLabel: (baseStyles) => ({
+                              ...baseStyles,
+                              color: "#0d6efd",
+                              fontWeight: "500",
+                              fontSize: "13px",
+                            }),
+                            multiValueRemove: (baseStyles) => ({
+                              ...baseStyles,
+                              color: "#0d6efd",
+                              borderRadius: "50px",
+                              "&:hover": {
+                                backgroundColor: "#0d6efd",
+                                color: "white",
+                              },
+                            }),
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className="col-12">

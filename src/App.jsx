@@ -46,19 +46,24 @@ import DataArsipStaff from "./component/Staff/DataArsipStaff.jsx";
 import UserManagement from "./component/UserManagement.jsx";
 import BranchMaster from "./component/Petugas/BranchMaster.jsx";
 import Surat from "./component/Petugas/Surat.jsx";
+import SuratMasukList from "./component/Staff/SuratMasuk.jsx";
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
-  const userRole = sessionStorage.getItem("userRole");
+  // Disinkronkan menggunakan localStorage agar sesuai dengan data login
+  const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem("role");
 
-  if (!isLoggedIn) {
-    return <Navigate to="/" />;
+  // Jika token tidak ada, anggap belum login dan lempar ke halaman depan
+  if (!token) {
+    return <Navigate to="/" replace />;
   }
 
-  // Jika allowedRoles didefinisikan, cek apakah user role sesuai
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    // Redirect ke dashboard sesuai role jika akses ditolak
-    return <Navigate to={`/dashboard${userRole}`} />;
+  // Cek otorisasi berdasarkan role jika allowedRoles dikonfigurasi
+  if (allowedRoles && !allowedRoles.includes(userRole?.toLowerCase())) {
+    // Redirect aman jika role tidak punya akses
+    const dashboardPath =
+      userRole === "staff umum" ? "/dashboardPetugas" : `/dashboard${userRole}`;
+    return <Navigate to={dashboardPath} replace />;
   }
 
   return children;
@@ -336,6 +341,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ManajemenSurat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/kotak-masuk"
+          element={
+            <ProtectedRoute>
+              <SuratMasukList />
             </ProtectedRoute>
           }
         />

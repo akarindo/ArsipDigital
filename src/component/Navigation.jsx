@@ -12,6 +12,7 @@ const Navigation = ({ onNavigateMobile }) => {
     { name: "Data Master", path: "/instansi", icon: "clipboard-list.png" },
     { name: "Data Pengguna", path: "/pengguna", icon: "clipboard-list.png" },
     { name: "Approval", path: "/approvalPetugas", icon: "history.png" },
+    { name: "Kotak Masuk", path: "/kotak-masuk", icon: "history.png" },
     { name: "Master Surat", path: "/surat", icon: "history.png" },
     { name: "Arsip Surat", path: "/gdrive", icon: "history.png" },
     {
@@ -32,6 +33,7 @@ const Navigation = ({ onNavigateMobile }) => {
     },
     { name: "Log History", path: "/logHistoryStaff", icon: "history.png" },
     { name: "Manajemen Surat", path: "/surat", icon: "history.png" },
+    { name: "Kotak Masuk", path: "/kotak-masuk", icon: "history.png" },
     {
       name: "Disposisi Surat",
       path: "/disposisistaff",
@@ -42,16 +44,13 @@ const Navigation = ({ onNavigateMobile }) => {
   const pimpinanMenu = [
     { name: "Dashboard", path: "/dashboardpegawai", icon: "house.png" },
     { name: "Data Arsip", path: "/dataArsip", icon: "clipboard-list.png" },
+    { name: "Kotak Masuk", path: "/kotak-masuk", icon: "history.png" },
     { name: "Riwayat Disposisi", path: "/riwayat", icon: "clipboard-list.png" },
-    {
-      name: "Disposisi Masuk",
-      path: "/disposisistaff",
-      icon: "clipboard-list.png",
-    },
   ];
 
   function handleLogout() {
     localStorage.clear();
+    sessionStorage.clear();
     navigate("/");
   }
 

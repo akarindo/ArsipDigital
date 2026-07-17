@@ -4,30 +4,58 @@ import { PengajuanContext } from "../context/PengajuanContext";
 
 export default function NewLogin() {
   const navigate = useNavigate();
+  const { refreshData, setToken, setRole, setUser } =
+    useContext(PengajuanContext);
 
+  // State Form & Loading
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State untuk toggle password
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // State Modal/Notifikasi
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
-  const { refreshData, setToken, setRole, setUser } =
-    useContext(PengajuanContext);
 
-  // useEffect(() => {
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("role");
-  //   localStorage.removeItem("user");
-  // }, []);
+  // Mapping Route berdasarkan Role
+  const getRolePath = (role) => {
+    const paths = {
+      pegawai: "/disposisistaff",
+      hrd: "/disposisistaff",
+      "staff umum": "/surat",
+      super_admin: "/surat",
+      direksi: "/disposisi",
+      pimpinan: "/dashboardPetugas", // Sesuai mapping di App.js Anda
+    };
+    return paths[role.toLowerCase()] || "/";
+  };
+
+  // Cek Status Login Saat Halaman Pertama Kali Dimuat (Auto Redirect)
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedRole = localStorage.getItem("role");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedToken && savedRole && savedUser) {
+      // Pulihkan state context jika hilang karena refresh
+      setToken(savedToken);
+      setRole(savedRole);
+      setUser(JSON.parse(savedUser));
+
+      // Redirect langsung ke dashboard tanpa logout
+      navigate(getRolePath(savedRole));
+    }
+  }, [navigate, setToken, setRole, setUser]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       const response = await fetch(
-        import.meta.env.VITE_API_URL + "/api/login",
+        `${import.meta.env.VITE_API_URL}/api/login`,
         {
           method: "POST",
           headers: {
@@ -42,16 +70,21 @@ export default function NewLogin() {
       if (!response.ok) {
         throw new Error(result.message || "Email atau Password Salah");
       }
+
       const { token, user } = result.data;
+
+      // Sinkronisasi dengan Context
       refreshData();
       setUser(user);
       setToken(token);
       setRole(user.role);
       setCurrentUser(user);
+
+      // Simpan Ke Penyimpanan Lokasi
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
       localStorage.setItem("user", JSON.stringify(user));
-      // refreshData();
+
       setShowSuccess(true);
     } catch (error) {
       setErrorMessage(error.message);
@@ -61,35 +94,20 @@ export default function NewLogin() {
     }
   };
 
-  const handleSuccess = () => {
+  const handleSuccessClose = () => {
     if (currentUser) {
       sessionStorage.setItem("isLoggedIn", "true");
       sessionStorage.setItem("userRole", currentUser.role);
-
-      const rolePath = {
-        pegawai: "/disposisistaff",
-        hrd: "/disposisistaff",
-        "staff umum": "/surat",
-        super_admin: "/surat",
-        direksi: "/disposisi",
-      };
-
-      navigate(rolePath[currentUser.role.toLowerCase()] || "/");
+      navigate(getRolePath(currentUser.role));
     }
     setShowSuccess(false);
   };
-  useEffect(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-  }, []);
 
   return (
     <div className="bg-light min-vh-100 d-flex align-items-center">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-md-8 col-lg-5">
-            {/* Logo atau Judul Sistem */}
             <div className="text-center mb-4">
               <div className="bg-primary d-inline-block p-3 rounded-circle mb-3 shadow-sm">
                 <i className="bx bxs-envelope text-white fs-2"></i>
@@ -106,7 +124,6 @@ export default function NewLogin() {
                 </p>
 
                 <form onSubmit={handleLogin}>
-                  {/* Input Email */}
                   <div className="mb-3">
                     <label className="form-label small fw-bold text-secondary">
                       Email Address
@@ -126,7 +143,6 @@ export default function NewLogin() {
                     </div>
                   </div>
 
-                  {/* Input Password */}
                   <div className="mb-3">
                     <label className="form-label small fw-bold text-secondary">
                       Password
@@ -234,7 +250,7 @@ export default function NewLogin() {
                 <p className="text-muted small">Anda akan segera dialihkan.</p>
                 <button
                   className="btn btn-success w-100 rounded-pill"
-                  onClick={handleSuccess}
+                  onClick={handleSuccessClose}
                 >
                   Lanjutkan
                 </button>

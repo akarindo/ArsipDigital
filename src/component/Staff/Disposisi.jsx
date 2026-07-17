@@ -6,6 +6,7 @@ import Select from "react-select"; // Import react-select
 export default function Disposisi() {
   const { token, user, users } = usePengajuan();
   const [loading, setLoading] = useState(true);
+  const [buttonLoad, setButtonLoad] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedSurat, setSelectedSurat] = useState(null);
 
@@ -49,12 +50,10 @@ export default function Disposisi() {
 
   async function handleTerimaSurat(item) {
     let form = [];
-    if (item.parent_uuid) {
-      form = { ...item, read_at: getLocalDateTimeString() };
-    } else {
-      form = { ...item, tanggal_direspon: getLocalDateTimeString() };
-    }
+    form = { ...item, read_at: getLocalDateTimeString() };
+
     try {
+      setButtonLoad(true);
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/disposisi/${item.uuid}`,
         {
@@ -69,10 +68,13 @@ export default function Disposisi() {
       );
       if (response.ok) {
         setSelectedSurat(null);
+        console.log("action");
         getDisposisi();
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setButtonLoad(false);
     }
   }
 
@@ -100,8 +102,6 @@ export default function Disposisi() {
       batas_waktu: selectedSurat.batas_waktu,
       catatan: selectedSurat.catatan,
     };
-    console.log("formdis", formDisposisi);
-    console.log("form", form);
 
     try {
       const response = await fetch(
@@ -280,8 +280,21 @@ export default function Disposisi() {
                         <div className="d-flex align-items-start gap-2 bg-light-subtle p-2 rounded-2 mb-4">
                           <i className="bx bx-notepad text-muted mt-1 fs-5"></i>
                           <span className="small text-muted text-break">
-                            <strong className="text-secondary">Catatan:</strong>{" "}
-                            {item.catatan || "Tidak ada catatan tambahan."}
+                            <strong className="text-secondary">
+                              Pengirim:
+                            </strong>{" "}
+                            {item.creator ? (
+                              <>
+                                {item.creator.name} —{" "}
+                                <span className="fw-semibold text-primary">
+                                  {item.creator.branch
+                                    ? item.creator.branch.name
+                                    : "Kantor Pusat"}
+                                </span>
+                              </>
+                            ) : (
+                              "Tidak ada data pengirim."
+                            )}
                           </span>
                         </div>
                       </div>
@@ -289,59 +302,24 @@ export default function Disposisi() {
                       {/* Action Buttons */}
                       <div className="mt-auto pt-2 border-top">
                         <div className="d-flex flex-column flex-sm-row gap-2 justify-content-end">
-                          {item?.parent_uuid !== user.uuid ? (
-                            item?.tanggal_direspon ? (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    previewPDF(item.surat.file_path)
-                                  }
-                                  className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1"
-                                >
-                                  <i className="bx bx-show fs-5"></i> Lihat
-                                  Surat
-                                </button>
-                                {(user.role === "hrd" ||
-                                  (user.role === "direksi" &&
-                                    !item.parent_uuid)) && (
-                                  <button
-                                    onClick={() => handleOpenDisposisi(item)}
-                                    className="btn btn-success btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1 shadow-sm"
-                                  >
-                                    <i className="bx bx-share fs-5"></i>{" "}
-                                    Teruskan
-                                  </button>
-                                )}
-                              </>
-                            ) : (
-                              <button
-                                onClick={() => handleTerimaSurat(item)}
-                                className="btn btn-primary btn-sm rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm"
-                              >
-                                <i className="bx bx-check-shield fs-5"></i>{" "}
-                                Konfirmasi Terima Surat
-                              </button>
-                            )
-                          ) : null}
-
-                          {item?.parent_uuid === user.uuid ? (
-                            item.read_at ? (
-                              <button
-                                onClick={() => previewPDF(item.surat.file_path)}
-                                className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1"
-                              >
-                                <i className="bx bx-show fs-5"></i> Lihat Surat
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleTerimaSurat(item)}
-                                className="btn btn-primary btn-sm rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm"
-                              >
-                                <i className="bx bx-check-shield fs-5"></i>{" "}
-                                Konfirmasi Terima Surat
-                              </button>
-                            )
-                          ) : null}
+                          {item.read_at ? (
+                            <button
+                              onClick={() => previewPDF(item.surat.file_path)}
+                              className="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 w-100 w-sm-auto d-flex align-items-center justify-content-center gap-1"
+                            >
+                              <i className="bx bx-show fs-5"></i> Lihat Surat
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleTerimaSurat(item)}
+                              className="btn btn-primary btn-sm rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                            >
+                              <i className="bx bx-check-shield fs-5"></i>{" "}
+                              {buttonLoad
+                                ? "Loading ...."
+                                : "Konfirmasi Terima Surat"}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
