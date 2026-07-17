@@ -62,7 +62,9 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (allowedRoles && !allowedRoles.includes(userRole?.toLowerCase())) {
     // Redirect aman jika role tidak punya akses
     const dashboardPath =
-      userRole === "staff umum" ? "/dashboardPetugas" : `/dashboard${userRole}`;
+      userRole === "staff umum" || userRole === "super_admin"
+        ? "/dashboardPetugas"
+        : `/dashboard${userRole}`;
     return <Navigate to={dashboardPath} replace />;
   }
 
@@ -88,7 +90,7 @@ export default function App() {
         <Route
           path="/dashboardPetugas"
           element={
-            <ProtectedRoute allowedRoles={["staff umum"]}>
+            <ProtectedRoute allowedRoles={["staff umum", "super_admin"]}>
               <DashboardPetugas />
             </ProtectedRoute>
           }
