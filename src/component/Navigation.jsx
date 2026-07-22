@@ -12,8 +12,9 @@ const Navigation = ({ onNavigateMobile }) => {
     { name: "Data Master", path: "/instansi", icon: "clipboard-list.png" },
     { name: "Data Pengguna", path: "/pengguna", icon: "clipboard-list.png" },
     { name: "Approval", path: "/approvalPetugas", icon: "history.png" },
+    { name: "Dashboard Surat", path: "/surat", icon: "history.png" },
+    { name: "E-SURAT", path: "/esurat", icon: "history.png" },
     { name: "Kotak Masuk", path: "/kotak-masuk", icon: "history.png" },
-    { name: "Master Surat", path: "/surat", icon: "history.png" },
     { name: "Arsip Surat", path: "/gdrive", icon: "history.png" },
     {
       name: "Disposisi Surat",
@@ -32,8 +33,9 @@ const Navigation = ({ onNavigateMobile }) => {
       icon: "clipboard-list.png",
     },
     { name: "Log History", path: "/logHistoryStaff", icon: "history.png" },
-    { name: "Manajemen Surat", path: "/surat", icon: "history.png" },
-    { name: "Kotak Masuk", path: "/kotak-masuk", icon: "history.png" },
+    { name: "Dashboard Surat", path: "/surat", icon: "history.png" },
+    { name: "E-SURAT", path: "/esurat", icon: "history.png" },
+    { name: "Arsip Surat", path: "/gdrive", icon: "history.png" },
     {
       name: "Disposisi Surat",
       path: "/disposisistaff",

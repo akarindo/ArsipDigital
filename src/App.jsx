@@ -47,6 +47,7 @@ import UserManagement from "./component/UserManagement.jsx";
 import BranchMaster from "./component/Petugas/BranchMaster.jsx";
 import Surat from "./component/Petugas/Surat.jsx";
 import SuratMasukList from "./component/Staff/SuratMasuk.jsx";
+import Esurat from "./component/Petugas/Esurat.jsx";
 
 function ProtectedRoute({ children, allowedRoles }) {
   // Disinkronkan menggunakan localStorage agar sesuai dengan data login
@@ -119,6 +120,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <LogPengajuanStaff />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/esurat"
+          element={
+            <ProtectedRoute>
+              <Esurat />
             </ProtectedRoute>
           }
         />

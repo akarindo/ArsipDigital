@@ -4,7 +4,7 @@ import Alert from "../Alert"; // Sesuaikan path import Alert Anda
 import { PengajuanContext } from "../../context/PengajuanContext"; // Menggunakan context yang sama dengan contoh Anda
 
 export default function Surat() {
-  const { token } = useContext(PengajuanContext);
+  const { token, user } = useContext(PengajuanContext);
   const [tab, setTab] = useState("masuk"); // 'masuk' atau 'keluar'
   const [dataSurat, setDataSurat] = useState([]);
   const [corporates, setCorporates] = useState([]);
@@ -57,7 +57,16 @@ export default function Surat() {
       );
       const result = await response.json();
       if (response.ok) {
-        setDataSurat(result);
+        console.log(tab);
+        if (user?.role == "super_admin" || user?.role == "staff umum") {
+          setDataSurat(result);
+        } else {
+          const filterSurat = result?.filter(
+            (data) => data.current_user == user.uuid,
+          );
+          setDataSurat(filterSurat);
+        }
+        console.log("result", result);
       } else {
         throw new Error(result.message || "Gagal mengambil data");
       }
