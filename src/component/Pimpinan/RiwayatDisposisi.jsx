@@ -245,8 +245,8 @@ export default function RiwayatDisposisi() {
                           </small>
                         </td>
                         <td>
-                          {item.tanggal_direspon
-                            ? `Di terima tanggal ${item.tanggal_direspon}`
+                          {item.read_at
+                            ? `Di terima tanggal ${item.read_at}`
                             : "belum diterima"}
                         </td>
                         <td>{item.user?.name}</td>

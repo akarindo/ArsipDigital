@@ -69,9 +69,14 @@ const Navigation = ({ onNavigateMobile }) => {
   }, []);
 
   return (
-    <div className="d-flex flex-column justify-content-between h-100 pb-4">
+    <div className="d-flex flex-column justify-content-between h-100 pb-4 overflow-hidden">
+      {/* 
+        Penambahan class Bootstrap: 
+        1. flex-grow-1 : Mengisi seluruh sisa ruang kosong vertikal.
+        2. overflow-y-auto : Memungkinkan area daftar menu di-scroll jika item melebihi tinggi layar.
+      */}
       <ul
-        className="metismenu p-3 mb-0"
+        className="metismenu p-3 mb-0 flex-grow-1 overflow-y-auto"
         id="menu"
         style={{ listStyle: "none" }}
       >
@@ -90,7 +95,6 @@ const Navigation = ({ onNavigateMobile }) => {
             >
               <Link
                 to={menu.path}
-                // Menutup sidebar di mobile setelah item di-klik
                 onClick={onNavigateMobile}
                 className={`link d-flex align-items-center p-2 rounded mb-1 text-decoration-none ${
                   isActive ? "bg-light text-primary fw-semibold" : "text-dark"
@@ -111,8 +115,8 @@ const Navigation = ({ onNavigateMobile }) => {
         })}
       </ul>
 
-      {/* Bagian Tombol Logout */}
-      <div className="px-4 mt-auto">
+      {/* Bagian Tombol Logout (Tetap diam di posisi bawah) */}
+      <div className="px-4 pt-3 mt-auto border-top">
         <button
           onClick={handleLogout}
           className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 rounded py-2"
