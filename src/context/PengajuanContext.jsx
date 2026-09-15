@@ -81,8 +81,9 @@ export const PengajuanProvider = ({ children }) => {
       throw new Error(result.message || `Fetch ${endpoint} Gagal`);
     return result;
   }, []);
-  const fetchUsers = async () => {
-    // setLoading(true);
+  const fetchUsers = useCallback(async () => {
+    if (!token) return [];
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users`,
@@ -94,26 +95,28 @@ export const PengajuanProvider = ({ children }) => {
         },
       );
       const resData = await response.json();
-      console.log("res", resData);
-      if (response.ok) {
-        setUsers(resData.data.users);
-        // Menghitung jumlah staff umum secara dinamis dari data api
-        const staffUmumCount = resData.data.users.filter(
-          (u) => u.role === "staff umum",
-        ).length;
-        setStats({
-          totalUser: resData.data.totalUser,
-          totalPetugas: staffUmumCount,
-        });
-      } else {
-        console.error("Gagal memuat data:", resData.message);
+      if (!response.ok) {
+        throw new Error(resData.message || "Gagal memuat data pengguna");
       }
+
+      const nextUsers = resData?.data?.users || [];
+      setUsers(nextUsers);
+
+      // Hitung ulang statistik dari hasil terbaru agar ikut berubah setelah CRUD.
+      const staffUmumCount = nextUsers.filter(
+        (u) => u.role === "staff umum",
+      ).length;
+      setStats({
+        totalUser: resData?.data?.totalUser ?? nextUsers.length,
+        totalPetugas: staffUmumCount,
+      });
+
+      return nextUsers;
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
-      // setLoading(false);
+      throw error;
     }
-  };
+  }, [token]);
   // --- Core Fetch Function (Parallel) ---
   const getAllMasterData = useCallback(
     async (authToken) => {
@@ -311,9 +314,11 @@ export const PengajuanProvider = ({ children }) => {
 
     if (token) {
       getAllMasterData(token);
-      fetchUsers();
+      fetchUsers().catch((error) =>
+        console.error("Error fetching users:", error),
+      );
     }
-  }, [token, getAllMasterData]);
+  }, [token, getAllMasterData, fetchUsers]);
 
   // --- Context Value ---
   const contextValue = useMemo(
@@ -341,6 +346,7 @@ export const PengajuanProvider = ({ children }) => {
       setToken,
       setRole,
       setUser,
+      fetchUsers,
       handleChangeBuild: (uuid) => handleChangeBuild(uuid),
       handleChangeFloor: (uuid) => handleChangeFloor(uuid),
       handleChangeRoom: (uuid) => handleChangeRoom(uuid),
@@ -381,6 +387,7 @@ export const PengajuanProvider = ({ children }) => {
       setToken,
       setRole,
       setUser,
+      fetchUsers,
       currentUuid,
       formDataArsip,
       getAllMasterData,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePengajuan } from "../../context/PengajuanContext";
 import AdminLayout from "../layouts/AdminLayout";
 import Alert from "../Alert";
@@ -13,6 +13,8 @@ const Esurat = () => {
   const [tabArsip, setTabArsip] = useState("eksternal");
   const [corporates, setCorporates] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const fileInputMasukRef = useRef(null);
+  const fileInputKeluarRef = useRef(null);
 
   // State Form Surat Masuk
   const [formMasuk, setFormMasuk] = useState({
@@ -255,11 +257,22 @@ const Esurat = () => {
 
         const modalId =
           type === "masuk" ? "modalSuratMasuk" : "modalSuratKeluar";
-        window.bootstrap.Modal.getInstance(
+        window.bootstrap?.Modal?.getInstance(
           document.getElementById(modalId),
-        ).hide();
+        )?.hide();
 
         setSelectedData(null);
+        if (type === "masuk") {
+          resetFormMasuk();
+          if (fileInputMasukRef.current) {
+            fileInputMasukRef.current.value = "";
+          }
+        } else {
+          resetFormKeluar();
+          if (fileInputKeluarRef.current) {
+            fileInputKeluarRef.current.value = "";
+          }
+        }
         fetchData();
       } else {
         const errorData = await response.json();
@@ -801,6 +814,7 @@ const Esurat = () => {
                       </span>
                       <input
                         type="file"
+                        ref={fileInputMasukRef}
                         className="form-control bg-light border-0"
                         accept="application/pdf"
                         onChange={(e) => handleFileChange(e, "masuk")}
@@ -980,12 +994,13 @@ const Esurat = () => {
                       </span>
                       <input
                         type="file"
+                        ref={fileInputKeluarRef}
                         className="form-control bg-light border-0"
                         accept="application/pdf"
                         onChange={(e) => handleFileChange(e, "keluar")}
                       />
                     </div>
-                    {formMasuk.file_pdf && (
+                    {formKeluar.file_pdf && (
                       <small className="text-success">
                         File berhasil diproses!
                       </small>

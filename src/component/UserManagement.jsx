@@ -1,11 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { usePengajuan } from "../context/PengajuanContext";
 import AdminLayout from "./layouts/AdminLayout";
+import Alert from "./Alert"; // Adjust path if needed
 
 const UserManagement = () => {
+  // State Alert Notification
+  const [alerts, setAlerts] = useState([]);
+
+  const removeAlert = useCallback((id) => {
+    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+  }, []);
+
+  const addAlert = useCallback(
+    (message, type = "success") => {
+      const id = Date.now();
+      setAlerts((prev) => [...prev, { id, message, type }]);
+
+      // Auto dismiss dalam 4 detik
+      setTimeout(() => {
+        removeAlert(id);
+      }, 4000);
+    },
+    [removeAlert],
+  );
+
   // State Loading
-  const [isInitialLoading, setIsInitialLoading] = useState(true); // Loading saat pertama kali buka page
-  const [loading, setLoading] = useState(false); // Loading saat hit api (create, update, delete)
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [branches, setBranches] = React.useState([]);
 
   const { token, users, stats, fetchUsers } = usePengajuan();
@@ -29,25 +50,46 @@ const UserManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
 
+  const getBranches = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/branches`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) throw new Error("Gagal mengambil data cabang");
+      const result = await response.json();
+      setBranches(result);
+    } catch (error) {
+      addAlert(error.message, "danger");
+    }
+  }, [token, addAlert]);
+
   // 1. FETCH DATA (Awal Buka Halaman)
   useEffect(() => {
     const loadInitialData = async () => {
       setIsInitialLoading(true);
       try {
-        // Berjalan paralel agar loading terasa lebih cepat dan efisien
         await Promise.allSettled([
           token ? getBranches() : Promise.resolve(),
-          fetchUsers ? fetchUsers() : Promise.resolve(),
+          fetchUsers(),
         ]);
       } catch (error) {
-        console.error("Gagal memuat data awal:", error);
+        addAlert("Gagal memuat data awal: " + error.message, "danger");
       } finally {
         setIsInitialLoading(false);
       }
     };
 
     loadInitialData();
-  }, []);
+  }, [token, fetchUsers, getBranches, addAlert]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -56,7 +98,7 @@ const UserManagement = () => {
   // 2. SUBMIT DATA (Create & Update)
   const handleSubmitUser = async (e) => {
     e.preventDefault();
-    setLoading(true); // Mulai loading saat kirim data
+    setLoading(true);
 
     const url = isEdit
       ? `${import.meta.env.VITE_API_URL}/api/users/${formData.id}`
@@ -76,30 +118,34 @@ const UserManagement = () => {
       });
 
       if (response.ok) {
-        alert(
+        addAlert(
           isEdit ? "User berhasil diperbarui!" : "User berhasil ditambahkan!",
+          "success",
         );
 
+        // 1. Sembunyikan Modal terlebih dahulu
         const modalEl = document.getElementById("userModal");
-        const modalInstance =
-          window.bootstrap?.Modal?.getInstance(modalEl) || window.$(modalEl);
-        modalInstance.hide();
+        const modalInstance = window.bootstrap?.Modal?.getInstance(modalEl);
+        modalInstance?.hide();
 
-        if (fetchUsers) await fetchUsers();
+        // Ambil data terbaru agar tabel dan statistik langsung ikut berubah.
+        await fetchUsers();
+        setCurrentPage(1);
       } else {
         const err = await response.json();
-        alert(err.message || "Gagal menyimpan data user");
+        addAlert(err.message || "Gagal menyimpan data user", "danger");
       }
-    } catch (error) {
-      alert("Terjadi kesalahan koneksi");
+    } catch {
+      addAlert("Terjadi kesalahan koneksi", "danger");
     } finally {
-      setLoading(false); // Matikan loading setelah proses selesai
+      setLoading(false);
     }
   };
 
   // 3. DELETE DATA
+  // DELETE DATA
   const handleDeleteUser = async () => {
-    setLoading(true); // Mulai loading saat proses hapus
+    setLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/${selectedUser.id}`,
@@ -113,44 +159,24 @@ const UserManagement = () => {
       );
 
       if (response.ok) {
-        alert("User berhasil dihapus!");
+        addAlert("User berhasil dihapus!", "success");
 
+        // 1. Sembunyikan Modal terlebih dahulu
         const modalEl = document.getElementById("deleteModal");
-        const modalInstance =
-          window.bootstrap?.Modal?.getInstance(modalEl) || window.$(modalEl);
-        modalInstance.hide();
+        const modalInstance = window.bootstrap?.Modal?.getInstance(modalEl);
+        modalInstance?.hide();
 
-        if (fetchUsers) await fetchUsers();
+        // Ambil data terbaru agar tabel dan statistik langsung ikut berubah.
+        await fetchUsers();
+        setCurrentPage(1);
       } else {
         const err = await response.json();
-        alert(err.message || "Gagal menghapus user");
+        addAlert(err.message || "Gagal menghapus user", "danger");
       }
-    } catch (error) {
-      alert("Terjadi kesalahan koneksi");
+    } catch {
+      addAlert("Terjadi kesalahan koneksi", "danger");
     } finally {
-      setLoading(false); // Matikan loading setelah proses hapus selesai
-    }
-  };
-
-  const getBranches = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/branches`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) throw new Error("Gagal mengambil data cabang");
-      const result = await response.json();
-      setBranches(result);
-    } catch (error) {
-      console.error(error.message);
+      setLoading(false);
     }
   };
 
@@ -201,7 +227,6 @@ const UserManagement = () => {
     modalInstance?.show();
   };
 
-  // Badge modern memakai kombinasi Soft Background & Dark Text
   const getBadgeClass = (role) => {
     switch (role?.toLowerCase()) {
       case "direksi":
@@ -236,7 +261,6 @@ const UserManagement = () => {
   );
   const totalPages = Math.ceil(filteredUsers.length / entriesPerPage);
 
-  // VIEW LOADING UNTUK DI AWAL BUKA PAGE
   if (isInitialLoading) {
     return (
       <AdminLayout>
@@ -256,6 +280,9 @@ const UserManagement = () => {
 
   return (
     <AdminLayout>
+      {/* Container Custom Toast Alert */}
+      <Alert alerts={alerts} removeAlert={removeAlert} />
+
       <style>{`
         .modern-card { border: none; border-radius: 16px; background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .stat-card { border: none; border-radius: 16px; background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: transform 0.2s; }
@@ -369,7 +396,6 @@ const UserManagement = () => {
         <div className="modern-card card mb-4">
           <div className="card-header bg-transparent border-0 pt-4 px-4 pb-2">
             <div className="row g-3 align-items-center justify-content-between">
-              {/* Entries Limit */}
               <div className="col-12 col-md-4 d-flex align-items-center gap-2">
                 <span className="text-muted small">Tampilkan</span>
                 <select
@@ -387,7 +413,6 @@ const UserManagement = () => {
                 </span>
               </div>
 
-              {/* Filters & Search */}
               <div className="col-12 col-md-7 d-flex flex-column flex-sm-row gap-2 justify-content-md-end">
                 <select
                   className="form-select form-select-sm rounded-3 w-sm-auto"
@@ -433,7 +458,6 @@ const UserManagement = () => {
             </div>
           </div>
 
-          {/* Table Area */}
           <div className="card-body p-0">
             <div className="table-responsive">
               <table className="table table-modern align-middle mb-0">
@@ -476,7 +500,9 @@ const UserManagement = () => {
                         </td>
                         <td className="text-center">
                           <span
-                            className={`badge rounded-pill text-uppercase px-3 py-1.5 font-weight-bold tracking-wider ${getBadgeClass(user.role)}`}
+                            className={`badge rounded-pill text-uppercase px-3 py-1.5 font-weight-bold tracking-wider ${getBadgeClass(
+                              user.role,
+                            )}`}
                             style={{ fontSize: "0.75rem" }}
                           >
                             {user.role}
@@ -520,7 +546,9 @@ const UserManagement = () => {
                 <nav>
                   <ul className="pagination pagination-sm mb-0 gap-1">
                     <li
-                      className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                      className={`page-item ${
+                        currentPage === 1 ? "disabled" : ""
+                      }`}
                     >
                       <button
                         className="page-link rounded-2 border border-0 bg-light text-dark"
@@ -534,10 +562,16 @@ const UserManagement = () => {
                     {[...Array(totalPages)].map((_, index) => (
                       <li
                         key={index}
-                        className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
+                        className={`page-item ${
+                          currentPage === index + 1 ? "active" : ""
+                        }`}
                       >
                         <button
-                          className={`page-link rounded-2 border-0 mx-0.5 ${currentPage === index + 1 ? "bg-primary text-white" : "bg-light text-dark"}`}
+                          className={`page-link rounded-2 border-0 mx-0.5 ${
+                            currentPage === index + 1
+                              ? "bg-primary text-white"
+                              : "bg-light text-dark"
+                          }`}
                           onClick={() => setCurrentPage(index + 1)}
                         >
                           {index + 1}
@@ -545,7 +579,9 @@ const UserManagement = () => {
                       </li>
                     ))}
                     <li
-                      className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                      className={`page-item ${
+                        currentPage === totalPages ? "disabled" : ""
+                      }`}
                     >
                       <button
                         className="page-link rounded-2 border border-0 bg-light text-dark"
@@ -571,7 +607,7 @@ const UserManagement = () => {
           id="userModal"
           tabIndex="-1"
           aria-hidden="true"
-          data-bs-backdrop="static" /* Mencegah modal tertutup saat tidak sengaja klik di luar modal ketika loading */
+          data-bs-backdrop="static"
         >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content modal-modern p-3">
@@ -707,7 +743,9 @@ const UserManagement = () => {
                   </button>
                   <button
                     type="submit"
-                    className={`btn btn-modern ${isEdit ? "btn-warning text-white" : "btn-primary"} d-flex align-items-center gap-2`}
+                    className={`btn btn-modern ${
+                      isEdit ? "btn-warning text-white" : "btn-primary"
+                    } d-flex align-items-center gap-2`}
                     disabled={loading}
                   >
                     {loading && (

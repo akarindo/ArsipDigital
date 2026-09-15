@@ -26,6 +26,25 @@ body {
   min-height: 100vh;
 }
 
+/* Keep native date controls readable on the light form backgrounds. */
+input[type="date"] {
+  color: #212529;
+  color-scheme: light;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #212529;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.75;
+  cursor: pointer;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
