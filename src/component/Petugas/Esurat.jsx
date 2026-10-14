@@ -98,6 +98,7 @@ const Esurat = () => {
   };
 
   const resetFormKeluar = () => {
+    setTabArsip("eksternal");
     setFormKeluar({
       nomor_surat: "",
       tujuan_instansi: "",
@@ -110,12 +111,28 @@ const Esurat = () => {
       no_resi: null,
       jenis_pengiriman: null,
       provider: null,
-      type: tabArsip,
+      type: "eksternal",
       penerima: null,
       status_internal: null,
       tanggal_serah: null,
       file_size: 0,
     });
+  };
+  const handleModeEkspedisiChange = (mode) => {
+    const denganEkspedisi = mode === "eksternal";
+    setTabArsip(mode);
+    setFormKeluar((prev) => ({
+      ...prev,
+      type: mode,
+      ...(denganEkspedisi
+        ? {}
+        : {
+            provider: null,
+            jenis_pengiriman: null,
+            no_resi: null,
+            tanggal_serah: null,
+          }),
+    }));
   };
   const getDeleteModal = () => {
     const modalEl = document.getElementById("modalKonfirmasiHapusSurat");
@@ -520,8 +537,19 @@ const Esurat = () => {
                                 className="btn btn-sm btn-outline-primary shadow-none"
                                 onClick={() => {
                                   setSelectedData(item);
-                                  if (tab === "masuk") setFormMasuk(item);
-                                  else setFormKeluar(item);
+                                  if (tab === "masuk") {
+                                    setFormMasuk(item);
+                                  } else {
+                                    const modeEkspedisi =
+                                      item.type === "internal"
+                                        ? "internal"
+                                        : "eksternal";
+                                    setTabArsip(modeEkspedisi);
+                                    setFormKeluar({
+                                      ...item,
+                                      type: modeEkspedisi,
+                                    });
+                                  }
                                   openModal(
                                     tab === "masuk"
                                       ? "modalSuratMasuk"
@@ -1007,7 +1035,41 @@ const Esurat = () => {
                     )}
                   </div>
 
-                  {/* KONTEN TAB EKSTERNAL (KODE LAMA ANDA) */}
+                  <div className="col-12">
+                    <label className="form-label small fw-bold text-secondary">
+                      Pengiriman Surat
+                    </label>
+                    <div
+                      className="btn-group w-100"
+                      role="group"
+                      aria-label="Pilihan ekspedisi"
+                    >
+                      <button
+                        type="button"
+                        className={`btn ${tabArsip === "internal" ? "btn-primary" : "btn-outline-primary"}`}
+                        aria-pressed={tabArsip === "internal"}
+                        onClick={() => handleModeEkspedisiChange("internal")}
+                      >
+                        <i className="bx bx-envelope me-1"></i>
+                        Tanpa Ekspedisi
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${tabArsip === "eksternal" ? "btn-primary" : "btn-outline-primary"}`}
+                        aria-pressed={tabArsip === "eksternal"}
+                        onClick={() => handleModeEkspedisiChange("eksternal")}
+                      >
+                        <i className="bx bx-truck me-1"></i>
+                        Dengan Ekspedisi
+                      </button>
+                    </div>
+                    <small className="text-muted">
+                      Detail kurir hanya diperlukan jika surat dikirim melalui
+                      ekspedisi.
+                    </small>
+                  </div>
+
+                  {/* Detail ekspedisi hanya ditampilkan untuk pengiriman dengan kurir */}
                   {tabArsip === "eksternal" && (
                     <div className="col-12 py-2 bg-light rounded-3 px-3 border animate__animated animate__fadeIn">
                       <h6 className="mb-3 mt-1 fw-bold text-primary small uppercase">
@@ -1021,7 +1083,7 @@ const Esurat = () => {
                           </label>
                           <select
                             className="form-select form-select-sm"
-                            value={formKeluar.provider}
+                            value={formKeluar.provider || ""}
                             onChange={(e) =>
                               setFormKeluar({
                                 ...formKeluar,
@@ -1030,6 +1092,7 @@ const Esurat = () => {
                             }
                             required={tabArsip === "eksternal"}
                           >
+                            <option value="">-- Pilih Provider --</option>
                             <option value="J&T">J&T Express</option>
                             <option value="JNE">JNE</option>
                             <option value="SICEPAT">Sicepat</option>
@@ -1044,8 +1107,9 @@ const Esurat = () => {
                             type="text"
                             className="form-control form-select-sm"
                             placeholder="Reguler/Kilat"
-                            value={formKeluar.jenis_pengiriman}
-                            required={tabArsip === "eksternal"}
+                            value={formKeluar.jenis_pengiriman || ""}
+                            // required={tabArsip === "eksternal"}
+                            required={false}
                             onChange={(e) =>
                               setFormKeluar({
                                 ...formKeluar,
@@ -1062,8 +1126,8 @@ const Esurat = () => {
                             type="text"
                             className="form-control form-select-sm"
                             placeholder="Contoh: JT1234..."
-                            value={formKeluar.no_resi}
-                            required={tabArsip === "eksternal"}
+                            value={formKeluar.no_resi || ""}
+                            required={false}
                             onChange={(e) =>
                               setFormKeluar({
                                 ...formKeluar,
@@ -1079,8 +1143,8 @@ const Esurat = () => {
                           <input
                             type="date"
                             className="form-control form-select-sm"
-                            value={formKeluar.tanggal_serah}
-                            required={tabArsip === "eksternal"}
+                            value={formKeluar.tanggal_serah || ""}
+                            required={false}
                             onChange={(e) =>
                               setFormKeluar({
                                 ...formKeluar,

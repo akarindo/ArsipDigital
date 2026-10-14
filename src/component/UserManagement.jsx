@@ -114,7 +114,11 @@ const UserManagement = () => {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          // Pinca memakai hak akses yang sama dengan direksi di backend.
+          role: formData.role === "pinca" ? "direksi" : formData.role,
+        }),
       });
 
       if (response.ok) {
@@ -688,6 +692,7 @@ const UserManagement = () => {
                         disabled={loading}
                       >
                         <option value="direksi">Direksi</option>
+                        <option value="pinca">Pinca</option>
                         <option value="staff umum">Staff Umum</option>
                         <option value="pegawai">Pegawai</option>
                       </select>
