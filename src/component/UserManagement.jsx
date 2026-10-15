@@ -116,8 +116,8 @@ const UserManagement = () => {
         },
         body: JSON.stringify({
           ...formData,
-          // Pinca memakai hak akses yang sama dengan direksi di backend.
-          role: formData.role === "pinca" ? "direksi" : formData.role,
+          // Simpan role asli agar label/status Pinca tidak berubah menjadi Direksi.
+          role: formData.role,
         }),
       });
 
@@ -234,6 +234,7 @@ const UserManagement = () => {
   const getBadgeClass = (role) => {
     switch (role?.toLowerCase()) {
       case "direksi":
+      case "pinca":
         return "bg-primary-subtle text-primary border border-primary-subtle";
       case "staff umum":
         return "bg-success-subtle text-success border border-success-subtle";
@@ -426,6 +427,7 @@ const UserManagement = () => {
                 >
                   <option value="all">Semua Role</option>
                   <option value="direksi">Direksi</option>
+                  <option value="pinca">Pinca</option>
                   <option value="staff umum">Staff Umum</option>
                   <option value="pegawai">Pegawai</option>
                 </select>

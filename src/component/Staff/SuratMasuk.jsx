@@ -17,6 +17,17 @@ const SuratMasukList = () => {
 
   // Filter staff dengan role pegawai untuk target disposisi
   const filterStaff = users?.filter((u) => u.role === "pegawai");
+  const previewPDF = (filePath) => {
+    if (filePath.startsWith("data:")) {
+      const newTab = window.open();
+      newTab.document.write(
+        `<iframe src="${filePath}" width="100%" height="100%" style="border:none;"></iframe>`,
+      );
+    } else {
+      const fileUrl = `${import.meta.env.VITE_API_URL}${filePath}`;
+      window.open(fileUrl, "_blank");
+    }
+  };
 
   const fetchSuratMasuk = async () => {
     try {
@@ -267,14 +278,13 @@ const SuratMasukList = () => {
                           <div className="d-flex gap-2">
                             {/* Tombol Buka PDF */}
                             {surat.file_path ? (
-                              <a
-                                href={`http://127.0.0.1:8000${surat.file_path}`}
+                              <button
+                                onClick={() => previewPDF(surat.file_path)}
                                 target="_blank"
-                                rel="noopener noreferrer"
                                 className="btn btn-sm btn-outline-primary radius-30 px-3"
                               >
                                 Buka PDF
-                              </a>
+                              </button>
                             ) : (
                               <span className="text-muted small align-self-center">
                                 Tidak ada file

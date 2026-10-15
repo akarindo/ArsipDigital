@@ -50,11 +50,9 @@ export default function RiwayatDisposisi() {
         },
       });
       const data = await res.json();
-      const filterData = data?.filter(
-        (dt) => dt.parent_uuid !== null && dt.user_id !== user.uuid,
-      );
-      console.log("filter", filterData);
-      const listdata = user.role == "direksi" ? filterData : data;
+      const listdata = ["direksi", "pinca"].includes(user.role)
+        ? data?.filter((dt) => dt.parent_uuid === user.uuid)
+        : data;
       if (res.ok) setDisposisiList(listdata);
     } catch (err) {
       console.error(err);
@@ -95,8 +93,10 @@ export default function RiwayatDisposisi() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [token]);
+    if (token && user?.uuid) {
+      fetchData();
+    }
+  }, [token, user]);
 
   /* =======================
      📈 CHART: DISPOSISI / BULAN

@@ -63,6 +63,8 @@ const Navigation = ({ onNavigateMobile }) => {
       setMenus(petugasMenu);
     } else if (userRole === "pegawai" || userRole === "hrd") {
       setMenus(staffMenu);
+    } else if (userRole === "direksi" || userRole === "pinca") {
+      setMenus(pimpinanMenu);
     } else {
       setMenus(pimpinanMenu);
     }

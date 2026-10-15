@@ -85,6 +85,7 @@ export default function Login() {
           navigate("/surat");
           break;
         case "direksi":
+        case "pinca":
           navigate("/disposisi");
           break;
       }

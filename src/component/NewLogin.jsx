@@ -27,6 +27,7 @@ export default function NewLogin() {
       "staff umum": "/surat",
       super_admin: "/surat",
       direksi: "/disposisi",
+      pinca: "/disposisi",
       pimpinan: "/dashboardPetugas", // Sesuai mapping di App.js Anda
     };
     return paths[role.toLowerCase()] || "/";

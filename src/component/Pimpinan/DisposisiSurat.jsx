@@ -36,7 +36,10 @@ export default function DisposisiSurat() {
   const [suratMasukList, setSuratMasukList] = useState([]);
   const [loading, setLoading] = useState(false);
   const filterStaff = users?.filter(
-    (user) => user.role != "super_admin" && user.role != "direksi",
+    (user) =>
+      user.role != "super_admin" &&
+      user.role != "direksi" &&
+      user.role != "pinca",
   );
   const [alerts, setAlerts] = useState([]);
 
@@ -74,7 +77,14 @@ export default function DisposisiSurat() {
         },
       );
       const dataSurat = await resSurat.json();
-      if (resSurat.ok) setSuratMasukList(dataSurat);
+      if (resSurat.ok) {
+        const inboxSurat = dataSurat.filter(
+          (surat) =>
+            Array.isArray(surat.ditujukan_kepada) &&
+            surat.ditujukan_kepada.includes(user?.uuid),
+        );
+        setSuratMasukList(inboxSurat);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -144,8 +154,10 @@ export default function DisposisiSurat() {
   }, [suratMasukList]);
 
   useEffect(() => {
-    fetchData();
-  }, [token]);
+    if (token && user?.uuid) {
+      fetchData();
+    }
+  }, [token, user]);
 
   const handleOpenDisposisi = (surat) => {
     setSelectedSurat(surat);
