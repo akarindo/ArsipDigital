@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePengajuan } from "../../context/PengajuanContext";
 import AdminLayout from "../layouts/AdminLayout";
 import Alert from "../Alert";
@@ -13,6 +19,13 @@ const Esurat = () => {
   const [tabArsip, setTabArsip] = useState("eksternal");
   const [corporates, setCorporates] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "desc",
+  });
   const fileInputMasukRef = useRef(null);
   const fileInputKeluarRef = useRef(null);
 
@@ -161,7 +174,7 @@ const Esurat = () => {
         showAlert("danger", data.message);
         setDeleteTarget(null);
       }
-    } catch (err) {
+    } catch {
       showAlert("danger", "Gagal!", "Gagal menghapus data");
     }
   };
@@ -299,7 +312,7 @@ const Esurat = () => {
           errorData.message || "Terjadi kesalahan validasi.",
         );
       }
-    } catch (err) {
+    } catch {
       showAlert("danger", "Gagal!", "Terjadi kesalahan koneksi.");
     }
   };
@@ -315,7 +328,7 @@ const Esurat = () => {
   const filterStaff = users?.filter((usr) => usr.role !== "pegawai");
 
   // 1. Fungsi Fetch Data (GET)
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const endpoint = tab === "masuk" ? "/surat-masuk" : "/surat-keluar";
@@ -350,8 +363,8 @@ const Esurat = () => {
     } finally {
       setLoading(false);
     }
-  };
-  async function getCorporate() {
+  }, [tab, token, user?.role, user?.uuid]);
+  const getCorporate = useCallback(async () => {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/api/corporates`,
       {
@@ -366,13 +379,107 @@ const Esurat = () => {
 
     const result = await response.json();
     setCorporates(result);
-  }
+  }, [token]);
+
+  const formatDate = (date) => {
+    if (!date) return "-";
+
+    const parsedDate = new Date(
+      String(date).includes("T") ? date : `${date}T00:00:00`,
+    );
+    return Number.isNaN(parsedDate.getTime())
+      ? date
+      : parsedDate.toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+  };
+
+  const filteredData = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) return dataSurat;
+
+    return dataSurat.filter((item) => {
+      const searchableValues = [
+        item.no_registrasi,
+        item.nomor_surat,
+        item.perihal,
+        item.sifat,
+        item.corporate?.name,
+        item.creator?.name,
+        item.alamat_tujuan,
+        tab === "masuk" ? item.tanggal_terima : item.tanggal_buat,
+      ];
+
+      return searchableValues.some((value) =>
+        String(value || "").toLowerCase().includes(query),
+      );
+    });
+  }, [dataSurat, searchQuery, tab]);
+
+  const sortedData = useMemo(() => {
+    const getSortValue = (item, key) => {
+      if (key === "registration") {
+        return `${item.no_registrasi || ""} ${item.nomor_surat || ""}`;
+      }
+      if (key === "institution") return item.corporate?.name || "";
+      if (key === "creator") return item.creator?.name || "";
+      if (key === "date") {
+        return tab === "masuk"
+          ? item.tanggal_terima || ""
+          : item.tanggal_buat || "";
+      }
+      return item[key] || "";
+    };
+
+    return [...filteredData].sort((first, second) => {
+      const firstValue = String(getSortValue(first, sortConfig.key));
+      const secondValue = String(getSortValue(second, sortConfig.key));
+      const comparison = firstValue.localeCompare(secondValue, "id", {
+        numeric: true,
+        sensitivity: "base",
+      });
+
+      return sortConfig.direction === "asc" ? comparison : -comparison;
+    });
+  }, [filteredData, sortConfig, tab]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const paginatedData = sortedData.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  const handleSort = (key) => {
+    setSortConfig((previous) => ({
+      key,
+      direction:
+        previous.key === key && previous.direction === "asc" ? "desc" : "asc",
+    }));
+    setCurrentPage(1);
+  };
+
+  const sortIcon = (key) => {
+    if (sortConfig.key !== key) return "bx-sort-alt-2";
+    return sortConfig.direction === "asc" ? "bx-sort-up" : "bx-sort-down";
+  };
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   useEffect(() => {
     fetchData();
     getCorporate();
+  }, [fetchData, getCorporate]);
+
+  useEffect(() => {
+    setSearchQuery("");
+    setCurrentPage(1);
   }, [tab]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
   return (
     <AdminLayout>
       <Alert alerts={alerts} removeAlert={removeAlert} />
@@ -416,22 +523,106 @@ const Esurat = () => {
                 </button>
               </div>
 
-              {/* Table Section */}
+              <div className="row g-3 align-items-center mb-3">
+                <div className="col-12 col-lg-7">
+                  <div className="input-group">
+                    <span className="input-group-text bg-light border-end-0">
+                      <i className="bx bx-search text-muted"></i>
+                    </span>
+                    <input
+                      type="search"
+                      className="form-control bg-light border-start-0"
+                      placeholder="Cari nomor surat, perihal, instansi..."
+                      value={searchQuery}
+                      onChange={(event) => {
+                        setSearchQuery(event.target.value);
+                        setCurrentPage(1);
+                      }}
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        className="btn btn-light border"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setCurrentPage(1);
+                        }}
+                        aria-label="Hapus pencarian"
+                      >
+                        <i className="bx bx-x"></i>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="col-12 col-lg-5 d-flex align-items-center justify-content-lg-end gap-2">
+                  <label htmlFor="pageSize" className="small text-muted text-nowrap">
+                    Tampilkan
+                  </label>
+                  <select
+                    id="pageSize"
+                    className="form-select form-select-sm"
+                    style={{ width: "auto" }}
+                    value={pageSize}
+                    onChange={(event) => {
+                      setPageSize(Number(event.target.value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                  </select>
+                  <span className="small text-muted text-nowrap">data</span>
+                  <span className="badge bg-primary-subtle text-primary ms-auto ms-lg-2">
+                    {sortedData.length} surat
+                  </span>
+                </div>
+              </div>
 
               <div className="table-responsive">
-                <table className="table table-hover align-middle">
+                <table className="table table-hover align-middle mb-0">
                   <thead className="table-light text-secondary small uppercase">
                     <tr>
                       <th style={{ width: "5%" }}>No</th>
-                      <th>No Registrasi / Surat</th>
                       <th>
-                        {tab === "masuk" ? "Asal Instansi" : "Tujuan & Alamat"}
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
+                          onClick={() => handleSort("registration")}
+                        >
+                          No Registrasi / Surat <i className={`bx ${sortIcon("registration")}`}></i>
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
+                          onClick={() => handleSort("institution")}
+                        >
+                          {tab === "masuk" ? "Asal Instansi" : "Tujuan & Alamat"} <i className={`bx ${sortIcon("institution")}`}></i>
+                        </button>
                       </th>
                       <th>Perihal</th>
-                      {/* <th>File & Ukuran</th>
-                              <th>{tab === "masuk" ? "Tgl Diterima" : "Tgl Dibuat"}</th> */}
+                      <th>
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
+                          onClick={() => handleSort("date")}
+                        >
+                          {tab === "masuk" ? "Tgl Diterima" : "Tgl Dibuat"} <i className={`bx ${sortIcon("date")}`}></i>
+                        </button>
+                      </th>
                       <th>Sifat</th>
-                      <th>Dibuat Oleh</th> {/* Kolom Baru */}
+                      <th>
+                        <button
+                          type="button"
+                          className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
+                          onClick={() => handleSort("creator")}
+                        >
+                          Dibuat Oleh <i className={`bx ${sortIcon("creator")}`}></i>
+                        </button>
+                      </th>
+                      <th>Lampiran</th>
                       <th className="text-center">Aksi</th>
                     </tr>
                   </thead>
@@ -442,13 +633,14 @@ const Esurat = () => {
                           colSpan="9"
                           className="text-center py-5 text-muted small"
                         >
+                          <span className="spinner-border spinner-border-sm me-2" role="status"></span>
                           Sedang memproses data...
                         </td>
                       </tr>
-                    ) : dataSurat.length > 0 ? (
-                      dataSurat.map((item, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td>
+                    ) : paginatedData.length > 0 ? (
+                      paginatedData.map((item, index) => (
+                        <tr key={item.id || item.uuid || index}>
+                          <td>{(currentPage - 1) * pageSize + index + 1}</td>
 
                           {/* NO REGIS & NO SURAT DIGABUNG AGAR MINIMIZE */}
                           <td>
@@ -460,7 +652,11 @@ const Esurat = () => {
 
                           <td style={{ maxWidth: "200px" }}>
                             <div className="text-truncate fw-semibold">
-                              {item.corporate?.name || "-"}
+                              {item.corporate?.name ||
+                                (tab === "masuk"
+                                  ? item.asal_instansi
+                                  : item.tujuan_instansi) ||
+                                "-"}
                             </div>
                             {tab === "keluar" && item.alamat_tujuan && (
                               <div className="small text-muted text-truncate">
@@ -469,41 +665,17 @@ const Esurat = () => {
                             )}
                           </td>
 
-                          <td>
-                            <span className="text-wrap">{item.perihal}</span>
+                          <td style={{ minWidth: "180px" }}>
+                            <span className="text-wrap">{item.perihal || "-"}</span>
                           </td>
 
-                          {/* KOLOM FILE & UKURAN DIGABUNG AGAR LEBIH RINGKAS */}
-                          {/* <td>
-                                    <div className="d-flex align-items-center gap-2">
-                                      {item.file_path ? (
-                                        <>
-                                          <button
-                                            className="btn btn-sm btn-outline-danger shadow-none p-1"
-                                            onClick={() => previewPDF(item.file_path)}
-                                            title="Lihat PDF"
-                                          >
-                                            <i className="bx bx-file-find fs-5"></i>
-                                          </button>
-                                          <span className="small text-muted">
-                                            {item.file_size
-                                              ? `${Math.round(item.file_size / 1024).toLocaleString()} KB`
-                                              : "0 KB"}
-                                          </span>
-                                        </>
-                                      ) : (
-                                        <span className="text-muted small">-</span>
-                                      )}
-                                    </div>
-                                  </td>
-        
-                                  <td>
-                                    <span className="small">
-                                      {tab === "masuk"
-                                        ? item.tanggal_terima
-                                        : item.tanggal_buat}
-                                    </span>
-                                  </td> */}
+                          <td className="text-nowrap small">
+                            {formatDate(
+                              tab === "masuk"
+                                ? item.tanggal_terima
+                                : item.tanggal_buat,
+                            )}
+                          </td>
 
                           <td>
                             <span
@@ -516,11 +688,9 @@ const Esurat = () => {
                           {/* MENAMPILKAN PEMBUAT SURAT (CURRENT USER) */}
                           <td>
                             <div className="d-flex flex-column">
-                              {/* Menampilkan nama user dari relasi 'creator' */}
                               <span className="fw-semibold small text-dark">
                                 {item.creator?.name || "Tidak Diketahui"}
                               </span>
-                              {/* Menampilkan role pembuat sebagai sub-info tambahan */}
                               <span
                                 className="text-muted"
                                 style={{ fontSize: "10px" }}
@@ -528,6 +698,22 @@ const Esurat = () => {
                                 {item.creator?.role || "Staff"}
                               </span>
                             </div>
+                          </td>
+
+                          <td>
+                            {item.file_path ? (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-danger text-nowrap"
+                                onClick={() => previewPDF(item.file_path)}
+                                title="Lihat PDF"
+                              >
+                                <i className="bx bxs-file-pdf me-1"></i>
+                                Lihat PDF
+                              </button>
+                            ) : (
+                              <span className="small text-muted">Tidak ada</span>
+                            )}
                           </td>
 
                           <td className="text-center">
@@ -576,12 +762,65 @@ const Esurat = () => {
                     ) : (
                       <tr>
                         <td colSpan="9" className="text-center py-5 text-muted">
-                          Belum ada data surat.
+                          {searchQuery
+                            ? "Tidak ada surat yang sesuai dengan pencarian."
+                            : "Belum ada data surat."}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 pt-3">
+                <span className="small text-muted">
+                  Menampilkan {sortedData.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+                  -{Math.min(currentPage * pageSize, sortedData.length)} dari {sortedData.length} data
+                </span>
+                <nav aria-label="Navigasi halaman surat">
+                  <ul className="pagination pagination-sm mb-0">
+                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                      <button
+                        type="button"
+                        className="page-link"
+                        onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Sebelumnya
+                      </button>
+                    </li>
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                      (page) => (
+                        <li
+                          className={`page-item ${currentPage === page ? "active" : ""}`}
+                          key={page}
+                        >
+                          <button
+                            type="button"
+                            className="page-link"
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </button>
+                        </li>
+                      ),
+                    )}
+                    <li
+                      className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                    >
+                      <button
+                        type="button"
+                        className="page-link"
+                        onClick={() =>
+                          setCurrentPage((page) => Math.min(totalPages, page + 1))
+                        }
+                        disabled={currentPage === totalPages}
+                      >
+                        Berikutnya
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
               </div>
             </div>
           </div>
